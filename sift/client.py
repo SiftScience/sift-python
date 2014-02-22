@@ -1,5 +1,5 @@
 """Python client for Sift Science's REST API
-(https://siftscience.com/docs/rest-api).
+(https://siftscience.com/docs/references/events-api).
 """
 
 import json
@@ -34,7 +34,7 @@ class Client(object):
 
         Args:
             event: The name of the event to send. This can either be a reserved
-                event name such as "$transaction" or "$label" or a custom event
+                event name such as "$transaction" or "$create_order" or a custom event
                 name (that does not start with a $).
             properties: A dict of additional event-specific attributes to track
             return_score: Whether the API response should include a score for this 

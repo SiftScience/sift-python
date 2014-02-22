@@ -19,7 +19,7 @@ except:
 setup(
     name='Sift',
     description='Python bindings for Sift Science\'s REST event API',
-    version='0.1.0',
+    version='0.1.1',
     url='https://siftscience.com',
 
     author='Sift Science',
