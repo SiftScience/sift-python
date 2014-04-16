@@ -5,11 +5,10 @@
 import json
 import logging
 import traceback
-
 import requests
 
 
-API_URL = 'https://api.siftscience.com/v202/events'
+API_URL = 'https://api.siftscience.com/v203/events'
 sift_logger = logging.getLogger('sift_client')
 
 
@@ -29,7 +28,7 @@ class Client(object):
         self.url = api_url
         self.timeout = timeout
 
-    def track(self, event, properties):
+    def track(self, event, properties, return_score=False):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.
 
@@ -38,6 +37,8 @@ class Client(object):
                 event name such as "$transaction" or "$label" or a custom event
                 name (that does not start with a $).
             properties: A dict of additional event-specific attributes to track
+            return_score: Whether the API response should include a score for this 
+                 user (the score will be calculated using this event)
         Returns:
             A requests.Response object if the track call succeeded, otherwise
             a subclass of requests.exceptions.RequestException indicating the
@@ -45,10 +46,10 @@ class Client(object):
         """
         headers = { 'Content-type' : 'application/json', 'Accept' : '*/*' }
         properties.update({ '$api_key': self.api_key, '$type': event })
-
+        params = { 'return_score' : return_score }
         try:
             response = requests.post(self.url, data=json.dumps(properties),
-                    headers=headers, timeout=self.timeout)
+                    headers=headers, timeout=self.timeout, params=params)
             # TODO(david): Wrap the response object in a class
             return response
         except requests.exceptions.RequestException as e:
