@@ -1,16 +1,16 @@
-"""Python client for Sift Science's REST API
-(https://siftscience.com/docs/references/events-api).
+"""Python client for Sift Science's API.
+See: https://siftscience.com/docs/references/events-api
 """
 
 import json
 import logging
-import traceback
 import requests
+import traceback
 
+from sift import version
 
 API_URL = 'https://api.siftscience.com/v203/events'
 sift_logger = logging.getLogger('sift_client')
-
 
 class Client(object):
     def __init__(self, api_key, api_url=API_URL, timeout=2.0):
@@ -44,7 +44,10 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
-        headers = { 'Content-type' : 'application/json', 'Accept' : '*/*' }
+        headers = { 'Content-type' : 'application/json',
+                    'Accept' : '*/*',
+                    'User-Agent' : 'SiftScience/v203 PythonClient/%s' % version.VERSION }
+
         properties.update({ '$api_key': self.api_key, '$type': event })
         params = { 'return_score' : return_score }
         try:
