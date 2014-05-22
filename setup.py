@@ -18,7 +18,7 @@ except:
 
 setup(
     name='Sift',
-    description='Python bindings for Sift Science\'s REST event API',
+    description='Python bindings for Sift Science\'s API',
     version='0.1.1',
     url='https://siftscience.com',
 
@@ -30,4 +30,12 @@ setup(
     install_requires=[
         "requests >= 0.14.1",
     ],
+
+    classifiers = [
+        "Programming Language :: Python",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Topic :: Software Development :: Libraries :: Python Modules"
+    ]
 )
