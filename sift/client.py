@@ -49,7 +49,8 @@ class Client(object):
                     'User-Agent' : 'SiftScience/v203 PythonClient/%s' % version.VERSION }
 
         properties.update({ '$api_key': self.api_key, '$type': event })
-        params = { 'return_score' : return_score }
+        if return_score:
+          params = { 'return_score' : return_score }
         try:
             response = requests.post(self.url, data=json.dumps(properties),
                     headers=headers, timeout=self.timeout, params=params)
