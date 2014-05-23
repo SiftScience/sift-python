@@ -9,7 +9,7 @@ import traceback
 
 from sift import version
 
-API_URL = 'https://api.siftscience.com/v203/events'
+API_URL = 'https://api.siftscience.com/v%s/events' % version.API_VERSION
 sift_logger = logging.getLogger('sift_client')
 
 class Client(object):
@@ -46,7 +46,7 @@ class Client(object):
         """
         headers = { 'Content-type' : 'application/json',
                     'Accept' : '*/*',
-                    'User-Agent' : 'SiftScience/v203 PythonClient/%s' % version.VERSION }
+                    'User-Agent' : 'SiftScience/v%s sift-python/%s' % (version.API_VERSION, version.VERSION) }
 
         properties.update({ '$api_key': self.api_key, '$type': event })
         if return_score:
