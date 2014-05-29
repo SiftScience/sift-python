@@ -9,7 +9,7 @@ import traceback
 
 from sift import version
 
-API_URL = 'https://api.siftscience.com/v%s/events' % version.API_VERSION
+API_URL = 'https://api.siftscience.com'
 sift_logger = logging.getLogger('sift_client')
 
 class Client(object):
@@ -25,13 +25,19 @@ class Client(object):
                 to 2 seconds.
         """
         self.api_key = api_key
-        self.url = api_url
+        self.url = api_url + '/v%s' % version.API_VERSION
         self.timeout = timeout
 
     def user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (version.API_VERSION, version.VERSION)
 
-    def track(self, event, properties, return_score=False):
+    def event_url(self):
+        return self.url + '/events'
+
+    def label_url(self, user_id):
+        return self.url + '/users/%s/labels' % user_id
+
+    def track(self, event, properties, path=None, return_score=False):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.
 
@@ -51,11 +57,13 @@ class Client(object):
                     'Accept' : '*/*',
                     'User-Agent' : self.user_agent() }
 
+        if path is None:
+          path = self.event_url()
         properties.update({ '$api_key': self.api_key, '$type': event })
         if return_score:
           params = { 'return_score' : return_score }
         try:
-            response = requests.post(self.url, data=json.dumps(properties),
+            response = requests.post(path, data=json.dumps(properties),
                     headers=headers, timeout=self.timeout, params=params)
             # TODO(david): Wrap the response object in a class
             return response
@@ -64,3 +72,21 @@ class Client(object):
             sift_logger.warn(traceback.format_exception_only(type(e), e))
 
             return e
+
+    def label(self, user_id, properties):
+        """Labels a user as either good or bad through the Sift Science API.
+        This call is blocking.
+
+        Args:
+            user_id:  A user's id. This id should be the same as the user_id used in
+                event calls.
+            properties: A dict of additional event-specific attributes to track
+        Returns:
+            A requests.Response object if the label call succeeded, otherwise
+            a subclass of requests.exceptions.RequestException indicating the
+            exception that occurred.
+        """
+        if not isinstance(user_id, str) or len(user_id.strip()) == 0:
+            raise RuntimeError("user_id must be a string")
+
+        return self.track('$label', properties, self.label_url(user_id))
