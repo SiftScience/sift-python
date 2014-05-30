@@ -34,6 +34,9 @@ class Client(object):
     def event_url(self):
         return self.url + '/events'
 
+    def score_url(self, user_id):
+        return self.url + '/score/%s' % user_id
+
     def label_url(self, user_id):
         return self.url + '/users/%s/labels' % user_id
 
@@ -64,6 +67,35 @@ class Client(object):
           params = { 'return_score' : return_score }
         try:
             response = requests.post(path, data=json.dumps(properties),
+                    headers=headers, timeout=self.timeout, params=params)
+            # TODO(david): Wrap the response object in a class
+            return response
+        except requests.exceptions.RequestException as e:
+            sift_logger.warn('Failed to track event: %s' % properties)
+            sift_logger.warn(traceback.format_exception_only(type(e), e))
+
+            return e
+
+    def score(self, user_id):
+        """Retrieves a user's fraud score from the Sift Science API.
+        This call is blocking.
+
+        Args:
+            user_id:  A user's id. This id should be the same as the user_id used in
+                event calls.
+        Returns:
+            A requests.Response object if the score call succeeded, otherwise
+            a subclass of requests.exceptions.RequestException indicating the
+            exception that occurred.
+        """
+        if not isinstance(user_id, str) or len(user_id.strip()) == 0:
+            raise RuntimeError("user_id must be a string")
+
+        headers = { 'User-Agent' : self.user_agent() }
+        params = { 'api_key': self.api_key }
+
+        try:
+            response = requests.get(self.score_url(user_id),
                     headers=headers, timeout=self.timeout, params=params)
             # TODO(david): Wrap the response object in a class
             return response
