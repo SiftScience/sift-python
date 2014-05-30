@@ -62,6 +62,12 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
+        if not isinstance(event, str) or len(event.strip()) == 0:
+            raise RuntimeError("user_id must be a string")
+
+        if not isinstance(properties, dict) or len(properties) == 0:
+            raise RuntimeError("properties dictionary may not be empty")
+
         headers = { 'Content-type' : 'application/json',
                     'Accept' : '*/*',
                     'User-Agent' : self.user_agent() }
@@ -69,8 +75,9 @@ class Client(object):
         if path is None:
           path = self.event_url()
         properties.update({ '$api_key': self.api_key, '$type': event })
+        params = {}
         if return_score:
-          params = { 'return_score' : return_score }
+          params.update({ 'return_score' : return_score })
         try:
             response = requests.post(path, data=json.dumps(properties),
                     headers=headers, timeout=self.timeout, params=params)
