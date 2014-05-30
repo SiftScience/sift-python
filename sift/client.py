@@ -28,6 +28,9 @@ class Client(object):
         self.url = api_url
         self.timeout = timeout
 
+    def user_agent(self):
+        return 'SiftScience/v%s sift-python/%s' % (version.API_VERSION, version.VERSION)
+
     def track(self, event, properties, return_score=False):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.
@@ -46,7 +49,7 @@ class Client(object):
         """
         headers = { 'Content-type' : 'application/json',
                     'Accept' : '*/*',
-                    'User-Agent' : 'SiftScience/v%s sift-python/%s' % (version.API_VERSION, version.VERSION) }
+                    'User-Agent' : self.user_agent() }
 
         properties.update({ '$api_key': self.api_key, '$type': event })
         if return_score:
