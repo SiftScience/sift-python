@@ -24,6 +24,12 @@ class Client(object):
             timeout: Number of seconds to wait before failing request. Defaults
                 to 2 seconds.
         """
+        if not isinstance(api_url, str) or len(api_url.strip()) == 0:
+            raise RuntimeError("api_url must be a string")
+
+        if not isinstance(api_key, str) or len(api_key.strip()) == 0:
+            raise RuntimeError("api_key is required")
+
         self.api_key = api_key
         self.url = api_url + '/v%s' % version.API_VERSION
         self.timeout = timeout
