@@ -81,8 +81,7 @@ class Client(object):
         try:
             response = requests.post(path, data=json.dumps(properties),
                     headers=headers, timeout=self.timeout, params=params)
-            # TODO(david): Wrap the response object in a class
-            return response
+            return Response(response)
         except requests.exceptions.RequestException as e:
             sift_logger.warn('Failed to track event: %s' % properties)
             sift_logger.warn(traceback.format_exception_only(type(e), e))
@@ -110,8 +109,7 @@ class Client(object):
         try:
             response = requests.get(self.score_url(user_id),
                     headers=headers, timeout=self.timeout, params=params)
-            # TODO(david): Wrap the response object in a class
-            return response
+            return Response(response)
         except requests.exceptions.RequestException as e:
             sift_logger.warn('Failed to track event: %s' % properties)
             sift_logger.warn(traceback.format_exception_only(type(e), e))
@@ -135,3 +133,18 @@ class Client(object):
             raise RuntimeError("user_id must be a string")
 
         return self.track('$label', properties, self.label_url(user_id))
+
+class Response(object):
+    def __init__(self, http_response):
+        print http_response.content
+        self.body = json.loads(http_response.content)
+        self.http_status_code = http_response.status_code
+        self.api_status = self.body['status']
+        self.api_error_message = self.body['error_message']
+        if 'request' in self.body.keys() and isinstance(self.body['request'], str):
+            self.request = json.loads(self.body['request'])
+        else:
+            self.request = None
+
+    def is_ok(self):
+        return self.api_status == 0
