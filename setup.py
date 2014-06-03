@@ -29,6 +29,7 @@ setup(
     packages=['sift'],
     install_requires=[
         "requests >= 0.14.1",
+        "mock >= 1.0.1",
     ],
 
     classifiers = [
