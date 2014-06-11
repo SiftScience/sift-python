@@ -19,7 +19,7 @@ except:
 setup(
     name='Sift',
     description='Python bindings for Sift Science\'s API',
-    version='0.1.1', # NB: must be kept in sync with sift/version.py
+    version='0.2.0', # NB: must be kept in sync with sift/version.py
     url='https://siftscience.com',
 
     author='Sift Science',
@@ -29,6 +29,7 @@ setup(
     packages=['sift'],
     install_requires=[
         "requests >= 0.14.1",
+        "mock >= 1.0.1",
     ],
 
     classifiers = [

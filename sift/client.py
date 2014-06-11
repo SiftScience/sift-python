@@ -9,7 +9,7 @@ import traceback
 
 from sift import version
 
-API_URL = 'https://api.siftscience.com/v203/events'
+API_URL = 'https://api.siftscience.com'
 sift_logger = logging.getLogger('sift_client')
 
 class Client(object):
@@ -24,11 +24,29 @@ class Client(object):
             timeout: Number of seconds to wait before failing request. Defaults
                 to 2 seconds.
         """
+        if not isinstance(api_url, str) or len(api_url.strip()) == 0:
+            raise RuntimeError("api_url must be a string")
+
+        if not isinstance(api_key, str) or len(api_key.strip()) == 0:
+            raise RuntimeError("api_key is required")
+
         self.api_key = api_key
-        self.url = api_url
+        self.url = api_url + '/v%s' % version.API_VERSION
         self.timeout = timeout
 
-    def track(self, event, properties, return_score=False):
+    def user_agent(self):
+        return 'SiftScience/v%s sift-python/%s' % (version.API_VERSION, version.VERSION)
+
+    def event_url(self):
+        return self.url + '/events'
+
+    def score_url(self, user_id):
+        return self.url + '/score/%s' % user_id
+
+    def label_url(self, user_id):
+        return self.url + '/users/%s/labels' % user_id
+
+    def track(self, event, properties, path=None, return_score=False):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.
 
@@ -44,20 +62,89 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
+        if not isinstance(event, str) or len(event.strip()) == 0:
+            raise RuntimeError("user_id must be a string")
+
+        if not isinstance(properties, dict) or len(properties) == 0:
+            raise RuntimeError("properties dictionary may not be empty")
+
         headers = { 'Content-type' : 'application/json',
                     'Accept' : '*/*',
-                    'User-Agent' : 'SiftScience/v203 PythonClient/%s' % version.VERSION }
+                    'User-Agent' : self.user_agent() }
 
+        if path is None:
+          path = self.event_url()
         properties.update({ '$api_key': self.api_key, '$type': event })
+        params = {}
         if return_score:
-          params = { 'return_score' : return_score }
+          params.update({ 'return_score' : return_score })
         try:
-            response = requests.post(self.url, data=json.dumps(properties),
+            response = requests.post(path, data=json.dumps(properties),
                     headers=headers, timeout=self.timeout, params=params)
-            # TODO(david): Wrap the response object in a class
-            return response
+            return Response(response)
         except requests.exceptions.RequestException as e:
             sift_logger.warn('Failed to track event: %s' % properties)
             sift_logger.warn(traceback.format_exception_only(type(e), e))
 
             return e
+
+    def score(self, user_id):
+        """Retrieves a user's fraud score from the Sift Science API.
+        This call is blocking.
+
+        Args:
+            user_id:  A user's id. This id should be the same as the user_id used in
+                event calls.
+        Returns:
+            A requests.Response object if the score call succeeded, otherwise
+            a subclass of requests.exceptions.RequestException indicating the
+            exception that occurred.
+        """
+        if not isinstance(user_id, str) or len(user_id.strip()) == 0:
+            raise RuntimeError("user_id must be a string")
+
+        headers = { 'User-Agent' : self.user_agent() }
+        params = { 'api_key': self.api_key }
+
+        try:
+            response = requests.get(self.score_url(user_id),
+                    headers=headers, timeout=self.timeout, params=params)
+            return Response(response)
+        except requests.exceptions.RequestException as e:
+            sift_logger.warn('Failed to track event: %s' % properties)
+            sift_logger.warn(traceback.format_exception_only(type(e), e))
+
+            return e
+
+    def label(self, user_id, properties):
+        """Labels a user as either good or bad through the Sift Science API.
+        This call is blocking.
+
+        Args:
+            user_id:  A user's id. This id should be the same as the user_id used in
+                event calls.
+            properties: A dict of additional event-specific attributes to track
+        Returns:
+            A requests.Response object if the label call succeeded, otherwise
+            a subclass of requests.exceptions.RequestException indicating the
+            exception that occurred.
+        """
+        if not isinstance(user_id, str) or len(user_id.strip()) == 0:
+            raise RuntimeError("user_id must be a string")
+
+        return self.track('$label', properties, self.label_url(user_id))
+
+class Response(object):
+    def __init__(self, http_response):
+        print http_response.content
+        self.body = json.loads(http_response.content)
+        self.http_status_code = http_response.status_code
+        self.api_status = self.body['status']
+        self.api_error_message = self.body['error_message']
+        if 'request' in self.body.keys() and isinstance(self.body['request'], str):
+            self.request = json.loads(self.body['request'])
+        else:
+            self.request = None
+
+    def is_ok(self):
+        return self.api_status == 0
