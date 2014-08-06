@@ -7,11 +7,18 @@ Bindings for Sift Science's `REST API <https://siftscience.com/docs/rest-api>`_.
 Installation
 ============
 
-Get the package from pip:
+Get the package from pip (may be outdated):
 
 ::
 
     pip install sift
+
+or install directly from GitHub:
+
+::
+
+    pip install git+https://github.com/SiftScience/sift-python
+
 
 Usage
 =====
