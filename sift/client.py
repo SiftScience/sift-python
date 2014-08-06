@@ -136,7 +136,6 @@ class Client(object):
 
 class Response(object):
     def __init__(self, http_response):
-        print http_response.content
         self.body = json.loads(http_response.content)
         self.http_status_code = http_response.status_code
         self.api_status = self.body['status']
@@ -145,6 +144,10 @@ class Response(object):
             self.request = json.loads(self.body['request'])
         else:
             self.request = None
+
+    def __str__(self):
+        return ('{"body": %s, "http_status_code": %s}' %
+                (json.dumps(self.body), str(self.http_status_code)))
 
     def is_ok(self):
         return self.api_status == 0
