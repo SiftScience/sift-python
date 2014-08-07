@@ -27,7 +27,7 @@ Here's an example:
 
 ::
 
-    import sift.Client
+    import sift.client
 
     api_key = 'XXXXXXXXXXXXXX'  # TODO
     sift_client = sift.Client(api_key)
@@ -37,7 +37,7 @@ Here's an example:
         '$user_id': '23056',
         '$user_email': 'buyer@gmail.com',
         '$seller_user_id': '2371',
-        '$seller_user_email': 'seller@gmail.com',
+        'seller_user_email': 'seller@gmail.com',
         '$transaction_id': '573050',
         '$currency_code': 'USD',
         '$amount': 15230000,
