@@ -7,7 +7,7 @@ import logging
 import requests
 import traceback
 
-from sift import version
+from . import version
 
 API_URL = 'https://api.siftscience.com'
 sift_logger = logging.getLogger('sift_client')
@@ -136,7 +136,7 @@ class Client(object):
 
 class Response(object):
     def __init__(self, http_response):
-        self.body = json.loads(http_response.content)
+        self.body = http_response.json()
         self.http_status_code = http_response.status_code
         self.api_status = self.body['status']
         self.api_error_message = self.body['error_message']
