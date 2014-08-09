@@ -25,9 +25,9 @@ def valid_transaction_properties():
 
 def valid_label_properties():
     return {
-     '$reasons': [ "$fake" ],
+      '$description': 'Listed a fake item',
       '$is_bad': True,
-      '$description': 'Listed a fake item'
+      '$reasons': [ "$fake" ],
     }
 
 def score_response_json():
@@ -54,7 +54,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_constructor_api_key(self):
         client = sift.Client(self.test_key)
-        self.assertEquals(client.api_key, self.test_key)
+        self.assertEqual(client.api_key, self.test_key)
 
     def test_track_requires_valid_event(self):
         self.assertRaises(RuntimeError, self.sift_client.track, None, {})
@@ -76,6 +76,7 @@ class TestSiftPythonClient(unittest.TestCase):
         event = '$transaction'
         mock_response = mock.Mock()
         mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
@@ -89,6 +90,7 @@ class TestSiftPythonClient(unittest.TestCase):
     def test_score_ok(self):
         mock_response = mock.Mock()
         mock_response.content = score_response_json()
+        mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         with mock.patch('requests.get') as mock_post:
             mock_post.return_value = mock_response
@@ -104,6 +106,7 @@ class TestSiftPythonClient(unittest.TestCase):
         event = '$transaction'
         mock_response = mock.Mock()
         mock_response.content = '{"status": 0, "error_message": "OK", "score_response": %s}' % score_response_json()
+        mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
@@ -119,13 +122,16 @@ class TestSiftPythonClient(unittest.TestCase):
         user_id = '54321'
         mock_response = mock.Mock()
         mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.label(user_id, valid_label_properties())
+            properties = {'$description': 'Listed a fake item', '$is_bad': True, '$reasons': [ "$fake" ]}
+            properties.update({ '$api_key': self.test_key, '$type': '$label'})
+            data = json.dumps(properties)
             mock_post.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % user_id,
-                data='{"$is_bad": true, "$api_key": "%s", "$reasons": ["$fake"], "$description": "Listed a fake item", "$type": "$label"}' % self.test_key,
-                headers=mock.ANY, timeout=mock.ANY, params={})
+                data=data, headers=mock.ANY, timeout=mock.ANY, params={})
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
