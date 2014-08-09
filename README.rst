@@ -54,6 +54,9 @@ Here's an example:
     # Request a score for the user with user_id 23056
     response = sift_client.score('23056')
     
-    # Label the user with user_id 23056 as Bad
-    response = sift_client.label('23056',{ "$is_bad" : True })
+    # Label the user with user_id 23056 as Not Bad
+    response = sift_client.label('23056',{ "$is_bad" : False })
+    
+    # Label the user with user_id 23056 as Bad with all optional fields
+    response = sift_client.label('23056',{ "$is_bad" : True, "$reasons" : ["$chargeback"], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "yoav@siftscience.com"})
     
