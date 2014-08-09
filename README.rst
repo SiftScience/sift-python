@@ -46,8 +46,6 @@ Here's an example:
         'distance_traveled': 5.26,
     })
     
-    response.is_ok()
-    True
+    response.is_ok()  // returns True of False
     
-    print response
-    {"body": {"status": 0, "error_message": "OK", "request": "{\"$type\": \"$transaction\", \"$transaction_id\": \"573050\", \"$amount\": 15230000, \"seller_user_email\": \"seller@gmail.com\", \"distance_traveled\": 5.26, \"$api_key\": \"1a3e7a7bb8428f10\", \"$user_email\": \"buyer@gmail.com\", \"$seller_user_id\": \"2371\", \"trip_time\": 930, \"$user_id\": \"23056\", \"$currency_code\": \"USD\", \"$time\": 1327604222}", "time": 1407545773}, "http_status_code": 200}
+    print response // prints entire response body and http status code
