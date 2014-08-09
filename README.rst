@@ -46,6 +46,14 @@ Here's an example:
         'distance_traveled': 5.26,
     })
     
-    response.is_ok()  // returns True of False
+    response.is_ok()  # returns True of False
     
-    print response // prints entire response body and http status code
+    print response # prints entire response body and http status code
+    
+    
+    # Request a score for the user with user_id 23056
+    response = sift_client.score('23056')
+    
+    # Label the user with user_id 23056 as Bad
+    response = sift_client.label('23056',{ "$is_bad" : True })
+    
