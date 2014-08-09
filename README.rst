@@ -33,7 +33,7 @@ Here's an example:
     sift_client = sift.Client(api_key)
 
     # Track a transaction event -- note this is blocking
-    sift_client.track('$transaction', {
+    response = sift_client.track('$transaction', {
         '$user_id': '23056',
         '$user_email': 'buyer@gmail.com',
         '$seller_user_id': '2371',
