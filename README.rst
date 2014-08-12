@@ -74,6 +74,6 @@ Here's an example:
     # Request a score for the user with user_id 23056
     response = client.score(user_id)
     
-        # Label the user with user_id 23056 as Bad with all optional fields
+    # Label the user with user_id 23056 as Bad with all optional fields
     response = client.label(user_id,{ "$is_bad" : True, "$reasons" : ["$chargeback", ], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "analyst.name@your_domain.com"})
     
