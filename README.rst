@@ -9,17 +9,27 @@ Installation
 
 Get the package from pip (may be outdated):
 
+Python 2:
 ::
 
     pip install sift
 
+Python 3:
+::
+    pip3 install sift
+    
 or install directly from GitHub:
 
+Python 2:
 ::
 
     pip install git+https://github.com/SiftScience/sift-python
 
+Python 3:
+::
 
+    pip3 install git+https://github.com/SiftScience/sift-python
+    
 Usage
 =====
 
@@ -30,21 +40,31 @@ Here's an example:
     import sift.client
 
     api_key = 'XXXXXXXXXXXXXX'  # TODO
-    sift_client = sift.Client(api_key)
+    client = sift.Client(api_key)
+
+    user_id= "23056"
 
     # Track a transaction event -- note this is blocking
-    response = sift_client.track('$transaction', {
-        '$user_id': '23056',
-        '$user_email': 'buyer@gmail.com',
-        '$seller_user_id': '2371',
-        'seller_user_email': 'seller@gmail.com',
-        '$transaction_id': '573050',
-        '$currency_code': 'USD',
-        '$amount': 15230000,
-        '$time': 1327604222,
-        'trip_time': 930,
-        'distance_traveled': 5.26,
-    })
+    event = "$transaction"
+
+    properties = {
+      "$user_id" : user_id, 
+      "$user_email" : "buyer@gmail.com", 
+      "$seller_user_id" : "2371", 
+    "seller_user_email" : "seller@gmail.com", 
+      "$transaction_id" : "573050", 
+      "$payment_method" : {
+        "$payment_type"    : "$credit_card",
+        "$payment_gateway" : "$braintree",
+        "$card_bin"        : "542486",
+        "$card_last4"      : "4444"             
+    }, 
+    "$currency_code" : "USD",
+    "$amount" : 15230000,
+    }
+
+    response = client.track(event, properties)
+
     
     response.is_ok()  # returns True of False
     
@@ -52,11 +72,8 @@ Here's an example:
     
     
     # Request a score for the user with user_id 23056
-    response = sift_client.score('23056')
+    response = client.score(user_id)
     
-    # Label the user with user_id 23056 as Not Bad
-    response = sift_client.label('23056',{ "$is_bad" : False })
-    
-    # Label the user with user_id 23056 as Bad with all optional fields
-    response = sift_client.label('23056',{ "$is_bad" : True, "$reasons" : ["$chargeback"], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "yoav@siftscience.com"})
+        # Label the user with user_id 23056 as Bad with all optional fields
+    response = client.label(user_id,{ "$is_bad" : True, "$reasons" : ["$chargeback", ], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "analyst.name@your_domain.com"})
     
