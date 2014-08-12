@@ -116,13 +116,14 @@ class Client(object):
 
             return e
 
-    def label(self, user_id, properties):
+    def label(self, user_id, user_is_bad, properties = None):
         """Labels a user as either good or bad through the Sift Science API.
         This call is blocking.
 
         Args:
             user_id:  A user's id. This id should be the same as the user_id used in
                 event calls.
+            is_bad:  Whether the label is a "Bad" one (True) or a "Not Bad" one (False) as boolean.
             properties: A dict of additional event-specific attributes to track
         Returns:
             A requests.Response object if the label call succeeded, otherwise
@@ -131,6 +132,11 @@ class Client(object):
         """
         if not isinstance(user_id, str) or len(user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
+
+        if properties is None:
+          properties = {} 
+
+        properties.update({ "$is_bad": user_is_bad })
 
         return self.track('$label', properties, self.label_url(user_id))
 
