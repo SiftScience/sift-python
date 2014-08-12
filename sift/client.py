@@ -123,7 +123,7 @@ class Client(object):
         Args:
             user_id:  A user's id. This id should be the same as the user_id used in
                 event calls.
-            is_bad:  Whether the label is a "Bad" one (True) or a "Not Bad" one (False) as boolean.
+            user_is_bad:  Whether the label is a "Bad" one (True) or a "Not Bad" one (False) as boolean.
             properties: A dict of additional event-specific attributes to track
         Returns:
             A requests.Response object if the label call succeeded, otherwise
