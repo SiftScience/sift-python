@@ -45,6 +45,8 @@ class TestSiftPythonClient(unittest.TestCase):
         self.sift_client = sift.Client(self.test_key)
 
     def test_global_api_key(self):
+        # test for error if global key is undefined
+        self.assertRaises(RuntimeError, sift.Client)
         sift.api_key = "a_test_global_api_key"
         local_api_key = "a_test_local_api_key"
 
