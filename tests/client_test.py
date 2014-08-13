@@ -44,7 +44,25 @@ class TestSiftPythonClient(unittest.TestCase):
         self.test_key = 'a_fake_test_api_key'
         self.sift_client = sift.Client(self.test_key)
 
-    def test_constructor_requires_api_key(self):
+    def test_global_api_key(self):
+        # test for error if global key is undefined
+        self.assertRaises(RuntimeError, sift.Client)
+        sift.api_key = "a_test_global_api_key"
+        local_api_key = "a_test_local_api_key"
+
+        client1 = sift.Client()
+        client2 = sift.Client(local_api_key)
+        
+        # test that global api key is assigned
+        assert(client1.api_key == sift.api_key)
+        # test that local api key is assigned
+        assert(client2.api_key == local_api_key)
+
+        client2 = sift.Client()
+        # test that client2 is assigned a new object with global api_key
+        assert(client2.api_key == sift.api_key)
+
+    def test_constructor_requires_valid_api_key(self):
         self.assertRaises(RuntimeError, sift.Client, None)
         self.assertRaises(RuntimeError, sift.Client, '')
 
