@@ -18,7 +18,7 @@ class Client(object):
         """Initialize the client.
 
         Args:
-            key: Your Sift Science API key associated with your customer
+            api_key: Your Sift Science API key associated with your customer
                 account. You can obtain this from
                 https://siftscience.com/quickstart
             api_url: The URL to send events to.
@@ -32,7 +32,7 @@ class Client(object):
           api_key = sift.api_key
 
         if not isinstance(api_key, str) or len(api_key.strip()) == 0:
-            raise RuntimeError("key is required")
+            raise RuntimeError("valid api_key is required")
 
         self.api_key = api_key
         self.url = api_url + '/v%s' % version.API_VERSION
