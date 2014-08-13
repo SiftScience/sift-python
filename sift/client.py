@@ -7,17 +7,18 @@ import logging
 import requests
 import traceback
 
+import sift
 from . import version
 
 API_URL = 'https://api.siftscience.com'
 sift_logger = logging.getLogger('sift_client')
 
 class Client(object):
-    def __init__(self, api_key, api_url=API_URL, timeout=2.0):
+    def __init__(self, key = None, api_url=API_URL, timeout=2.0):
         """Initialize the client.
 
         Args:
-            api_key: Your Sift Science API key associated with your customer
+            key: Your Sift Science API key associated with your customer
                 account. You can obtain this from
                 https://siftscience.com/quickstart
             api_url: The URL to send events to.
@@ -27,10 +28,13 @@ class Client(object):
         if not isinstance(api_url, str) or len(api_url.strip()) == 0:
             raise RuntimeError("api_url must be a string")
 
-        if not isinstance(api_key, str) or len(api_key.strip()) == 0:
-            raise RuntimeError("api_key is required")
+        if key is None:
+          key = sift.api_key
 
-        self.api_key = api_key
+        if not isinstance(key, str) or len(key.strip()) == 0:
+            raise RuntimeError("key is required")
+
+        self.api_key = key
         self.url = api_url + '/v%s' % version.API_VERSION
         self.timeout = timeout
 
