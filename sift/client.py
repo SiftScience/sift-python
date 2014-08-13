@@ -14,7 +14,7 @@ API_URL = 'https://api.siftscience.com'
 sift_logger = logging.getLogger('sift_client')
 
 class Client(object):
-    def __init__(self, key = None, api_url=API_URL, timeout=2.0):
+    def __init__(self, api_key = None, api_url=API_URL, timeout=2.0):
         """Initialize the client.
 
         Args:
@@ -28,13 +28,13 @@ class Client(object):
         if not isinstance(api_url, str) or len(api_url.strip()) == 0:
             raise RuntimeError("api_url must be a string")
 
-        if key is None:
-          key = sift.api_key
+        if api_key is None:
+          api_key = sift.api_key
 
-        if not isinstance(key, str) or len(key.strip()) == 0:
+        if not isinstance(api_key, str) or len(api_key.strip()) == 0:
             raise RuntimeError("key is required")
 
-        self.api_key = key
+        self.api_key = api_key
         self.url = api_url + '/v%s' % version.API_VERSION
         self.timeout = timeout
 
