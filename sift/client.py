@@ -6,6 +6,7 @@ import json
 import logging
 import requests
 import traceback
+import sys
 
 import sift
 from . import version
@@ -66,7 +67,7 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
-        if not ((sift.PYTHON_VERSION < 3 and isinstance(event, basestring)) or isinstance(event, str)) or len(event.strip()) == 0:
+        if not ((sys.version_info.major < 3 and isinstance(event, basestring)) or isinstance(event, str)) or len(event.strip()) == 0:
             raise RuntimeError("event must be a string")
 
         if not isinstance(properties, dict) or len(properties) == 0:
@@ -104,7 +105,7 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
-        if not ((sift.PYTHON_VERSION < 3 and isinstance(user_id, basestring)) or isinstance(user_id, str)) or len(user_id.strip()) == 0:
+        if not ((sys.version_info.major< 3 and isinstance(user_id, basestring)) or isinstance(user_id, str)) or len(user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
         headers = { 'User-Agent' : self.user_agent() }
@@ -133,7 +134,7 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
-        if not ((sift.PYTHON_VERSION < 3 and isinstance(user_id, basestring)) or isinstance(user_id, str)) or len(user_id.strip()) == 0:
+        if not ((sys.version_info.major < 3 and isinstance(user_id, basestring)) or isinstance(user_id, str)) or len(user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
         return self.track('$label', properties, self.label_url(user_id))

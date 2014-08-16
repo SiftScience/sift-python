@@ -3,6 +3,7 @@ import json
 import mock
 import sift
 import unittest
+import sys
 
 def valid_transaction_properties():
     return {
@@ -156,7 +157,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_unicode_string_parameter_support(self):
         # str is unicode in python 3, so no need to check as this was covered by other unit tests.
-        if sift.PYTHON_VERSION < 3:
+        if sys.version_info.major < 3:
           mock_response = mock.Mock()
           mock_response.content = '{"status": 0, "error_message": "OK"}'
           mock_response.json.return_value = json.loads(mock_response.content)
