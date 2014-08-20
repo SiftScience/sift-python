@@ -42,8 +42,8 @@ Here's an example:
     api_key = 'XXXXXXXXXXXXXX'  # TODO
     client = sift.Client(api_key)
 
-    user_id= "23056"
-
+    user_id= "23056"    # User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
+    
     # Track a transaction event -- note this is blocking
     event = "$transaction"
 
