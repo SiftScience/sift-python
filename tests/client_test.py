@@ -3,6 +3,7 @@ import json
 import mock
 import sift
 import unittest
+import sys
 
 def valid_transaction_properties():
     return {
@@ -153,6 +154,22 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
+
+    def test_unicode_string_parameter_support(self):
+        # str is unicode in python 3, so no need to check as this was covered by other unit tests.
+        if sys.version_info.major < 3:
+          mock_response = mock.Mock()
+          mock_response.content = '{"status": 0, "error_message": "OK"}'
+          mock_response.json.return_value = json.loads(mock_response.content)
+          mock_response.status_code = 200
+          user_id = u'23056'
+          with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            assert(self.sift_client.track(u'$transaction', valid_transaction_properties()))
+            assert(self.sift_client.label(user_id, valid_label_properties()))
+          with mock.patch('requests.get') as mock_post:
+            mock_post.return_value = mock_response
+            assert(self.sift_client.score(user_id)) 
 
 
 def main():

@@ -6,6 +6,7 @@ import json
 import logging
 import requests
 import traceback
+import sys
 
 import sift
 from . import version
@@ -37,6 +38,10 @@ class Client(object):
         self.api_key = api_key
         self.url = api_url + '/v%s' % version.API_VERSION
         self.timeout = timeout
+        if sys.version_info.major < 3:
+          self.UNICODE_STRING = basestring
+        else:
+          self.UNICODE_STRING = str
 
     def user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (version.API_VERSION, version.VERSION)
@@ -66,8 +71,8 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
-        if not isinstance(event, str) or len(event.strip()) == 0:
-            raise RuntimeError("user_id must be a string")
+        if not isinstance(event, self.UNICODE_STRING) or len(event.strip()) == 0:
+            raise RuntimeError("event must be a string")
 
         if not isinstance(properties, dict) or len(properties) == 0:
             raise RuntimeError("properties dictionary may not be empty")
@@ -104,7 +109,7 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
-        if not isinstance(user_id, str) or len(user_id.strip()) == 0:
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
         headers = { 'User-Agent' : self.user_agent() }
@@ -133,7 +138,7 @@ class Client(object):
             a subclass of requests.exceptions.RequestException indicating the
             exception that occurred.
         """
-        if not isinstance(user_id, str) or len(user_id.strip()) == 0:
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
         return self.track('$label', properties, self.label_url(user_id))
