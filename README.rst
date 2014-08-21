@@ -39,8 +39,8 @@ Here's an example:
 
     import sift.client
 
-    api_key = 'XXXXXXXXXXXXXX'  # TODO
-    client = sift.Client(api_key)
+    sift.api_key = 'XXXXXXXXXXXXXX'  # TODO
+    client = sift.Client()
 
     user_id= "23056"    # User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
     
