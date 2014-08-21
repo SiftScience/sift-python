@@ -14,6 +14,7 @@ from . import version
 API_URL = 'https://api.siftscience.com'
 sift_logger = logging.getLogger('sift_client')
 
+
 class Client(object):
     def __init__(self, api_key = None, api_url=API_URL, timeout=2.0):
         """Initialize the client.
@@ -57,7 +58,9 @@ class Client(object):
 
     def track(self, event, properties, path=None, return_score=False):
         """Track an event and associated properties to the Sift Science client.
-        This call is blocking.
+        This call is blocking.  Check out https://siftscience.com/resources/references/events_api
+        for more information on what types of events you can send and fields you can add to the
+        properties parameter.
 
         Args:
             event: The name of the event to send. This can either be a reserved
@@ -99,7 +102,8 @@ class Client(object):
 
     def score(self, user_id):
         """Retrieves a user's fraud score from the Sift Science API.
-        This call is blocking.
+        This call is blocking.  Check out https://siftscience.com/resources/references/score_api.html
+        for more information on our Score response structure
 
         Args:
             user_id:  A user's id. This id should be the same as the user_id used in
@@ -127,7 +131,8 @@ class Client(object):
 
     def label(self, user_id, properties):
         """Labels a user as either good or bad through the Sift Science API.
-        This call is blocking.
+        This call is blocking.  Check out https://siftscience.com/resources/references/labels_api.html
+        for more information on what fields to send in properties.
 
         Args:
             user_id:  A user's id. This id should be the same as the user_id used in
@@ -142,6 +147,7 @@ class Client(object):
             raise RuntimeError("user_id must be a string")
 
         return self.track('$label', properties, self.label_url(user_id))
+
 
 class Response(object):
     def __init__(self, http_response):
