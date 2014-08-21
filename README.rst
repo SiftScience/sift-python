@@ -8,7 +8,6 @@ Installation
 ============
 
 Set up a virtual environment with virtualenv (otherwise you will need to make the pip calls as sudo):
-
 ::
 
     virtualenv venv
