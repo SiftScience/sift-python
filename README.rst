@@ -7,7 +7,14 @@ Bindings for Sift Science's `REST API <https://siftscience.com/docs/rest-api>`_.
 Installation
 ============
 
-Get the package from pip (may be outdated):
+Set up a virtual environment with virtualenv (otherwise you will need to make the pip calls as sudo):
+
+::
+
+    virtualenv venv
+    source venv/bin/activate
+
+Get the latest released package from pip:
 
 Python 2:
 ::
@@ -18,7 +25,7 @@ Python 3:
 ::
     pip3 install sift
     
-or install directly from GitHub:
+or install newest source directly from GitHub:
 
 Python 2:
 ::
