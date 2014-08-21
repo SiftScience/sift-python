@@ -13,7 +13,7 @@ Set up a virtual environment with virtualenv (otherwise you will need to make th
     virtualenv venv
     source venv/bin/activate
 
-Get the latest stable release from pip:
+Get the latest released package from pip:
 
 Python 2:
 ::
@@ -22,9 +22,10 @@ Python 2:
 
 Python 3:
 ::
+
     pip3 install sift
     
-or install the latest source code directly from GitHub:
+or install newest source directly from GitHub:
 
 Python 2:
 ::
@@ -82,4 +83,3 @@ Here's an example:
     
     # Label the user with user_id 23056 as Bad with all optional fields
     response = client.label(user_id,{ "$is_bad" : True, "$reasons" : ["$chargeback", ], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "analyst.name@your_domain.com"})
-    
