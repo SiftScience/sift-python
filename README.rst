@@ -14,7 +14,7 @@ Set up a virtual environment with virtualenv (otherwise you will need to make th
     virtualenv venv
     source venv/bin/activate
 
-Get the latest released package from pip:
+Get the latest stable release from pip:
 
 Python 2:
 ::
@@ -25,7 +25,7 @@ Python 3:
 ::
     pip3 install sift
     
-or install newest source directly from GitHub:
+or install the latest source code directly from GitHub:
 
 Python 2:
 ::
