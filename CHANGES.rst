@@ -1,12 +1,12 @@
-0.2.0.1 (2014-08-20)
+1.1.0.0 (2014-08-25)
 ====================
+* Added Module-scoped API key.
 * Minor documentation updates.
 
-0.2.0 (2014-08-19)
+0.2.0 (2014-08-20)
 ==================
 * Added Label and Score functions.
 * Added Python 3 compatibility.
-* Added Module-scoped API key.
 
 0.1.1 (2014-02-21)
 ==================

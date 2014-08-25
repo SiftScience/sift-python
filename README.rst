@@ -46,7 +46,7 @@ Here's an example:
 
     import sift.client
 
-    sift.api_key = 'XXXXXXXXXXXXXX'  # TODO
+    sift.api_key = '<your api key here>'
     client = sift.Client()
 
     user_id= "23056"    # User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
