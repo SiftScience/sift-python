@@ -1,3 +1,7 @@
+1.1.1.0 (2014-09-3)
+===================
+* Added timeout parameter to track, score, and label functions.
+
 1.1.0.0 (2014-08-25)
 ====================
 * Added Module-scoped API key.
