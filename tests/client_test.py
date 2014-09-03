@@ -4,6 +4,7 @@ import mock
 import sift
 import unittest
 import sys
+import requests.exceptions
 
 def valid_transaction_properties():
     return {
@@ -106,6 +107,28 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
 
+    def test_event_with_timeout_param_ok(self):
+        event = '$transaction'
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.track(event, valid_transaction_properties(), timeout=test_timeout)
+            mock_post.assert_called_with('https://api.siftscience.com/v203/events',
+                data=mock.ANY, headers=mock.ANY, timeout=test_timeout, params={})
+            assert(response.is_ok())
+            assert(response.api_status == 0)
+            assert(response.api_error_message == "OK")
+
+    def test_event_with_timeout_param_failure(self):
+        event = '$transaction'
+        test_timeout = .01
+        self.assertTrue(isinstance(self.sift_client.track(event, valid_transaction_properties(), timeout=test_timeout),
+                                   requests.exceptions.Timeout))
+
     def test_score_ok(self):
         mock_response = mock.Mock()
         mock_response.content = score_response_json()
@@ -120,6 +143,26 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
+
+    def test_score_with_timeout_param_ok(self):
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = score_response_json()
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.get') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.score('12345', test_timeout)
+            mock_post.assert_called_with('https://api.siftscience.com/v203/score/12345',
+                params={'api_key':self.test_key},
+                headers=mock.ANY, timeout=test_timeout)
+            assert(response.is_ok())
+            assert(response.api_error_message == "OK")
+            assert(response.body['score'] == 0.55)
+
+    def test_score_with_timeout_param_failure(self):
+        test_timeout = 0.01
+        self.assertTrue(isinstance(self.sift_client.score('12345', test_timeout),requests.exceptions.Timeout))
 
     def test_sync_score_ok(self):
         event = '$transaction'
@@ -154,6 +197,31 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
+
+    def test_label_user_with_timeout_param_ok(self):
+        user_id = '54321'
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.label(user_id, valid_label_properties(), test_timeout)
+            properties = {'$description': 'Listed a fake item', '$is_bad': True, '$reasons': [ "$fake" ]}
+            properties.update({ '$api_key': self.test_key, '$type': '$label'})
+            data = json.dumps(properties)
+            mock_post.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % user_id,
+                data=data, headers=mock.ANY, timeout=test_timeout, params={})
+            assert(response.is_ok())
+            assert(response.api_status == 0)
+            assert(response.api_error_message == "OK")
+
+    def test_label_user_with_timeout_param_failure(self):
+        user_id = '54321'
+        test_timeout = .01
+        self.assertTrue(isinstance(self.sift_client.label(user_id, valid_label_properties(), test_timeout),
+                                   requests.exceptions.Timeout))
 
     def test_unicode_string_parameter_support(self):
         # str is unicode in python 3, so no need to check as this was covered by other unit tests.

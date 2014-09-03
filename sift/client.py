@@ -12,6 +12,7 @@ import sift
 from . import version
 
 API_URL = 'https://api.siftscience.com'
+logging.basicConfig()
 sift_logger = logging.getLogger('sift_client')
 
 
@@ -56,7 +57,7 @@ class Client(object):
     def label_url(self, user_id):
         return self.url + '/users/%s/labels' % user_id
 
-    def track(self, event, properties, path=None, return_score=False):
+    def track(self, event, properties, path=None, return_score=False, timeout = None):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.  Check out https://siftscience.com/resources/references/events_api
         for more information on what types of events you can send and fields you can add to the
@@ -86,13 +87,17 @@ class Client(object):
 
         if path is None:
           path = self.event_url()
+
+        if timeout is None:
+            timeout = self.timeout
+
         properties.update({ '$api_key': self.api_key, '$type': event })
         params = {}
         if return_score:
           params.update({ 'return_score' : return_score })
         try:
             response = requests.post(path, data=json.dumps(properties),
-                    headers=headers, timeout=self.timeout, params=params)
+                    headers=headers, timeout=timeout, params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
             sift_logger.warn('Failed to track event: %s' % properties)
@@ -100,7 +105,7 @@ class Client(object):
 
             return e
 
-    def score(self, user_id):
+    def score(self, user_id, timeout = None):
         """Retrieves a user's fraud score from the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/score_api.html
         for more information on our Score response structure
@@ -116,20 +121,23 @@ class Client(object):
         if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
+        if timeout is None:
+            timeout = self.timeout
+
         headers = { 'User-Agent' : self.user_agent() }
         params = { 'api_key': self.api_key }
 
         try:
             response = requests.get(self.score_url(user_id),
-                    headers=headers, timeout=self.timeout, params=params)
+                    headers=headers, timeout=timeout, params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            sift_logger.warn('Failed to track event: %s' % properties)
+            sift_logger.warn('Failed to get score for user %s' % user_id)
             sift_logger.warn(traceback.format_exception_only(type(e), e))
 
             return e
 
-    def label(self, user_id, properties):
+    def label(self, user_id, properties, timeout = None):
         """Labels a user as either good or bad through the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/labels_api.html
         for more information on what fields to send in properties.
@@ -146,7 +154,7 @@ class Client(object):
         if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
-        return self.track('$label', properties, self.label_url(user_id))
+        return self.track('$label', properties, self.label_url(user_id), timeout=timeout)
 
 
 class Response(object):
