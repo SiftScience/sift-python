@@ -126,7 +126,8 @@ class TestSiftPythonClient(unittest.TestCase):
     def test_event_with_timeout_param_failure(self):
         event = '$transaction'
         test_timeout = .01
-        self.assertTrue(isinstance(self.sift_client.track(event, valid_transaction_properties(), timeout=test_timeout), requests.exceptions.Timeout))
+        self.assertTrue(isinstance(self.sift_client.track(event, valid_transaction_properties(), timeout=test_timeout),
+                                   requests.exceptions.Timeout))
 
     def test_score_ok(self):
         mock_response = mock.Mock()
@@ -219,7 +220,8 @@ class TestSiftPythonClient(unittest.TestCase):
     def test_label_user_with_timeout_param_failure(self):
         user_id = '54321'
         test_timeout = .01
-        self.assertTrue(isinstance(self.sift_client.label(user_id, valid_label_properties(), test_timeout), requests.exceptions.Timeout))
+        self.assertTrue(isinstance(self.sift_client.label(user_id, valid_label_properties(), test_timeout),
+                                   requests.exceptions.Timeout))
 
     def test_unicode_string_parameter_support(self):
         # str is unicode in python 3, so no need to check as this was covered by other unit tests.
