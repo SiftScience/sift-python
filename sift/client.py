@@ -12,6 +12,7 @@ import sift
 from . import version
 
 API_URL = 'https://api.siftscience.com'
+logging.basicConfig()
 sift_logger = logging.getLogger('sift_client')
 
 
@@ -131,7 +132,7 @@ class Client(object):
                     headers=headers, timeout=timeout, params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            sift_logger.warn('Failed to track event: %s' % properties)
+            sift_logger.warn('Failed to get score for user %s' % user_id)
             sift_logger.warn(traceback.format_exception_only(type(e), e))
 
             return e
