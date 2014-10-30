@@ -103,7 +103,7 @@ class Client(object):
             sift_logger.warn('Failed to track event: %s' % properties)
             sift_logger.warn(traceback.format_exception_only(type(e), e))
 
-            return e
+            raise
 
     def score(self, user_id, timeout = None):
         """Retrieves a user's fraud score from the Sift Science API.
@@ -135,7 +135,7 @@ class Client(object):
             sift_logger.warn('Failed to get score for user %s' % user_id)
             sift_logger.warn(traceback.format_exception_only(type(e), e))
 
-            return e
+            raise
 
     def label(self, user_id, properties, timeout = None):
         """Labels a user as either good or bad through the Sift Science API.
