@@ -2,7 +2,7 @@
 Sift Science Python Bindings
 ============================
 
-Bindings for Sift Science's `REST API <https://siftscience.com/docs/rest-api>`_.
+Bindings for Sift Science's `Events <https://siftscience.com/resources/references/events-api.html>`_, `Labels <https://siftscience.com/resources/references/labels-api.html>`_, and `Score <https://siftscience.com/resources/references/score-api.html>`_ APIs.
 
 Installation
 ============
@@ -83,3 +83,13 @@ Here's an example:
     
     # Label the user with user_id 23056 as Bad with all optional fields
     response = client.label(user_id,{ "$is_bad" : True, "$reasons" : ["$chargeback", ], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "analyst.name@your_domain.com"})
+    
+Testing
+=======
+
+Before submitting a change, make sure the following commands run without errors from the root dir of the repository:
+
+::
+
+    PYTHONPATH=. python tests/client_test.py
+    PYTHONPATH=. python3 tests/client_test.py
