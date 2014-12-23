@@ -40,6 +40,12 @@ def score_response_json():
       "score": 0.55
     }"""
 
+def response_with_data_header():
+    return {
+            'content-length': 166,
+            'content-type': 'application/json; charset=UTF-8'
+           }
+
 class TestSiftPythonClient(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -98,6 +104,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.content = '{"status": 0, "error_message": "OK"}'
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.track(event, valid_transaction_properties())
@@ -114,6 +121,8 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.content = '{"status": 0, "error_message": "OK"}'
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.track(event, valid_transaction_properties(), timeout=test_timeout)
@@ -134,6 +143,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.content = score_response_json()
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
         with mock.patch('requests.get') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.score('12345')
@@ -150,6 +160,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.content = score_response_json()
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
         with mock.patch('requests.get') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.score('12345', test_timeout)
@@ -170,6 +181,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.content = '{"status": 0, "error_message": "OK", "score_response": %s}' % score_response_json()
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.track(event, valid_transaction_properties(), return_score=True)
@@ -186,6 +198,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.content = '{"status": 0, "error_message": "OK"}'
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.label(user_id, valid_label_properties())
@@ -205,6 +218,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.content = '{"status": 0, "error_message": "OK"}'
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.label(user_id, valid_label_properties(), test_timeout)
@@ -223,21 +237,36 @@ class TestSiftPythonClient(unittest.TestCase):
         self.assertTrue(isinstance(self.sift_client.label(user_id, valid_label_properties(), test_timeout),
                                    requests.exceptions.Timeout))
 
+    def test_unlabel_user_ok(self):
+
+        user_id = '54321'
+        mock_response = mock.Mock()
+        mock_response.status_code = 204
+        with mock.patch('requests.delete') as mock_delete:
+            mock_delete.return_value = mock_response
+            response = self.sift_client.unlabel(user_id)
+            mock_delete.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % user_id,
+                                           headers=mock.ANY, timeout=mock.ANY, params={'api_key': self.test_key})
+            assert(response.is_ok())
+
     def test_unicode_string_parameter_support(self):
         # str is unicode in python 3, so no need to check as this was covered by other unit tests.
         if sys.version_info.major < 3:
-          mock_response = mock.Mock()
-          mock_response.content = '{"status": 0, "error_message": "OK"}'
-          mock_response.json.return_value = json.loads(mock_response.content)
-          mock_response.status_code = 200
-          user_id = u'23056'
-          with mock.patch('requests.post') as mock_post:
-            mock_post.return_value = mock_response
-            assert(self.sift_client.track(u'$transaction', valid_transaction_properties()))
-            assert(self.sift_client.label(user_id, valid_label_properties()))
-          with mock.patch('requests.get') as mock_post:
-            mock_post.return_value = mock_response
-            assert(self.sift_client.score(user_id)) 
+            mock_response = mock.Mock()
+            mock_response.content = '{"status": 0, "error_message": "OK"}'
+            mock_response.json.return_value = json.loads(mock_response.content)
+            mock_response.status_code = 200
+            mock_response.headers = response_with_data_header()
+
+            user_id = u'23056'
+
+            with mock.patch('requests.post') as mock_post:
+                mock_post.return_value = mock_response
+                assert(self.sift_client.track(u'$transaction', valid_transaction_properties()))
+                assert(self.sift_client.label(user_id, valid_label_properties()))
+            with mock.patch('requests.get') as mock_post:
+                mock_post.return_value = mock_response
+                assert(self.sift_client.score(user_id))
 
 
 def main():

@@ -146,6 +146,7 @@ class Client(object):
             user_id:  A user's id. This id should be the same as the user_id used in
                 event calls.
             properties: A dict of additional event-specific attributes to track
+            timeout(optional): specify a custom timeout for this call
         Returns:
             A requests.Response object if the label call succeeded, otherwise
             a subclass of requests.exceptions.RequestException indicating the
@@ -156,21 +157,73 @@ class Client(object):
 
         return self.track('$label', properties, self.label_url(user_id), timeout=timeout)
 
+    def unlabel(self, user_id, timeout = None):
+        """unlabels a user through the Sift Science API.
+        This call is blocking.  Check out https://siftscience.com/resources/references/labels_api.html
+        for more information.
+
+        Args:
+            user_id:  A user's id. This id should be the same as the user_id used in
+                event calls.
+            timeout(optional): specify a custom timeout for this call
+        Returns:
+            A requests.Response object if the unlabel call succeeded, otherwise
+            a subclass of requests.exceptions.RequestException indicating the
+            exception that occurred.
+        """
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise RuntimeError("user_id must be a string")
+
+        if timeout is None:
+            timeout = self.timeout
+
+        headers = { 'User-Agent' : self.user_agent() }
+        params = { 'api_key': self.api_key }
+
+        try:
+
+            response = requests.delete(self.label_url(user_id),
+                    headers=headers, timeout=timeout, params=params)
+            return Response(response)
+
+        except requests.exceptions.RequestException as e:
+            sift_logger.warn('Failed to unlabel user %s' % user_id)
+            sift_logger.warn(traceback.format_exception_only(type(e), e))
+
+            return e
+
+
 
 class Response(object):
+
+    HTTP_CODES_WITHOUT_BODY = [204, 304]
+
     def __init__(self, http_response):
-        self.body = http_response.json()
+
         self.http_status_code = http_response.status_code
-        self.api_status = self.body['status']
-        self.api_error_message = self.body['error_message']
-        if 'request' in self.body.keys() and isinstance(self.body['request'], str):
-            self.request = json.loads(self.body['request'])
-        else:
-            self.request = None
+        self.url = http_response.url
+        self.body = None
+
+        if (self.http_status_code not in self.HTTP_CODES_WITHOUT_BODY) \
+            and 'content-length' in http_response.headers:
+            self.body = http_response.json()
+            self.api_status = self.body['status']
+            self.api_error_message = self.body['error_message']
+            if 'request' in self.body.keys() \
+               and isinstance(self.body['request'], str):
+                self.request = json.loads(self.body['request'])
+            else:
+                self.request = None
 
     def __str__(self):
         return ('{"body": %s, "http_status_code": %s}' %
-                (json.dumps(self.body), str(self.http_status_code)))
+                ('{}' if self.body == None else json.dumps(self.body), str(self.http_status_code)))
 
     def is_ok(self):
+
+        if self.http_status_code in self.HTTP_CODES_WITHOUT_BODY:
+            return 204 == self.http_status_code
+
         return self.api_status == 0
+
+
