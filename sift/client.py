@@ -200,9 +200,13 @@ class Response(object):
 
     def __init__(self, http_response):
 
+        # Set defaults.
+        self.body = None
+        self.request = None
+        self.api_status = None
+        self.api_error_message = None
         self.http_status_code = http_response.status_code
         self.url = http_response.url
-        self.body = None
 
         if (self.http_status_code not in self.HTTP_CODES_WITHOUT_BODY) \
             and 'content-length' in http_response.headers:
