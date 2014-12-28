@@ -220,8 +220,9 @@ class Response(object):
                 self.request = None
 
     def __str__(self):
-        return ('{"body": %s, "http_status_code": %s}' %
-                ('{}' if self.body == None else json.dumps(self.body), str(self.http_status_code)))
+        return ('{%s "http_status_code": %s}' %
+                ('' if self.body == None else '"body": ' +
+                 json.dumps(self.body) + ',', str(self.http_status_code)))
 
     def is_ok(self):
 
