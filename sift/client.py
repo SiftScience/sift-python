@@ -12,7 +12,6 @@ import sift
 from . import version
 
 API_URL = 'https://api.siftscience.com'
-logging.basicConfig()
 sift_logger = logging.getLogger('sift_client')
 
 
@@ -68,7 +67,7 @@ class Client(object):
                 event name such as "$transaction" or "$create_order" or a custom event
                 name (that does not start with a $).
             properties: A dict of additional event-specific attributes to track
-            return_score: Whether the API response should include a score for this 
+            return_score: Whether the API response should include a score for this
                  user (the score will be calculated using this event)
         Returns:
             A requests.Response object if the track call succeeded, otherwise
@@ -230,5 +229,3 @@ class Response(object):
             return 204 == self.http_status_code
 
         return self.api_status == 0
-
-
