@@ -1,3 +1,8 @@
+1.1.2.0 (2015-02-04)
+====================
+* Added Unlabel functionaly
+* Minor bug fixes.
+
 1.1.1.0 (2014-09-3)
 ===================
 * Added timeout parameter to track, score, and label functions.

@@ -83,7 +83,10 @@ Here's an example:
     
     # Label the user with user_id 23056 as Bad with all optional fields
     response = client.label(user_id,{ "$is_bad" : True, "$reasons" : ["$chargeback", ], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "analyst.name@your_domain.com"})
-    
+
+    # Remove a label from a user with user_id 23056
+    response = client.unlabel(user_id)
+
 Testing
 =======
 
