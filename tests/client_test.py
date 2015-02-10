@@ -5,7 +5,10 @@ import sift
 import unittest
 import sys
 import requests.exceptions
-import urllib
+if sys.version_info.major < 3:
+  import urllib
+else:
+  import urllib.parse as urllib
 
 def valid_transaction_properties():
     return {
@@ -278,7 +281,7 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.delete') as mock_delete:
             mock_delete.return_value = mock_response
             response = self.sift_client.unlabel(user_id)
-            mock_delete.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % urllib.quote_plus(user_id),
+            mock_delete.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % urllib.quote(user_id),
                                            headers=mock.ANY, timeout=mock.ANY, params={'api_key': self.test_key})
             assert(response.is_ok())
 
@@ -295,7 +298,7 @@ class TestSiftPythonClient(unittest.TestCase):
             properties = {'$description': 'Listed a fake item', '$is_bad': True, '$reasons': [ "$fake" ]}
             properties.update({ '$api_key': self.test_key, '$type': '$label'})
             data = json.dumps(properties)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % urllib.quote_plus(user_id),
+            mock_post.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % urllib.quote(user_id),
                 data=data, headers=mock.ANY, timeout=mock.ANY, params={})
             assert(response.is_ok())
             assert(response.api_status == 0)
@@ -311,7 +314,7 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.get') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.score(user_id)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/score/%s' % urllib.quote_plus(user_id),
+            mock_post.assert_called_with('https://api.siftscience.com/v203/score/%s' % urllib.quote(user_id),
                 params={'api_key':self.test_key},
                 headers=mock.ANY, timeout=mock.ANY)
             assert(response.is_ok())

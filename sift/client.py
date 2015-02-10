@@ -7,7 +7,10 @@ import logging
 import requests
 import traceback
 import sys
-import urllib
+if sys.version_info.major < 3:
+  import urllib
+else:
+  import urllib.parse as urllib
 
 import sift
 from . import version

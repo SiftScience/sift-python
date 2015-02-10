@@ -3,7 +3,9 @@ python:
   - "2.7"
   - "3.4"
 # command to install dependencies
-install: "python setup.py install"
+install:
+  - "python setup.py install"
+  - "python3 setup.py install"
 # command to run tests
 script:
   - "PYTHONPATH=. python tests/client_test.py"
