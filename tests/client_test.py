@@ -169,10 +169,6 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
 
-    def test_score_with_timeout_param_failure(self):
-        test_timeout = 0.01
-        self.assertTrue(isinstance(self.sift_client.score('12345', test_timeout),requests.exceptions.Timeout))
-
     def test_sync_score_ok(self):
         event = '$transaction'
         mock_response = mock.Mock()
@@ -228,12 +224,6 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
-
-    def test_label_user_with_timeout_param_failure(self):
-        user_id = '54321'
-        test_timeout = .01
-        self.assertTrue(isinstance(self.sift_client.label(user_id, valid_label_properties(), test_timeout),
-                                   requests.exceptions.Timeout))
 
     def test_unlabel_user_ok(self):
 
