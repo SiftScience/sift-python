@@ -8,4 +8,3 @@ install:
 # command to run tests
 script:
   - "PYTHONPATH=. python tests/client_test.py"
-  - "PYTHONPATH=. python3 tests/client_test.py"
