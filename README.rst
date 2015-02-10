@@ -1,9 +1,9 @@
 ============================
-Sift Science Python Bindings |TravisCI|
+Sift Science Python Bindings |TravisCI|_
 ============================
 
 .. |TravisCI| image:: https://travis-ci.org/SiftScience/sift-python.png?branch=master
-.. TravisCI: https://travis-ci.org/SiftScience/sift-python
+.. _TravisCI: https://travis-ci.org/SiftScience/sift-python
 
 Bindings for Sift Science's `Events <https://siftscience.com/resources/references/events-api.html>`_, `Labels <https://siftscience.com/resources/references/labels-api.html>`_, and `Score <https://siftscience.com/resources/references/score-api.html>`_ APIs.
 
