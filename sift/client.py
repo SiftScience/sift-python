@@ -7,7 +7,10 @@ import logging
 import requests
 import traceback
 import sys
-import urllib
+if sys.version_info.major < 3:
+  import urllib
+else:
+  import urllib.parse as urllib
 
 import sift
 from . import version
@@ -53,10 +56,10 @@ class Client(object):
         return self.url + '/events'
 
     def score_url(self, user_id):
-        return self.url + '/score/%s' % urllib.quote_plus(user_id)
+        return self.url + '/score/%s' % urllib.quote(user_id)
 
     def label_url(self, user_id):
-        return self.url + '/users/%s/labels' % urllib.quote_plus(user_id)
+        return self.url + '/users/%s/labels' % urllib.quote(user_id)
 
     def track(self, event, properties, path=None, return_score=False, timeout = None):
         """Track an event and associated properties to the Sift Science client.
