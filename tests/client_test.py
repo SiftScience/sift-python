@@ -136,12 +136,6 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
 
-    def test_event_with_timeout_param_failure(self):
-        event = '$transaction'
-        test_timeout = .01
-        self.assertTrue(isinstance(self.sift_client.track(event, valid_transaction_properties(), timeout=test_timeout),
-                                   requests.exceptions.Timeout))
-
     def test_score_ok(self):
         mock_response = mock.Mock()
         mock_response.content = score_response_json()
