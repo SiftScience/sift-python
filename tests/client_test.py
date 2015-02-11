@@ -5,7 +5,7 @@ import sift
 import unittest
 import sys
 import requests.exceptions
-if sys.version_info.major < 3:
+if sys.version_info[0] < 3:
   import urllib
 else:
   import urllib.parse as urllib

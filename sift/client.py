@@ -7,7 +7,8 @@ import logging
 import requests
 import traceback
 import sys
-if sys.version_info.major < 3:
+# Use index instead of keyword argument to support Python 2.6
+if sys.version_info[0] < 3:
   import urllib
 else:
   import urllib.parse as urllib
