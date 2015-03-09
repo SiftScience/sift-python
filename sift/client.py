@@ -73,7 +73,9 @@ class Client(object):
                 name (that does not start with a $).
             properties: A dict of additional event-specific attributes to track
             return_score: Whether the API response should include a score for this 
-                 user (the score will be calculated using this event)
+                 user (the score will be calculated using this event).  This feature must be
+                 enabled for your account in order to use it.  Please contact
+                 support@siftscience.com if you are interested in using this feature.
         Returns:
             A requests.Response object if the track call succeeded, otherwise
             a subclass of requests.exceptions.RequestException indicating the
