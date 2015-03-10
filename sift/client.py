@@ -7,7 +7,7 @@ import logging
 import requests
 import traceback
 import sys
-if sys.version_info.major < 3:
+if sys.version_info[0] < 3:
   import urllib
 else:
   import urllib.parse as urllib
@@ -44,7 +44,7 @@ class Client(object):
         self.api_key = api_key
         self.url = api_url + '/v%s' % version.API_VERSION
         self.timeout = timeout
-        if sys.version_info.major < 3:
+        if sys.version_info[0] < 3:
           self.UNICODE_STRING = basestring
         else:
           self.UNICODE_STRING = str
