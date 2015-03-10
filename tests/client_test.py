@@ -51,8 +51,7 @@ def response_with_data_header():
            }
 
 class TestSiftPythonClient(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
+    def setUp(self):
         self.test_key = 'a_fake_test_api_key'
         self.sift_client = sift.Client(self.test_key)
 
