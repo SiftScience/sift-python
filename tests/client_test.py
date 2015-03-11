@@ -5,7 +5,7 @@ import sift
 import unittest
 import sys
 import requests.exceptions
-if sys.version_info.major < 3:
+if sys.version_info[0] < 3:
   import urllib
 else:
   import urllib.parse as urllib
@@ -51,8 +51,7 @@ def response_with_data_header():
            }
 
 class TestSiftPythonClient(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
+    def setUp(self):
         self.test_key = 'a_fake_test_api_key'
         self.sift_client = sift.Client(self.test_key)
 
@@ -239,7 +238,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_unicode_string_parameter_support(self):
         # str is unicode in python 3, so no need to check as this was covered by other unit tests.
-        if sys.version_info.major < 3:
+        if sys.version_info[0] < 3:
             mock_response = mock.Mock()
             mock_response.content = '{"status": 0, "error_message": "OK"}'
             mock_response.json.return_value = json.loads(mock_response.content)
