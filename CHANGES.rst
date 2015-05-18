@@ -1,3 +1,9 @@
+1.1.2.1 (2015-05-18)
+====================
+* Added Python 2.6 compatibility
+* Added Travis CI
+* Minor bug fixes
+
 1.1.2.0 (2015-02-04)
 ====================
 * Added Unlabel functionaly
