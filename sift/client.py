@@ -3,9 +3,9 @@ See: https://siftscience.com/docs/references/events-api
 """
 
 import json
-import logging
 import requests
 import traceback
+import warnings
 import sys
 if sys.version_info[0] < 3:
   import urllib
@@ -16,8 +16,6 @@ import sift
 from . import version
 
 API_URL = 'https://api.siftscience.com'
-logging.basicConfig()
-sift_logger = logging.getLogger('sift_client')
 
 
 class Client(object):
@@ -106,8 +104,8 @@ class Client(object):
                     headers=headers, timeout=timeout, params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            sift_logger.warn('Failed to track event: %s' % properties)
-            sift_logger.warn(traceback.format_exception_only(type(e), e))
+            warnings.warn('Failed to track event: %s' % properties)
+            warnings.warn(traceback.format_exception_only(type(e), e))
 
             return e
 
@@ -138,8 +136,8 @@ class Client(object):
                     headers=headers, timeout=timeout, params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            sift_logger.warn('Failed to get score for user %s' % user_id)
-            sift_logger.warn(traceback.format_exception_only(type(e), e))
+            warnings.warn('Failed to get score for user %s' % user_id)
+            warnings.warn(traceback.format_exception_only(type(e), e))
 
             return e
 
@@ -193,8 +191,8 @@ class Client(object):
             return Response(response)
 
         except requests.exceptions.RequestException as e:
-            sift_logger.warn('Failed to unlabel user %s' % user_id)
-            sift_logger.warn(traceback.format_exception_only(type(e), e))
+            warnings.warn('Failed to unlabel user %s' % user_id)
+            warnings.warn(traceback.format_exception_only(type(e), e))
 
             return e
 
