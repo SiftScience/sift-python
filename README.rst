@@ -61,7 +61,7 @@ Here's an example:
       "$user_id" : user_id, 
       "$user_email" : "buyer@gmail.com", 
       "$seller_user_id" : "2371", 
-    "seller_user_email" : "seller@gmail.com", 
+      "seller_user_email" : "seller@gmail.com", 
       "$transaction_id" : "573050", 
       "$payment_method" : {
         "$payment_type"    : "$credit_card",
