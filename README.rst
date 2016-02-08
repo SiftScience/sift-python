@@ -52,7 +52,7 @@ Here's an example:
     sift.api_key = '<your api key here>'
     client = sift.Client()
 
-    user_id= "23056"    # User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
+    user_id= "23056"   # User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
     
     # Track a transaction event -- note this is blocking
     event = "$transaction"
@@ -85,7 +85,10 @@ Here's an example:
     response = client.score(user_id)
     
     # Label the user with user_id 23056 as Bad with all optional fields
-    response = client.label(user_id,{ "$is_bad" : True, "$reasons" : ["$chargeback", ], "$description" : "Chargeback issued", "$source" : "Manual Review", "$analyst" : "analyst.name@your_domain.com"})
+    response = client.label(user_id,{ "$is_bad" : True, "$reasons" : ["$chargeback", ],
+                            "$description" : "Chargeback issued",
+                            "$source" : "Manual Review",
+                            "$analyst" : "analyst.name@your_domain.com"})
 
     # Remove a label from a user with user_id 23056
     response = client.unlabel(user_id)
