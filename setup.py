@@ -19,7 +19,7 @@ except:
 setup(
     name='Sift',
     description='Python bindings for Sift Science\'s API',
-    version='1.1.2.2', # NB: must be kept in sync with sift/version.py
+    version='1.1.2.3', # NB: must be kept in sync with sift/version.py
     url='https://siftscience.com',
 
     author='Sift Science',
