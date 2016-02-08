@@ -68,9 +68,9 @@ Here's an example:
         "$payment_gateway" : "$braintree",
         "$card_bin"        : "542486",
         "$card_last4"      : "4444"             
-    }, 
-    "$currency_code" : "USD",
-    "$amount" : 15230000,
+      }, 
+      "$currency_code" : "USD",
+      "$amount" : 15230000,
     }
 
     response = client.track(event, properties)
