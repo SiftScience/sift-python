@@ -105,8 +105,7 @@ class Client(object):
             return Response(response)
         except requests.exceptions.RequestException as e:
             warnings.warn('Failed to track event: %s' % properties)
-            warnings.warn(traceback.format_exception_only(type(e), e))
-
+            warnings.warn(traceback.format_exc())
             return e
 
     def score(self, user_id, timeout = None):
@@ -137,8 +136,7 @@ class Client(object):
             return Response(response)
         except requests.exceptions.RequestException as e:
             warnings.warn('Failed to get score for user %s' % user_id)
-            warnings.warn(traceback.format_exception_only(type(e), e))
-
+            warnings.warn(traceback.format_exc())
             return e
 
     def label(self, user_id, properties, timeout = None):
@@ -192,8 +190,7 @@ class Client(object):
 
         except requests.exceptions.RequestException as e:
             warnings.warn('Failed to unlabel user %s' % user_id)
-            warnings.warn(traceback.format_exception_only(type(e), e))
-
+            warnings.warn(traceback.format_exc())
             return e
 
 
