@@ -89,7 +89,7 @@ class Client(object):
         """
         if not isinstance(
                 event, self.UNICODE_STRING) or len(
-                event.strip()) == 0:
+                    event.strip()) == 0:
             raise RuntimeError("event must be a string")
 
         if not isinstance(properties, dict) or len(properties) == 0:
@@ -137,7 +137,7 @@ class Client(object):
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
-                user_id.strip()) == 0:
+                    user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
         if timeout is None:
@@ -175,7 +175,7 @@ class Client(object):
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
-                user_id.strip()) == 0:
+                    user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
         return self.track(
@@ -200,7 +200,7 @@ class Client(object):
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
-                user_id.strip()) == 0:
+                    user_id.strip()) == 0:
             raise RuntimeError("user_id must be a string")
 
         if timeout is None:
