@@ -7,35 +7,38 @@ import unittest
 import sys
 import requests.exceptions
 if sys.version_info[0] < 3:
-  import urllib
+    import urllib
 else:
-  import urllib.parse as urllib
+    import urllib.parse as urllib
+
 
 def valid_transaction_properties():
     return {
-      '$buyer_user_id': '123456',
-      '$seller_user_id': '654321',
-      '$amount': 1253200,
-      '$currency_code': 'USD',
-      '$time': int(datetime.datetime.now().strftime('%s')),
-      '$transaction_id': 'my_transaction_id',
-      '$billing_name': 'Mike Snow',
-      '$billing_bin': '411111',
-      '$billing_last4': '1111',
-      '$billing_address1': '123 Main St.',
-      '$billing_city': 'San Francisco',
-      '$billing_region': 'CA',
-      '$billing_country': 'US',
-      '$billing_zip': '94131',
-      '$user_email': 'mike@example.com'
+        '$buyer_user_id': '123456',
+        '$seller_user_id': '654321',
+        '$amount': 1253200,
+        '$currency_code': 'USD',
+        '$time': int(datetime.datetime.now().strftime('%s')),
+        '$transaction_id': 'my_transaction_id',
+        '$billing_name': 'Mike Snow',
+        '$billing_bin': '411111',
+        '$billing_last4': '1111',
+        '$billing_address1': '123 Main St.',
+        '$billing_city': 'San Francisco',
+        '$billing_region': 'CA',
+        '$billing_country': 'US',
+        '$billing_zip': '94131',
+        '$user_email': 'mike@example.com'
     }
+
 
 def valid_label_properties():
     return {
-      '$description': 'Listed a fake item',
-      '$is_bad': True,
-      '$reasons': [ "$fake" ],
+        '$description': 'Listed a fake item',
+        '$is_bad': True,
+        '$reasons': ["$fake"],
     }
+
 
 def score_response_json():
     return """{
@@ -45,13 +48,16 @@ def score_response_json():
       "score": 0.55
     }"""
 
+
 def response_with_data_header():
     return {
-            'content-length': 166,
-            'content-type': 'application/json; charset=UTF-8'
-           }
+        'content-length': 166,
+        'content-type': 'application/json; charset=UTF-8'
+    }
+
 
 class TestSiftPythonClient(unittest.TestCase):
+
     def setUp(self):
         self.test_key = 'a_fake_test_api_key'
         self.sift_client = sift.Client(self.test_key)
@@ -64,7 +70,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
         client1 = sift.Client()
         client2 = sift.Client(local_api_key)
-        
+
         # test that global api key is assigned
         assert(client1.api_key == sift.api_key)
         # test that local api key is assigned
@@ -111,9 +117,14 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
-            response = self.sift_client.track(event, valid_transaction_properties())
-            mock_post.assert_called_with('https://api.siftscience.com/v203/events',
-                data=mock.ANY, headers=mock.ANY, timeout=mock.ANY, params={})
+            response = self.sift_client.track(
+                event, valid_transaction_properties())
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={})
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -129,9 +140,14 @@ class TestSiftPythonClient(unittest.TestCase):
 
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
-            response = self.sift_client.track(event, valid_transaction_properties(), timeout=test_timeout)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/events',
-                data=mock.ANY, headers=mock.ANY, timeout=test_timeout, params={})
+            response = self.sift_client.track(
+                event, valid_transaction_properties(), timeout=test_timeout)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=test_timeout,
+                params={})
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -145,9 +161,12 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.get') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.score('12345')
-            mock_post.assert_called_with('https://api.siftscience.com/v203/score/12345',
-                params={'api_key':self.test_key},
-                headers=mock.ANY, timeout=mock.ANY)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/score/12345',
+                params={
+                    'api_key': self.test_key},
+                headers=mock.ANY,
+                timeout=mock.ANY)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -162,9 +181,12 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.get') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.score('12345', test_timeout)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/score/12345',
-                params={'api_key':self.test_key},
-                headers=mock.ANY, timeout=test_timeout)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/score/12345',
+                params={
+                    'api_key': self.test_key},
+                headers=mock.ANY,
+                timeout=test_timeout)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -172,15 +194,22 @@ class TestSiftPythonClient(unittest.TestCase):
     def test_sync_score_ok(self):
         event = '$transaction'
         mock_response = mock.Mock()
-        mock_response.content = '{"status": 0, "error_message": "OK", "score_response": %s}' % score_response_json()
+        mock_response.content = '{"status": 0, "error_message": "OK", "score_response": %s}' % score_response_json(
+        )
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
-            response = self.sift_client.track(event, valid_transaction_properties(), return_score=True)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/events',
-                data=mock.ANY, headers=mock.ANY, timeout=mock.ANY, params={'return_score': True})
+            response = self.sift_client.track(
+                event, valid_transaction_properties(), return_score=True)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={
+                    'return_score': True})
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -195,12 +224,17 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
-            response = self.sift_client.label(user_id, valid_label_properties())
-            properties = {'$description': 'Listed a fake item', '$is_bad': True, '$reasons': [ "$fake" ]}
-            properties.update({ '$api_key': self.test_key, '$type': '$label'})
+            response = self.sift_client.label(
+                user_id, valid_label_properties())
+            properties = {
+                '$description': 'Listed a fake item',
+                '$is_bad': True,
+                '$reasons': ["$fake"]}
+            properties.update({'$api_key': self.test_key, '$type': '$label'})
             data = json.dumps(properties)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % user_id,
-                data=data, headers=mock.ANY, timeout=mock.ANY, params={})
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/users/%s/labels' %
+                user_id, data=data, headers=mock.ANY, timeout=mock.ANY, params={})
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -215,12 +249,17 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
-            response = self.sift_client.label(user_id, valid_label_properties(), test_timeout)
-            properties = {'$description': 'Listed a fake item', '$is_bad': True, '$reasons': [ "$fake" ]}
-            properties.update({ '$api_key': self.test_key, '$type': '$label'})
+            response = self.sift_client.label(
+                user_id, valid_label_properties(), test_timeout)
+            properties = {
+                '$description': 'Listed a fake item',
+                '$is_bad': True,
+                '$reasons': ["$fake"]}
+            properties.update({'$api_key': self.test_key, '$type': '$label'})
             data = json.dumps(properties)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % user_id,
-                data=data, headers=mock.ANY, timeout=test_timeout, params={})
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/users/%s/labels' %
+                user_id, data=data, headers=mock.ANY, timeout=test_timeout, params={})
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -233,12 +272,15 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.delete') as mock_delete:
             mock_delete.return_value = mock_response
             response = self.sift_client.unlabel(user_id)
-            mock_delete.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % user_id,
-                                           headers=mock.ANY, timeout=mock.ANY, params={'api_key': self.test_key})
+            mock_delete.assert_called_with(
+                'https://api.siftscience.com/v203/users/%s/labels' %
+                user_id, headers=mock.ANY, timeout=mock.ANY, params={
+                    'api_key': self.test_key})
             assert(response.is_ok())
 
     def test_unicode_string_parameter_support(self):
-        # str is unicode in python 3, so no need to check as this was covered by other unit tests.
+        # str is unicode in python 3, so no need to check as this was covered
+        # by other unit tests.
         if sys.version_info[0] < 3:
             mock_response = mock.Mock()
             mock_response.content = '{"status": 0, "error_message": "OK"}'
@@ -250,12 +292,17 @@ class TestSiftPythonClient(unittest.TestCase):
 
             with mock.patch('requests.post') as mock_post:
                 mock_post.return_value = mock_response
-                assert(self.sift_client.track(u'$transaction', valid_transaction_properties()))
-                assert(self.sift_client.label(user_id, valid_label_properties()))
+                assert(
+                    self.sift_client.track(
+                        u'$transaction',
+                        valid_transaction_properties()))
+                assert(
+                    self.sift_client.label(
+                        user_id,
+                        valid_label_properties()))
             with mock.patch('requests.get') as mock_post:
                 mock_post.return_value = mock_response
                 assert(self.sift_client.score(user_id))
-
 
     def test_unlabel_user_with_special_chars_ok(self):
 
@@ -265,8 +312,10 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.delete') as mock_delete:
             mock_delete.return_value = mock_response
             response = self.sift_client.unlabel(user_id)
-            mock_delete.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % urllib.quote(user_id),
-                                           headers=mock.ANY, timeout=mock.ANY, params={'api_key': self.test_key})
+            mock_delete.assert_called_with(
+                'https://api.siftscience.com/v203/users/%s/labels' %
+                urllib.quote(user_id), headers=mock.ANY, timeout=mock.ANY, params={
+                    'api_key': self.test_key})
             assert(response.is_ok())
 
     def test_label_user__with_special_chars_ok(self):
@@ -278,12 +327,21 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
-            response = self.sift_client.label(user_id, valid_label_properties())
-            properties = {'$description': 'Listed a fake item', '$is_bad': True, '$reasons': [ "$fake" ]}
-            properties.update({ '$api_key': self.test_key, '$type': '$label'})
+            response = self.sift_client.label(
+                user_id, valid_label_properties())
+            properties = {
+                '$description': 'Listed a fake item',
+                '$is_bad': True,
+                '$reasons': ["$fake"]}
+            properties.update({'$api_key': self.test_key, '$type': '$label'})
             data = json.dumps(properties)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/users/%s/labels' % urllib.quote(user_id),
-                data=data, headers=mock.ANY, timeout=mock.ANY, params={})
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/users/%s/labels' %
+                urllib.quote(user_id),
+                data=data,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={})
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -298,9 +356,13 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.get') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.score(user_id)
-            mock_post.assert_called_with('https://api.siftscience.com/v203/score/%s' % urllib.quote(user_id),
-                params={'api_key':self.test_key},
-                headers=mock.ANY, timeout=mock.ANY)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/score/%s' %
+                urllib.quote(user_id),
+                params={
+                    'api_key': self.test_key},
+                headers=mock.ANY,
+                timeout=mock.ANY)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -309,8 +371,10 @@ class TestSiftPythonClient(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             with mock.patch('requests.post') as mock_post:
-                mock_post.side_effect = mock.Mock(side_effect = requests.exceptions.RequestException("Failed"))
-                response = self.sift_client.track('$transaction', valid_transaction_properties())
+                mock_post.side_effect = mock.Mock(
+                    side_effect=requests.exceptions.RequestException("Failed"))
+                response = self.sift_client.track(
+                    '$transaction', valid_transaction_properties())
             assert(len(w) == 2)
             assert('Failed to track event:' in str(w[0].message))
             assert('RequestException: Failed' in str(w[1].message))
@@ -320,7 +384,8 @@ class TestSiftPythonClient(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             with mock.patch('requests.get') as mock_get:
-                mock_get.side_effect = mock.Mock(side_effect = requests.exceptions.RequestException("Failed"))
+                mock_get.side_effect = mock.Mock(
+                    side_effect=requests.exceptions.RequestException("Failed"))
                 response = self.sift_client.score('Fred')
             assert(len(w) == 2)
             assert('Failed to get score for user Fred' in str(w[0].message))
@@ -331,7 +396,8 @@ class TestSiftPythonClient(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             with mock.patch('requests.delete') as mock_delete:
-                mock_delete.side_effect = mock.Mock(side_effect = requests.exceptions.RequestException("Failed"))
+                mock_delete.side_effect = mock.Mock(
+                    side_effect=requests.exceptions.RequestException("Failed"))
                 response = self.sift_client.unlabel('Fred')
 
             assert(len(w) == 2)
@@ -339,7 +405,7 @@ class TestSiftPythonClient(unittest.TestCase):
             assert('RequestException: Failed' in str(w[1].message))
             assert('Traceback' in str(w[1].message))
 
-            
+
 def main():
     unittest.main()
 
