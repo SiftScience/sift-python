@@ -67,6 +67,7 @@ class Client(object):
             properties,
             path=None,
             return_score=False,
+            return_action=False,
             timeout=None):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.  Check out https://siftscience.com/resources/references/events_api
@@ -77,11 +78,18 @@ class Client(object):
             event: The name of the event to send. This can either be a reserved
                 event name such as "$transaction" or "$create_order" or a custom event
                 name (that does not start with a $).
+
             properties: A dict of additional event-specific attributes to track
+
             return_score: Whether the API response should include a score for this
                  user (the score will be calculated using this event).  This feature must be
                  enabled for your account in order to use it.  Please contact
                  support@siftscience.com if you are interested in using this feature.
+
+            return_action: Whether the API response should include actions in the response. For
+                 more information on how this works, please visit the tutorial at:
+                 https://siftscience.com/resources/tutorials/formulas
+
         Returns:
             A requests.Response object if the track call succeeded, otherwise
             a subclass of requests.exceptions.RequestException indicating the
@@ -107,8 +115,13 @@ class Client(object):
 
         properties.update({'$api_key': self.api_key, '$type': event})
         params = {}
+
         if return_score:
             params.update({'return_score': return_score})
+
+        if return_action:
+            params.update({'return_action': return_action})
+
         try:
             response = requests.post(
                 path,
