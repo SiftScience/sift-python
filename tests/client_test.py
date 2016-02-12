@@ -42,16 +42,45 @@ def valid_label_properties():
 
 def score_response_json():
     return """{
-      "status":0,
+      "status": 0,
       "error_message": "OK",
-      "user_id":"12345",
+      "user_id": "12345",
       "score": 0.55
+    }"""
+
+
+def action_response_json():
+    return """{
+        "actions": [
+            {
+                "action": {
+                    "id": "freds_action"
+                },
+                "entity": {
+                    "id": "Fred"
+                },
+                "id": "ACTION1234567890:freds_action",
+                "triggers": [
+                    {
+                        "source": "synchronous_action",
+                        "trigger": {
+                            "id": "TRIGGER1234567890"
+                        },
+                        "type": "formula"
+                    }
+                ]
+            }
+        ],
+        "score": 0.55,
+        "status": 0,
+        "error_message": "OK",
+        "user_id": "Fred"
     }"""
 
 
 def response_with_data_header():
     return {
-        'content-length': 166,
+        'content-length': 1,         # Simply has to be > 0
         'content-type': 'application/json; charset=UTF-8'
     }
 
@@ -404,6 +433,38 @@ class TestSiftPythonClient(unittest.TestCase):
             assert('Failed to unlabel user Fred' in str(w[0].message))
             assert('RequestException: Failed' in str(w[1].message))
             assert('Traceback' in str(w[1].message))
+
+    def test_return_actions_on_track(self):
+        event = '$transaction'
+        mock_response = mock.Mock()
+        mock_response.content = '{"status": 0, "error_message": "OK", "score_response": %s}' % action_response_json(
+        )
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+
+            response = self.sift_client.track(
+                event, valid_transaction_properties(), return_action=True)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v203/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={
+                    'return_action': True})
+
+            assert(response.is_ok())
+            assert(response.api_status == 0)
+            assert(response.api_error_message == "OK")
+
+            actions = response.body["score_response"]['actions']
+            assert(actions)
+            assert(actions[0]['action'])
+            assert(actions[0]['action']['id'] == 'freds_action')
+            assert(actions[0]['triggers'])
 
 
 def main():
