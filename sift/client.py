@@ -70,7 +70,7 @@ class Client(object):
             return_action=False,
             timeout=None):
         """Track an event and associated properties to the Sift Science client.
-        This call is blocking.  Check out https://siftscience.com/resources/references/events_api
+        This call is blocking.  Check out https://siftscience.com/resources/references/events-api
         for more information on what types of events you can send and fields you can add to the
         properties parameter.
 
