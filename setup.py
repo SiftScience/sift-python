@@ -1,3 +1,4 @@
+import imp
 import os
 
 try:
@@ -11,15 +12,17 @@ here = os.path.abspath(os.path.dirname(__file__))
 try:
     README = open(os.path.join(here, 'README.rst')).read()
     CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
-except:
+except Exception:
     README = ''
     CHANGES = ''
 
+# Use imp to avoid sift/__init__.py
+version_mod = imp.load_source('__tmp', os.path.join(here, 'sift/version.py'))
 
 setup(
     name='Sift',
     description='Python bindings for Sift Science\'s API',
-    version='1.1.2.5',  # NB: must be kept in sync with sift/version.py
+    version=version_mod.VERSION,
     url='https://siftscience.com',
 
     author='Sift Science',
