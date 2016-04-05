@@ -253,7 +253,12 @@ class Response(object):
 
         if (self.http_status_code not in self.HTTP_CODES_WITHOUT_BODY) \
                 and 'content-length' in http_response.headers:
-            self.body = http_response.json()
+            try:
+                self.body = http_response.json()
+            except ValueError as e:
+                not_json_warning = "Failed to parse json response from {}.  HTTP status code: {}.".format(self.url, self.http_status_code)
+                warnings.warn(not_json_warning)
+                return
             self.api_status = self.body['status']
             self.api_error_message = self.body['error_message']
             if 'request' in self.body.keys() \
