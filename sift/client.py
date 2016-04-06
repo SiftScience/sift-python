@@ -255,17 +255,22 @@ class Response(object):
                 and 'content-length' in http_response.headers:
             try:
                 self.body = http_response.json()
+                self.api_status = self.body['status']
+                self.api_error_message = self.body['error_message']
+                if 'request' in self.body.keys() \
+                   and isinstance(self.body['request'], str):
+                    self.request = json.loads(self.body['request'])
+                else:
+                    self.request = None
             except ValueError as e:
                 not_json_warning = "Failed to parse json response from {}.  HTTP status code: {}.".format(self.url, self.http_status_code)
                 warnings.warn(not_json_warning)
-                return
-            self.api_status = self.body['status']
-            self.api_error_message = self.body['error_message']
-            if 'request' in self.body.keys() \
-               and isinstance(self.body['request'], str):
-                self.request = json.loads(self.body['request'])
-            else:
-                self.request = None
+            finally:
+                if (int(self.http_status_code) < 200 or int(self.http_status_code) >= 300):
+                    non_2xx_warning = "{} returned non-2XX http status code {}".format(self.url, self.http_status_code)
+                    if self.api_error_message:
+                        non_2xx_warning += " with error message: {}".format(self.api_error_message)
+                    raise ApiException(non_2xx_warning)
 
     def __str__(self):
         return ('{%s "http_status_code": %s}' %
@@ -278,3 +283,7 @@ class Response(object):
             return 204 == self.http_status_code
 
         return self.api_status == 0
+
+class ApiException(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
