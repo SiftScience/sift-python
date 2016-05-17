@@ -444,14 +444,14 @@ class TestSiftPythonClient(unittest.TestCase):
             with mock.patch('requests.delete') as mock_delete:
                 mock_delete.side_effect = mock.Mock(
                     side_effect=requests.exceptions.RequestException("Failed"))
-                response = self.sift_client.unlabel('Fred')
-                assert(isinstance(response,
-                                  requests.exceptions.RequestException))
-
-            assert(len(w) == 2)
-            assert('Failed to unlabel user Fred' in str(w[0].message))
-            assert('RequestException: Failed' in str(w[1].message))
-            assert('Traceback' in str(w[1].message))
+                try:
+                    response = self.sift_client.unlabel('Fred')
+                except Exception as e:
+                    assert(isinstance(e, requests.exceptions.RequestException))
+                    assert(len(w) == 2)
+                    assert('Failed to unlabel user Fred' in str(w[0].message))
+                    assert('RequestException: Failed' in str(w[1].message))
+                    assert('Traceback' in str(w[1].message))
 
     def test_return_actions_on_track(self):
         event = '$transaction'
