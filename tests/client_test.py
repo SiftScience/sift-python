@@ -154,6 +154,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -177,6 +178,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=test_timeout,
                 params={})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -196,6 +198,7 @@ class TestSiftPythonClient(unittest.TestCase):
                     'api_key': self.test_key},
                 headers=mock.ANY,
                 timeout=mock.ANY)
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -216,6 +219,7 @@ class TestSiftPythonClient(unittest.TestCase):
                     'api_key': self.test_key},
                 headers=mock.ANY,
                 timeout=test_timeout)
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -239,6 +243,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=mock.ANY,
                 params={
                     'return_score': True})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -264,6 +269,7 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_post.assert_called_with(
                 'https://api.siftscience.com/v203/users/%s/labels' %
                 user_id, data=data, headers=mock.ANY, timeout=mock.ANY, params={})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -289,6 +295,7 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_post.assert_called_with(
                 'https://api.siftscience.com/v203/users/%s/labels' %
                 user_id, data=data, headers=mock.ANY, timeout=test_timeout, params={})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -305,6 +312,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v203/users/%s/labels' %
                 user_id, headers=mock.ANY, timeout=mock.ANY, params={
                     'api_key': self.test_key})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
 
     def test_unicode_string_parameter_support(self):
@@ -345,6 +353,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v203/users/%s/labels' %
                 urllib.quote(user_id), headers=mock.ANY, timeout=mock.ANY, params={
                     'api_key': self.test_key})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
 
     def test_label_user__with_special_chars_ok(self):
@@ -371,6 +380,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={})
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -392,6 +402,7 @@ class TestSiftPythonClient(unittest.TestCase):
                     'api_key': self.test_key},
                 headers=mock.ANY,
                 timeout=mock.ANY)
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -402,12 +413,15 @@ class TestSiftPythonClient(unittest.TestCase):
             with mock.patch('requests.post') as mock_post:
                 mock_post.side_effect = mock.Mock(
                     side_effect=requests.exceptions.RequestException("Failed"))
-                response = self.sift_client.track(
-                    '$transaction', valid_transaction_properties())
-            assert(len(w) == 2)
-            assert('Failed to track event:' in str(w[0].message))
-            assert('RequestException: Failed' in str(w[1].message))
-            assert('Traceback' in str(w[1].message))
+                try:
+                    response = self.sift_client.track(
+                        '$transaction', valid_transaction_properties())
+                except Exception as e:
+                    assert(isinstance(e, requests.exceptions.RequestException))
+                    assert(len(w) == 2)
+                    assert('Failed to track event:' in str(w[0].message))
+                    assert('RequestException: Failed' in str(w[1].message))
+                    assert('Traceback' in str(w[1].message))
 
     def test_exception_during_score_call(self):
         with warnings.catch_warnings(record=True) as w:
@@ -415,11 +429,14 @@ class TestSiftPythonClient(unittest.TestCase):
             with mock.patch('requests.get') as mock_get:
                 mock_get.side_effect = mock.Mock(
                     side_effect=requests.exceptions.RequestException("Failed"))
-                response = self.sift_client.score('Fred')
-            assert(len(w) == 2)
-            assert('Failed to get score for user Fred' in str(w[0].message))
-            assert('RequestException: Failed' in str(w[1].message))
-            assert('Traceback' in str(w[1].message))
+                try:
+                    response = self.sift_client.score('Fred')
+                except Exception as e:
+                    assert(isinstance(e, requests.exceptions.RequestException))
+                    assert(len(w) == 2)
+                    assert('Failed to get score for user Fred' in str(w[0].message))
+                    assert('RequestException: Failed' in str(w[1].message))
+                    assert('Traceback' in str(w[1].message))
 
     def test_exception_during_unlabel_call(self):
         with warnings.catch_warnings(record=True) as w:
@@ -428,6 +445,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 mock_delete.side_effect = mock.Mock(
                     side_effect=requests.exceptions.RequestException("Failed"))
                 response = self.sift_client.unlabel('Fred')
+                assert(isinstance(response,
+                                  requests.exceptions.RequestException))
 
             assert(len(w) == 2)
             assert('Failed to unlabel user Fred' in str(w[0].message))
@@ -456,6 +475,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 params={
                     'return_action': True})
 
+            assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")

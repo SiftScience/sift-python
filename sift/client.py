@@ -92,8 +92,8 @@ class Client(object):
 
         Returns:
             A requests.Response object if the track call succeeded, otherwise
-            a subclass of requests.exceptions.RequestException indicating the
-            exception that occurred.
+            raises a RuntimeError or subclass of
+            requests.exceptions.RequestException.
         """
         if not isinstance(
                 event, self.UNICODE_STRING) or len(
@@ -133,7 +133,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             warnings.warn('Failed to track event: %s' % properties)
             warnings.warn(traceback.format_exc())
-            return e
+            raise e
 
     def score(self, user_id, timeout=None):
         """Retrieves a user's fraud score from the Sift Science API.
@@ -144,9 +144,8 @@ class Client(object):
             user_id:  A user's id. This id should be the same as the user_id used in
                 event calls.
         Returns:
-            A requests.Response object if the score call succeeded, otherwise
-            a subclass of requests.exceptions.RequestException indicating the
-            exception that occurred.
+            A requests.Response object if the score call succeeded, or raises
+            a RuntimeError or subclass of requests.exceptions.RequestException.
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
@@ -169,7 +168,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             warnings.warn('Failed to get score for user %s' % user_id)
             warnings.warn(traceback.format_exc())
-            return e
+            raise e
 
     def label(self, user_id, properties, timeout=None):
         """Labels a user as either good or bad through the Sift Science API.
@@ -183,8 +182,7 @@ class Client(object):
             timeout(optional): specify a custom timeout for this call
         Returns:
             A requests.Response object if the label call succeeded, otherwise
-            a subclass of requests.exceptions.RequestException indicating the
-            exception that occurred.
+            raises a RuntimeError or a subclass of requests.exceptions.RequestException.
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
@@ -208,8 +206,7 @@ class Client(object):
             timeout(optional): specify a custom timeout for this call
         Returns:
             A requests.Response object if the unlabel call succeeded, otherwise
-            a subclass of requests.exceptions.RequestException indicating the
-            exception that occurred.
+            raises a RuntimeError or subclass of requests.exceptions.RequestException.
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
@@ -234,7 +231,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             warnings.warn('Failed to unlabel user %s' % user_id)
             warnings.warn(traceback.format_exc())
-            return e
+            raise e
 
 
 class Response(object):
