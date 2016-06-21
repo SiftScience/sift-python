@@ -230,7 +230,10 @@ class Response(object):
     HTTP_CODES_WITHOUT_BODY = [204, 304]
 
     def __init__(self, http_response):
-
+        """
+        Raises ApiException on invalid JSON in Response body or non-2XX HTTP
+        status code.
+        """
         # Set defaults.
         self.body = None
         self.request = None
