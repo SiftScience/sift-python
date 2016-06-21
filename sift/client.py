@@ -4,8 +4,6 @@ See: https://siftscience.com/docs/references/events-api
 
 import json
 import requests
-import traceback
-import warnings
 import sys
 if sys.version_info[0] < 3:
     import urllib
@@ -91,7 +89,7 @@ class Client(object):
                  https://siftscience.com/resources/tutorials/formulas
 
         Returns:
-            A requests.Response object if the track call succeeded, otherwise
+            A sift.client.Response object if the track call succeeded, otherwise
             raises a RuntimeError or subclass of
             requests.exceptions.RequestException.
         """
@@ -131,8 +129,6 @@ class Client(object):
                 params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            warnings.warn('Failed to track event: %s' % properties)
-            warnings.warn(traceback.format_exc())
             raise e
 
     def score(self, user_id, timeout=None):
@@ -144,7 +140,7 @@ class Client(object):
             user_id:  A user's id. This id should be the same as the user_id used in
                 event calls.
         Returns:
-            A requests.Response object if the score call succeeded, or raises
+            A sift.client.Response object if the score call succeeded, or raises
             a RuntimeError or subclass of requests.exceptions.RequestException.
         """
         if not isinstance(
@@ -166,8 +162,6 @@ class Client(object):
                 params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            warnings.warn('Failed to get score for user %s' % user_id)
-            warnings.warn(traceback.format_exc())
             raise e
 
     def label(self, user_id, properties, timeout=None):
@@ -181,7 +175,7 @@ class Client(object):
             properties: A dict of additional event-specific attributes to track
             timeout(optional): specify a custom timeout for this call
         Returns:
-            A requests.Response object if the label call succeeded, otherwise
+            A sift.client.Response object if the label call succeeded, otherwise
             raises a RuntimeError or a subclass of requests.exceptions.RequestException.
         """
         if not isinstance(
@@ -205,7 +199,7 @@ class Client(object):
                 event calls.
             timeout(optional): specify a custom timeout for this call
         Returns:
-            A requests.Response object if the unlabel call succeeded, otherwise
+            A sift.client.Response object if the unlabel call succeeded, otherwise
             raises a RuntimeError or subclass of requests.exceptions.RequestException.
         """
         if not isinstance(
@@ -229,8 +223,6 @@ class Client(object):
             return Response(response)
 
         except requests.exceptions.RequestException as e:
-            warnings.warn('Failed to unlabel user %s' % user_id)
-            warnings.warn(traceback.format_exc())
             raise e
 
 
@@ -259,9 +251,9 @@ class Response(object):
                     self.request = json.loads(self.body['request'])
                 else:
                     self.request = None
-            except ValueError as e:
+            except ValueError:
                 not_json_warning = "Failed to parse json response from {}.  HTTP status code: {}.".format(self.url, self.http_status_code)
-                warnings.warn(not_json_warning)
+                raise ApiException(not_json_warning)
             finally:
                 if (int(self.http_status_code) < 200 or int(self.http_status_code) >= 300):
                     non_2xx_warning = "{} returned non-2XX http status code {}".format(self.url, self.http_status_code)

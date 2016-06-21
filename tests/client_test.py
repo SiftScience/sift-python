@@ -408,50 +408,35 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.body['score'] == 0.55)
 
     def test_exception_during_track_call(self):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            with mock.patch('requests.post') as mock_post:
-                mock_post.side_effect = mock.Mock(
-                    side_effect=requests.exceptions.RequestException("Failed"))
-                try:
-                    response = self.sift_client.track(
-                        '$transaction', valid_transaction_properties())
-                except Exception as e:
-                    assert(isinstance(e, requests.exceptions.RequestException))
-                    assert(len(w) == 2)
-                    assert('Failed to track event:' in str(w[0].message))
-                    assert('RequestException: Failed' in str(w[1].message))
-                    assert('Traceback' in str(w[1].message))
+        warnings.simplefilter("always")
+        with mock.patch('requests.post') as mock_post:
+            mock_post.side_effect = mock.Mock(
+                side_effect=requests.exceptions.RequestException("Failed"))
+            try:
+                response = self.sift_client.track(
+                    '$transaction', valid_transaction_properties())
+            except Exception as e:
+                assert(isinstance(e, requests.exceptions.RequestException))
 
     def test_exception_during_score_call(self):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            with mock.patch('requests.get') as mock_get:
-                mock_get.side_effect = mock.Mock(
-                    side_effect=requests.exceptions.RequestException("Failed"))
-                try:
-                    response = self.sift_client.score('Fred')
-                except Exception as e:
-                    assert(isinstance(e, requests.exceptions.RequestException))
-                    assert(len(w) == 2)
-                    assert('Failed to get score for user Fred' in str(w[0].message))
-                    assert('RequestException: Failed' in str(w[1].message))
-                    assert('Traceback' in str(w[1].message))
+        warnings.simplefilter("always")
+        with mock.patch('requests.get') as mock_get:
+            mock_get.side_effect = mock.Mock(
+                side_effect=requests.exceptions.RequestException("Failed"))
+            try:
+                response = self.sift_client.score('Fred')
+            except Exception as e:
+                assert(isinstance(e, requests.exceptions.RequestException))
 
     def test_exception_during_unlabel_call(self):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            with mock.patch('requests.delete') as mock_delete:
-                mock_delete.side_effect = mock.Mock(
-                    side_effect=requests.exceptions.RequestException("Failed"))
-                try:
-                    response = self.sift_client.unlabel('Fred')
-                except Exception as e:
-                    assert(isinstance(e, requests.exceptions.RequestException))
-                    assert(len(w) == 2)
-                    assert('Failed to unlabel user Fred' in str(w[0].message))
-                    assert('RequestException: Failed' in str(w[1].message))
-                    assert('Traceback' in str(w[1].message))
+        warnings.simplefilter("always")
+        with mock.patch('requests.delete') as mock_delete:
+            mock_delete.side_effect = mock.Mock(
+                side_effect=requests.exceptions.RequestException("Failed"))
+            try:
+                response = self.sift_client.unlabel('Fred')
+            except Exception as e:
+                assert(isinstance(e, requests.exceptions.RequestException))
 
     def test_return_actions_on_track(self):
         event = '$transaction'
