@@ -93,7 +93,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_global_api_key(self):
         # test for error if global key is undefined
-        self.assertRaises(RuntimeError, sift.Client)
+        self.assertRaises(sift.client.ApiException, sift.Client)
         sift.api_key = "a_test_global_api_key"
         local_api_key = "a_test_local_api_key"
 
@@ -110,32 +110,32 @@ class TestSiftPythonClient(unittest.TestCase):
         assert(client2.api_key == sift.api_key)
 
     def test_constructor_requires_valid_api_key(self):
-        self.assertRaises(RuntimeError, sift.Client, None)
-        self.assertRaises(RuntimeError, sift.Client, '')
+        self.assertRaises(sift.client.ApiException, sift.Client, None)
+        self.assertRaises(sift.client.ApiException, sift.Client, '')
 
     def test_constructor_invalid_api_url(self):
-        self.assertRaises(RuntimeError, sift.Client, self.test_key, None)
-        self.assertRaises(RuntimeError, sift.Client, self.test_key, '')
+        self.assertRaises(sift.client.ApiException, sift.Client, self.test_key, None)
+        self.assertRaises(sift.client.ApiException, sift.Client, self.test_key, '')
 
     def test_constructor_api_key(self):
         client = sift.Client(self.test_key)
         self.assertEqual(client.api_key, self.test_key)
 
     def test_track_requires_valid_event(self):
-        self.assertRaises(RuntimeError, self.sift_client.track, None, {})
-        self.assertRaises(RuntimeError, self.sift_client.track, '', {})
-        self.assertRaises(RuntimeError, self.sift_client.track, 42, {})
+        self.assertRaises(sift.client.ApiException, self.sift_client.track, None, {})
+        self.assertRaises(sift.client.ApiException, self.sift_client.track, '', {})
+        self.assertRaises(sift.client.ApiException, self.sift_client.track, 42, {})
 
     def test_track_requires_properties(self):
         event = 'custom_event'
-        self.assertRaises(RuntimeError, self.sift_client.track, event, None)
-        self.assertRaises(RuntimeError, self.sift_client.track, event, 42)
-        self.assertRaises(RuntimeError, self.sift_client.track, event, {})
+        self.assertRaises(sift.client.ApiException, self.sift_client.track, event, None)
+        self.assertRaises(sift.client.ApiException, self.sift_client.track, event, 42)
+        self.assertRaises(sift.client.ApiException, self.sift_client.track, event, {})
 
     def test_score_requires_user_id(self):
-        self.assertRaises(RuntimeError, self.sift_client.score, None)
-        self.assertRaises(RuntimeError, self.sift_client.score, '')
-        self.assertRaises(RuntimeError, self.sift_client.score, 42)
+        self.assertRaises(sift.client.ApiException, self.sift_client.score, None)
+        self.assertRaises(sift.client.ApiException, self.sift_client.score, '')
+        self.assertRaises(sift.client.ApiException, self.sift_client.score, 42)
 
     def test_event_ok(self):
         event = '$transaction'
@@ -416,7 +416,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 response = self.sift_client.track(
                     '$transaction', valid_transaction_properties())
             except Exception as e:
-                assert(isinstance(e, requests.exceptions.RequestException))
+                assert(isinstance(e, sift.client.ApiException))
 
     def test_exception_during_score_call(self):
         warnings.simplefilter("always")
@@ -426,7 +426,7 @@ class TestSiftPythonClient(unittest.TestCase):
             try:
                 response = self.sift_client.score('Fred')
             except Exception as e:
-                assert(isinstance(e, requests.exceptions.RequestException))
+                assert(isinstance(e, sift.client.ApiException))
 
     def test_exception_during_unlabel_call(self):
         warnings.simplefilter("always")
@@ -436,7 +436,7 @@ class TestSiftPythonClient(unittest.TestCase):
             try:
                 response = self.sift_client.unlabel('Fred')
             except Exception as e:
-                assert(isinstance(e, requests.exceptions.RequestException))
+                assert(isinstance(e, sift.client.ApiException))
 
     def test_return_actions_on_track(self):
         event = '$transaction'

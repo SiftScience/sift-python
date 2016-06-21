@@ -30,13 +30,13 @@ class Client(object):
                 to 2 seconds.
         """
         if not isinstance(api_url, str) or len(api_url.strip()) == 0:
-            raise RuntimeError("api_url must be a string")
+            raise ApiException("api_url must be a string")
 
         if api_key is None:
             api_key = sift.api_key
 
         if not isinstance(api_key, str) or len(api_key.strip()) == 0:
-            raise RuntimeError("valid api_key is required")
+            raise ApiException("valid api_key is required")
 
         self.api_key = api_key
         self.url = api_url + '/v%s' % version.API_VERSION
@@ -90,16 +90,15 @@ class Client(object):
 
         Returns:
             A sift.client.Response object if the track call succeeded, otherwise
-            raises a RuntimeError or subclass of
-            requests.exceptions.RequestException.
+            raises an ApiException.
         """
         if not isinstance(
                 event, self.UNICODE_STRING) or len(
                     event.strip()) == 0:
-            raise RuntimeError("event must be a string")
+            raise ApiException("event must be a string")
 
         if not isinstance(properties, dict) or len(properties) == 0:
-            raise RuntimeError("properties dictionary may not be empty")
+            raise ApiException("properties dictionary may not be empty")
 
         headers = {'Content-type': 'application/json',
                    'Accept': '*/*',
@@ -129,7 +128,7 @@ class Client(object):
                 params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            raise e
+            raise ApiException(str(e))
 
     def score(self, user_id, timeout=None):
         """Retrieves a user's fraud score from the Sift Science API.
@@ -141,12 +140,12 @@ class Client(object):
                 event calls.
         Returns:
             A sift.client.Response object if the score call succeeded, or raises
-            a RuntimeError or subclass of requests.exceptions.RequestException.
+            an ApiException.
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
                     user_id.strip()) == 0:
-            raise RuntimeError("user_id must be a string")
+            raise ApiException("user_id must be a string")
 
         if timeout is None:
             timeout = self.timeout
@@ -162,7 +161,7 @@ class Client(object):
                 params=params)
             return Response(response)
         except requests.exceptions.RequestException as e:
-            raise e
+            raise ApiException(str(e))
 
     def label(self, user_id, properties, timeout=None):
         """Labels a user as either good or bad through the Sift Science API.
@@ -176,12 +175,12 @@ class Client(object):
             timeout(optional): specify a custom timeout for this call
         Returns:
             A sift.client.Response object if the label call succeeded, otherwise
-            raises a RuntimeError or a subclass of requests.exceptions.RequestException.
+            raises an ApiException.
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
                     user_id.strip()) == 0:
-            raise RuntimeError("user_id must be a string")
+            raise ApiException("user_id must be a string")
 
         return self.track(
             '$label',
@@ -200,12 +199,12 @@ class Client(object):
             timeout(optional): specify a custom timeout for this call
         Returns:
             A sift.client.Response object if the unlabel call succeeded, otherwise
-            raises a RuntimeError or subclass of requests.exceptions.RequestException.
+            raises an ApiException.
         """
         if not isinstance(
                 user_id, self.UNICODE_STRING) or len(
                     user_id.strip()) == 0:
-            raise RuntimeError("user_id must be a string")
+            raise ApiException("user_id must be a string")
 
         if timeout is None:
             timeout = self.timeout
@@ -223,7 +222,7 @@ class Client(object):
             return Response(response)
 
         except requests.exceptions.RequestException as e:
-            raise e
+            raise ApiException(str(e))
 
 
 class Response(object):
@@ -272,6 +271,7 @@ class Response(object):
             return 204 == self.http_status_code
 
         return self.api_status == 0
+
 
 class ApiException(Exception):
     def __init__(self, *args, **kwargs):
