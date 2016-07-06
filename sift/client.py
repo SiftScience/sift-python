@@ -243,7 +243,7 @@ class Response(object):
         self.url = http_response.url
 
         if (self.http_status_code not in self.HTTP_CODES_WITHOUT_BODY) \
-                and 'content-length' in http_response.headers:
+                and http_response.text:
             try:
                 self.body = http_response.json()
                 self.api_status = self.body['status']
