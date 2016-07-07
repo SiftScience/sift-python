@@ -1,3 +1,7 @@
+2.0.1.0 (2016-07-07)
+====================
+-   Fixes bug parsing chunked HTTP responses
+
 2.0.0.0 (2016-06-21)
 ====================
 -   Major version bump; client APIs have changed to raise exceptions
