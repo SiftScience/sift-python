@@ -11,14 +11,19 @@ else:
     import urllib.parse as urllib
 
 import sift
-from . import version
+import sift.version
 
 API_URL = 'https://api.siftscience.com'
 
 
 class Client(object):
 
-    def __init__(self, api_key=None, api_url=API_URL, timeout=2.0):
+    def __init__(
+            self,
+            api_key=None,
+            api_url=API_URL,
+            timeout=2.0,
+            version=sift.version.API_VERSION):
         """Initialize the client.
 
         Args:
@@ -39,25 +44,25 @@ class Client(object):
             raise ApiException("valid api_key is required")
 
         self.api_key = api_key
-        self.url = api_url + '/v%s' % version.API_VERSION
+        self.url = api_url
         self.timeout = timeout
+        self.version = version
         if sys.version_info[0] < 3:
             self.UNICODE_STRING = basestring
         else:
             self.UNICODE_STRING = str
 
-    def user_agent(self):
-        return 'SiftScience/v%s sift-python/%s' % (
-            version.API_VERSION, version.VERSION)
+    def _user_agent(self):
+        return 'SiftScience/v%s sift-python/%s' % (sift.version.API_VERSION, sift.version.VERSION)
 
-    def event_url(self):
-        return self.url + '/events'
+    def _event_url(self, version):
+        return self.url + '/v%s/events' % version
 
-    def score_url(self, user_id):
-        return self.url + '/score/%s' % urllib.quote(user_id)
+    def _score_url(self, user_id, version):
+        return self.url + '/v%s/score/%s' % (version, urllib.quote(user_id))
 
-    def label_url(self, user_id):
-        return self.url + '/users/%s/labels' % urllib.quote(user_id)
+    def _label_url(self, user_id, version):
+        return self.url + '/v%s/users/%s/labels' % (version, urllib.quote(user_id))
 
     def track(
             self,
@@ -66,7 +71,8 @@ class Client(object):
             path=None,
             return_score=False,
             return_action=False,
-            timeout=None):
+            timeout=None,
+            version=None):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.  Check out https://siftscience.com/resources/references/events-api
         for more information on what types of events you can send and fields you can add to the
@@ -102,10 +108,13 @@ class Client(object):
 
         headers = {'Content-type': 'application/json',
                    'Accept': '*/*',
-                   'User-Agent': self.user_agent()}
+                   'User-Agent': self._user_agent()}
+
+        if version is None:
+            version = self.version
 
         if path is None:
-            path = self.event_url()
+            path = self._event_url(version)
 
         if timeout is None:
             timeout = self.timeout
@@ -130,7 +139,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-    def score(self, user_id, timeout=None):
+    def score(self, user_id, timeout=None, version=None):
         """Retrieves a user's fraud score from the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/score_api.html
         for more information on our Score response structure
@@ -150,12 +159,15 @@ class Client(object):
         if timeout is None:
             timeout = self.timeout
 
-        headers = {'User-Agent': self.user_agent()}
+        if version is None:
+            version = self.version
+
+        headers = {'User-Agent': self._user_agent()}
         params = {'api_key': self.api_key}
 
         try:
             response = requests.get(
-                self.score_url(user_id),
+                self._score_url(user_id, version),
                 headers=headers,
                 timeout=timeout,
                 params=params)
@@ -163,7 +175,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-    def label(self, user_id, properties, timeout=None):
+    def label(self, user_id, properties, timeout=None, version=None):
         """Labels a user as either good or bad through the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/labels_api.html
         for more information on what fields to send in properties.
@@ -182,13 +194,17 @@ class Client(object):
                     user_id.strip()) == 0:
             raise ApiException("user_id must be a string")
 
+        if version is None:
+            version = self.version
+
         return self.track(
             '$label',
             properties,
-            self.label_url(user_id),
-            timeout=timeout)
+            path=self._label_url(user_id, version),
+            timeout=timeout,
+            version=version)
 
-    def unlabel(self, user_id, timeout=None):
+    def unlabel(self, user_id, timeout=None, version=None):
         """unlabels a user through the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/labels_api.html
         for more information.
@@ -209,13 +225,16 @@ class Client(object):
         if timeout is None:
             timeout = self.timeout
 
-        headers = {'User-Agent': self.user_agent()}
+        if version is None:
+            version = self.version
+
+        headers = {'User-Agent': self._user_agent()}
         params = {'api_key': self.api_key}
 
         try:
 
             response = requests.delete(
-                self.label_url(user_id),
+                self._label_url(user_id, version),
                 headers=headers,
                 timeout=timeout,
                 params=params)
