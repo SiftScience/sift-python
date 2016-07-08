@@ -110,5 +110,5 @@ except sift.client.ApiException:
 Before submitting a change, make sure the following commands run without
 errors from the root dir of the repository:
 
-    PYTHONPATH=. python tests/client_test.py
-    PYTHONPATH=. python3 tests/client_test.py
+    python -m unittest discover
+    python3 -m unittest discover
