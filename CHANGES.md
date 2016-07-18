@@ -1,9 +1,19 @@
+3.0.0.0 2016-07-19
+==================
+
+-   Adds support for v204 of Sift Science's APIs
+-   Adds Workflow Status API, User Decisions API, Order Decisions API
+-   V204 APIs are now called by default -- this is an incompatible change
+    (use version='203' to call the previous API version)
+
 2.0.1.0 (2016-07-07)
 ====================
+
 -   Fixes bug parsing chunked HTTP responses
 
 2.0.0.0 (2016-06-21)
 ====================
+
 -   Major version bump; client APIs have changed to raise exceptions
     in the case of API errors to be more Pythonic
 
