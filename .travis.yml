@@ -8,4 +8,4 @@ install:
   - pip install -e .[test]
 # command to run tests
 script:
-  - python tests/client_test.py
+  - unit2

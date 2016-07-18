@@ -36,6 +36,7 @@ setup(
     extras_require={
         'test': [
             'mock >= 1.0.1',
+            'unittest2 >= 1, < 2',
         ],
     },
 
