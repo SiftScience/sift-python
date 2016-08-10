@@ -39,7 +39,7 @@ Python 3:
 
 ## Documentation
 
-Please see [here](https://siftscience.com/docs/api/python) for the
+Please see [here](https://siftscience.com/developers/docs/python/events-api/overview) for the
 most up-to-date documentation.
 
 ## Changelog
