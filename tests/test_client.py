@@ -41,7 +41,6 @@ def valid_label_properties():
         '$analyst': 'super.sleuth@example.com'
     }
 
-
 def score_response_json():
     return """{
       "status": 0,
@@ -294,6 +293,133 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.body['score_response']['score'] == 0.85)
             assert(response.body['score_response']['scores']['content_abuse']['score'] == 0.14)
             assert(response.body['score_response']['scores']['payment_abuse']['score'] == 0.97)
+
+    def test_apply_decision_to_user_ok(self):
+        user_id = '54321'
+        mock_response = mock.Mock()
+        applyDecisionRequest = {
+                'decision_id': 'user_looks_ok_legacy',
+                'source': 'MANUAL_REVIEW',
+                'analyst': 'analyst@biz.com',
+                'time': 1481569575
+             }
+        applyDecisionResponseJson = '{' \
+                                    '"time":"1481569575",' \
+                                    '"status":0,' \
+                                    '"request": {' \
+                                        '"decision_id":"user_looks_ok_legacy",' \
+                                        '"source":"MANUAL_REVIEW",' \
+                                        '"analyst":"analyst@biz.com",' \
+                                        '"time":"1481569575"' \
+                                    '},' \
+                                    '"error_message":"OK"}'
+        mock_response.content = applyDecisionResponseJson
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.apply_user_decision(user_id, applyDecisionRequest)
+            data = json.dumps(applyDecisionRequest)
+            mock_post.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/decisions' % user_id,
+                auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
+            assert(isinstance(response, sift.client.Response))
+            assert(response.is_ok())
+            assert(response.api_status == 0)
+            assert(response.api_error_message == "OK")
+
+    def test_apply_decision_manual_review_no_analyst_fails(self):
+        user_id = '54321'
+        mock_response = mock.Mock()
+        applyDecisionRequest = {
+            'decision_id': 'user_looks_ok_legacy',
+            'source': 'MANUAL_REVIEW',
+            'time': 1481569575
+        }
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+        try:
+            response = self.sift_client.apply_user_decision(user_id, applyDecisionRequest)
+            data = json.dumps(applyDecisionRequest)
+            mock_post.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/decisions' % user_id,
+                auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
+        except Exception as e:
+            assert(isinstance(e, sift.client.ApiException))
+
+    def test_apply_decision_no_source_fails(self):
+        user_id = '54321'
+        mock_response = mock.Mock()
+        applyDecisionRequest = {
+            'decision_id': 'user_looks_ok_legacy',
+            'time': 1481569575
+        }
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+        try:
+            response = self.sift_client.apply_user_decision(user_id, applyDecisionRequest)
+            data = json.dumps(applyDecisionRequest)
+            mock_post.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/decisions' % user_id,
+                auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
+        except Exception as e:
+            assert(isinstance(e, sift.client.ApiException))
+
+    def test_apply_decision_invalid_source_fails(self):
+        user_id = '54321'
+        mock_response = mock.Mock()
+        applyDecisionRequest = {
+            'decision_id': 'user_looks_ok_legacy',
+            'source': 'INVALID_SOURCE',
+            'time': 1481569575
+        }
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+        try:
+            response = self.sift_client.apply_user_decision(user_id, applyDecisionRequest)
+            data = json.dumps(applyDecisionRequest)
+            mock_post.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/decisions' % user_id,
+                auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
+        except Exception as e:
+            assert(isinstance(e, sift.client.ApiException))
+
+    def test_apply_decision_to_order_ok(self):
+        user_id = '54321'
+        order_id = '43210'
+        mock_response = mock.Mock()
+        applyDecisionRequest = {
+                'decision_id': 'order_looks_bad_payment_abuse',
+                'source': 'AUTOMATED_RULE',
+                'time': 1481569575
+            }
+
+        applyDecisionResponseJson = '{'\
+            '"time": "1481569575",' \
+            '"status": 0,' \
+            '"request": {' \
+                '"decision_id":"order_looks_bad_payment_abuse",' \
+                '"source":"AUTOMATED_RULE",' \
+                '"time":"1481569575"' \
+            '},' \
+            '"error_message": "OK"}'
+
+        mock_response.content = applyDecisionResponseJson
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.apply_order_decision(user_id, order_id, applyDecisionRequest)
+            data = json.dumps(applyDecisionRequest)
+            mock_post.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/orders/%s/decisions' % (user_id,order_id),
+                auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
+            assert(isinstance(response, sift.client.Response))
+            assert(response.is_ok())
+            assert(response.api_status == 0)
+            assert(response.api_error_message == "OK")
 
     def test_label_user_ok(self):
         user_id = '54321'

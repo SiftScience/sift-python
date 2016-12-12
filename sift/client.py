@@ -16,6 +16,7 @@ import sift.version
 
 API_URL = 'https://api.siftscience.com'
 API3_URL = 'https://api3.siftscience.com'
+DECISION_SOURCES = ['MANUAL_REVIEW', 'AUTOMATED_RULE', 'CHARGEBACK']
 
 
 class Client(object):
@@ -314,6 +315,99 @@ class Client(object):
             raise ApiException(str(e))
 
 
+    def apply_user_decision(self, user_id, apply_decision_request, timeout=None):
+        """Apply decision to user
+
+        Args:
+            user_id: id of user
+            applyDecisionJson:
+                decision_id: decision to apply to user
+                source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
+                analyst: id or email, required if `source: MANUAL_REVIEW`
+                time: in millis when decision was applied
+        Returns
+            A sift.client.Response object if the call succeeded, else raises an ApiException
+        """
+
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+
+        if timeout is None:
+            timeout = self.timeout
+
+        if 'source' in apply_decision_request:
+            apply_decision_request.update({'source': apply_decision_request.get('source').upper()})
+            if apply_decision_request.get('source') not in DECISION_SOURCES:
+                raise ApiException("decision 'source' must be one of [%s]" % ", ".join(DECISION_SOURCES))
+        else:
+            raise ApiException("must provide decision 'source'")
+
+        if apply_decision_request.get('source') == 'MANUAL_REVIEW' and \
+                ('analyst' not in apply_decision_request or len(apply_decision_request.get('analyst')) == 0):
+            raise ApiException("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
+
+        try:
+            return Response(requests.post(
+                self._user_decisions_url(self.account_id, user_id),
+                data=json.dumps(apply_decision_request),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+    def apply_order_decision(self, user_id, order_id, apply_decision_request, timeout=None):
+        """Apply decision to order
+
+        Args:
+            user_id: id of user
+            order_id: id of order
+            applyDecisionJson:
+                decision_id: decision to apply to user
+                source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
+                analyst: id or email, required if `source: MANUAL_REVIEW`
+                time: in millis when decision was applied
+        Returns
+            A sift.client.Response object if the call succeeded, else raises an ApiException
+        """
+
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+
+        if not isinstance(order_id, self.UNICODE_STRING) or len(order_id.strip()) == 0:
+            raise ApiException("order_id must be a string")
+
+        if 'source' in apply_decision_request:
+            apply_decision_request.update({'source': apply_decision_request.get('source').upper()})
+            if apply_decision_request.get('source') not in DECISION_SOURCES:
+                raise ApiException("decision 'source' must be one of [%s]" % ", ".join(DECISION_SOURCES))
+        else:
+            raise ApiException("must provide decision 'source'")
+
+        if apply_decision_request.get('source') == 'MANUAL_REVIEW' and \
+                ('analyst' not in apply_decision_request or len(apply_decision_request.get('analyst')) == 0):
+            raise ApiException("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
+
+        if timeout is None:
+            timeout = self.timeout
+
+        try:
+            return Response(requests.post(
+                self._order_apply_decisions_url(self.account_id, user_id, order_id),
+                data=json.dumps(apply_decision_request),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+
     def get_user_decisions(self, user_id, timeout=None):
         """Gets the decisions for a user.
 
@@ -391,6 +485,8 @@ class Client(object):
     def _order_decisions_url(self, account_id, order_id):
         return API3_URL + '/v3/accounts/%s/orders/%s/decisions' % (account_id, order_id)
 
+    def _order_apply_decisions_url(self, account_id, user_id, order_id):
+        return API3_URL + '/v3/accounts/%s/users/%s/orders/%s/decisions' % (account_id, user_id, order_id)
 
 class Response(object):
 
