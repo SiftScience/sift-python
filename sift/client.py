@@ -369,6 +369,7 @@ class Client(object):
                 decision_id: decision to apply to user
                 source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
                 analyst: id or email, required if `source: MANUAL_REVIEW`
+                description: note or description of decision applied or reasons (optional)
                 time: in millis when decision was applied
         Returns
             A sift.client.Response object if the call succeeded, else raises an ApiException

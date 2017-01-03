@@ -301,18 +301,18 @@ class TestSiftPythonClient(unittest.TestCase):
                 'decision_id': 'user_looks_ok_legacy',
                 'source': 'MANUAL_REVIEW',
                 'analyst': 'analyst@biz.com',
+                'description': 'called user and verified account',
                 'time': 1481569575
              }
         applyDecisionResponseJson = '{' \
-                                    '"time":"1481569575",' \
-                                    '"status":0,' \
-                                    '"request": {' \
-                                        '"decision_id":"user_looks_ok_legacy",' \
-                                        '"source":"MANUAL_REVIEW",' \
-                                        '"analyst":"analyst@biz.com",' \
-                                        '"time":"1481569575"' \
+                                    '"entity": {' \
+                                        '"id": "54321",' \
+                                        '"type": "user"'    \
                                     '},' \
-                                    '"error_message":"OK"}'
+                                    '"decision": {' \
+                                        '"id":"user_looks_ok_legacy"' \
+                                    '},' \
+                                    '"time":"1481569575"}'
         mock_response.content = applyDecisionResponseJson
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
@@ -324,10 +324,11 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_post.assert_called_with(
                 'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/decisions' % user_id,
                 auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
+
             assert(isinstance(response, sift.client.Response))
+            assert(response.body['entity']['type'] == 'user')
+            assert(response.http_status_code == 200)
             assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
 
     def test_apply_decision_manual_review_no_analyst_fails(self):
         user_id = '54321'
@@ -395,15 +396,15 @@ class TestSiftPythonClient(unittest.TestCase):
                 'time': 1481569575
             }
 
-        applyDecisionResponseJson = '{'\
-            '"time": "1481569575",' \
-            '"status": 0,' \
-            '"request": {' \
-                '"decision_id":"order_looks_bad_payment_abuse",' \
-                '"source":"AUTOMATED_RULE",' \
-                '"time":"1481569575"' \
-            '},' \
-            '"error_message": "OK"}'
+        applyDecisionResponseJson = '{' \
+                                    '"entity": {' \
+                                        '"id": "54321",' \
+                                        '"type": "order"'    \
+                                    '},' \
+                                    '"decision": {' \
+                                        '"id":"order_looks_bad_payment_abuse"' \
+                                    '},' \
+                                    '"time":"1481569575"}'
 
         mock_response.content = applyDecisionResponseJson
         mock_response.json.return_value = json.loads(mock_response.content)
@@ -418,8 +419,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
             assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
+            assert(response.http_status_code == 200)
+            assert(response.body['entity']['type'] == 'order')
 
     def test_label_user_ok(self):
         user_id = '54321'
