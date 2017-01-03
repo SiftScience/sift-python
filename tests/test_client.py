@@ -294,6 +294,52 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.body['score_response']['scores']['content_abuse']['score'] == 0.14)
             assert(response.body['score_response']['scores']['payment_abuse']['score'] == 0.97)
 
+    def test_get_decisions(self):
+        mock_response = mock.Mock()
+        getDecisionsResponseJson =  \
+            '{' \
+                '"data": [' \
+                    '{' \
+                        '"id": "block_user",' \
+                        '"name" : "Block user",' \
+                        '"description": "user has a different billing and shipping addresses",' \
+                        '"entity_type": "user",' \
+                        '"abuse_type": "legacy",' \
+                        '"category": "block",' \
+                        '"webhook_url": "http://web.hook",' \
+                        '"created_at": "1468005577348",' \
+                        '"created_by": "admin@biz.com",' \
+                        '"updated_at": "1469229177756",' \
+                        '"updated_by": "analyst@biz.com"' \
+                    '}' \
+                '],' \
+                '"has_more": "true",' \
+                '"next_ref": "v3/accounts/accountId/decisions"' \
+            '}'
+
+        mock_response.content = getDecisionsResponseJson
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch('requests.get') as mock_get:
+            mock_get.return_value = mock_response
+
+            response = self.sift_client.get_decisions(entity_type="user",
+                                                      limit=10,
+                                                      start_from=None,
+                                                      abuse_types="legacy,payment_abuse",
+                                                      timeout=3)
+            mock_get.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/decisions',
+                headers=mock.ANY,
+                auth=mock.ANY,
+                params={'entity_type':'user','limit':10,'abuse_types':'legacy,payment_abuse'},
+                timeout=3)
+
+            assert(isinstance(response, sift.client.Response))
+            assert(response.is_ok())
+            assert(response.body['data'][0]['id'] == 'block_user')
+
     def test_apply_decision_to_user_ok(self):
         user_id = '54321'
         mock_response = mock.Mock()

@@ -314,6 +314,42 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
+    def get_decisions(self, entity_type, limit, start_from, abuse_types, timeout=None):
+        """Get decisions available to customer
+
+        Args:
+            entity_type: only return decisions applicable to entity type {USER|ORDER}
+            limit: number of query results (decisions) to return [default: 100]
+            start_from: result set offset for use in pagination [default: 0]
+            abuse_types: csv of abuse_types to filter returned decisions by (optional)
+
+        Returns:
+            A sift.client.Response object containing array of decisions if call succeeded
+            Otherwise raises an exception
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        params = {}
+
+        if entity_type:
+            params['entity_type'] = entity_type
+        if limit:
+            params['limit'] = limit
+        if start_from:
+            params['from'] = start_from
+        if abuse_types:
+            params['abuse_types'] = abuse_types
+
+        try:
+            get = requests.get(self._get_decisions_url(self.account_id), params=params,
+                               auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                               headers={'User-Agent': self._user_agent()}, timeout=timeout)
+            return Response(get)
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
 
     def apply_user_decision(self, user_id, apply_decision_request, timeout=None):
         """Apply decision to user
@@ -479,6 +515,9 @@ class Client(object):
 
     def _workflow_status_url(self, account_id, run_id):
         return API3_URL + '/v3/accounts/%s/workflows/runs/%s' % (account_id, run_id)
+
+    def _get_decisions_url(self, account_id):
+        return API3_URL + '/v3/accounts/%s/decisions' % (account_id)
 
     def _user_decisions_url(self, account_id, user_id):
         return API3_URL + '/v3/accounts/%s/users/%s/decisions' % (account_id, user_id)
