@@ -343,10 +343,9 @@ class Client(object):
             params['abuse_types'] = abuse_types
 
         try:
-            get = requests.get(self._get_decisions_url(self.account_id), params=params,
-                               auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
-                               headers={'User-Agent': self._user_agent()}, timeout=timeout)
-            return Response(get)
+            return Response(requests.get(self._get_decisions_url(self.account_id), params=params,
+                                         auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                                         headers={'User-Agent': self._user_agent()}, timeout=timeout))
 
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
