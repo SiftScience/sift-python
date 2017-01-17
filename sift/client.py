@@ -321,7 +321,7 @@ class Client(object):
             entity_type: only return decisions applicable to entity type {USER|ORDER}
             limit: number of query results (decisions) to return [default: 100]
             start_from: result set offset for use in pagination [default: 0]
-            abuse_types: csv of abuse_types to filter returned decisions by (optional)
+            abuse_types: csv of abuse_types by which to filter returned decisions (optional)
 
         Returns:
             A sift.client.Response object containing array of decisions if call succeeded
@@ -333,7 +333,7 @@ class Client(object):
 
         params = {}
 
-        if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0\
+        if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0 \
                 or entity_type not in {'user', 'order'}:
             raise ApiException("entity_type must be one of {user, order}")
 
@@ -361,7 +361,7 @@ class Client(object):
 
         Args:
             user_id: id of user
-            apply_decision_request:
+            properties:
                 decision_id: decision to apply to user
                 source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
                 analyst: id or email, required if `source: MANUAL_REVIEW`
@@ -373,7 +373,7 @@ class Client(object):
         if timeout is None:
             timeout = self.timeout
 
-        self.validate_apply_decision_request(properties, user_id, None)
+        self._validate_apply_decision_request(properties, user_id)
 
         try:
             return Response(requests.post(
@@ -394,12 +394,12 @@ class Client(object):
         Args:
             user_id: id of user
             order_id: id of order
-            applyDecisionJson:
+            properties:
                 decision_id: decision to apply to user
                 source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
                 analyst: id or email, required if 'source: MANUAL_REVIEW'
-                description: note or description of decision applied or reasons (optional)
-                time: in millis when decision was applied
+                description: free form text (optional)
+                time: in millis when decision was applied (optional)
         Returns
             A sift.client.Response object if the call succeeded, else raises an ApiException
         """
@@ -407,7 +407,12 @@ class Client(object):
         if timeout is None:
             timeout = self.timeout
 
-        self.validate_apply_decision_request(properties, user_id, order_id)
+
+        if order_id is None or not isinstance(order_id, self.UNICODE_STRING) or \
+                        len(order_id.strip()) == 0:
+            raise ApiException("order_id must be a string")
+
+        self._validate_apply_decision_request(properties, user_id)
 
         try:
             return Response(requests.post(
@@ -422,12 +427,9 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-    def validate_apply_decision_request(self, properties, user_id, order_id):
+    def _validate_apply_decision_request(self, properties, user_id):
         if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
             raise ApiException("user_id must be a string")
-
-        if not order_id is None and (not isinstance(order_id, self.UNICODE_STRING) or len(order_id.strip()) == 0):
-            raise ApiException("order_id must be a string")
 
         if not isinstance(properties, dict) or len(properties) == 0:
             raise ApiException("properties dictionary may not be empty")
