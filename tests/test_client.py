@@ -294,6 +294,12 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.body['score_response']['scores']['content_abuse']['score'] == 0.14)
             assert(response.body['score_response']['scores']['payment_abuse']['score'] == 0.97)
 
+    def test_get_decisions_fails(self):
+        try:
+            self.sift_client.get_decisions('usr')
+        except Exception as e:
+            assert(isinstance(e, sift.client.ApiException))
+
     def test_get_decisions(self):
         mock_response = mock.Mock()
         get_decisions_response_json =  \

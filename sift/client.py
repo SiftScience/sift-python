@@ -334,7 +334,7 @@ class Client(object):
         params = {}
 
         if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0 \
-                or entity_type not in {'user', 'order'}:
+                or entity_type.lower() not in ['user', 'order']:
             raise ApiException("entity_type must be one of {user, order}")
 
         params['entity_type'] = entity_type
