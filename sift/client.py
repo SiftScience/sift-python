@@ -314,7 +314,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-    def get_decisions(self, entity_type, limit, start_from, abuse_types, timeout=None):
+    def get_decisions(self, entity_type, limit=None, start_from=None, abuse_types=None, timeout=None):
         """Get decisions available to customer
 
         Args:
@@ -325,7 +325,7 @@ class Client(object):
 
         Returns:
             A sift.client.Response object containing array of decisions if call succeeded
-            Otherwise raises an exception
+            Otherwise raises an ApiException
         """
 
         if timeout is None:
@@ -333,12 +333,18 @@ class Client(object):
 
         params = {}
 
-        if entity_type:
-            params['entity_type'] = entity_type
+        if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0\
+                or entity_type not in {'user', 'order'}:
+            raise ApiException("entity_type must be one of {user, order}")
+
+        params['entity_type'] = entity_type
+
         if limit:
             params['limit'] = limit
+
         if start_from:
             params['from'] = start_from
+
         if abuse_types:
             params['abuse_types'] = abuse_types
 
@@ -350,12 +356,12 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-    def apply_user_decision(self, user_id, apply_decision_request, timeout=None):
+    def apply_user_decision(self, user_id, properties, timeout=None):
         """Apply decision to user
 
         Args:
             user_id: id of user
-            applyDecisionJson:
+            apply_decision_request:
                 decision_id: decision to apply to user
                 source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
                 analyst: id or email, required if `source: MANUAL_REVIEW`
@@ -364,27 +370,15 @@ class Client(object):
             A sift.client.Response object if the call succeeded, else raises an ApiException
         """
 
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
-
         if timeout is None:
             timeout = self.timeout
 
-        if 'source' in apply_decision_request:
-            apply_decision_request.update({'source': apply_decision_request.get('source').upper()})
-            if apply_decision_request.get('source') not in DECISION_SOURCES:
-                raise ApiException("decision 'source' must be one of [%s]" % ", ".join(DECISION_SOURCES))
-        else:
-            raise ApiException("must provide decision 'source'")
-
-        if apply_decision_request.get('source') == 'MANUAL_REVIEW' and \
-                ('analyst' not in apply_decision_request or len(apply_decision_request.get('analyst')) == 0):
-            raise ApiException("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
+        self.validate_apply_decision_request(properties, user_id, None)
 
         try:
             return Response(requests.post(
                 self._user_decisions_url(self.account_id, user_id),
-                data=json.dumps(apply_decision_request),
+                data=json.dumps(properties),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'Content-type': 'application/json',
                          'Accept': '*/*',
@@ -394,7 +388,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-    def apply_order_decision(self, user_id, order_id, apply_decision_request, timeout=None):
+    def apply_order_decision(self, user_id, order_id, properties, timeout=None):
         """Apply decision to order
 
         Args:
@@ -403,37 +397,22 @@ class Client(object):
             applyDecisionJson:
                 decision_id: decision to apply to user
                 source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
-                analyst: id or email, required if `source: MANUAL_REVIEW`
+                analyst: id or email, required if 'source: MANUAL_REVIEW'
                 description: note or description of decision applied or reasons (optional)
                 time: in millis when decision was applied
         Returns
             A sift.client.Response object if the call succeeded, else raises an ApiException
         """
 
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
-
-        if not isinstance(order_id, self.UNICODE_STRING) or len(order_id.strip()) == 0:
-            raise ApiException("order_id must be a string")
-
-        if 'source' in apply_decision_request:
-            apply_decision_request.update({'source': apply_decision_request.get('source').upper()})
-            if apply_decision_request.get('source') not in DECISION_SOURCES:
-                raise ApiException("decision 'source' must be one of [%s]" % ", ".join(DECISION_SOURCES))
-        else:
-            raise ApiException("must provide decision 'source'")
-
-        if apply_decision_request.get('source') == 'MANUAL_REVIEW' and \
-                ('analyst' not in apply_decision_request or len(apply_decision_request.get('analyst')) == 0):
-            raise ApiException("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
-
         if timeout is None:
             timeout = self.timeout
+
+        self.validate_apply_decision_request(properties, user_id, order_id)
 
         try:
             return Response(requests.post(
                 self._order_apply_decisions_url(self.account_id, user_id, order_id),
-                data=json.dumps(apply_decision_request),
+                data=json.dumps(properties),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'Content-type': 'application/json',
                          'Accept': '*/*',
@@ -442,6 +421,27 @@ class Client(object):
 
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
+
+    def validate_apply_decision_request(self, properties, user_id, order_id):
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+
+        if not order_id is None and (not isinstance(order_id, self.UNICODE_STRING) or len(order_id.strip()) == 0):
+            raise ApiException("order_id must be a string")
+
+        if not isinstance(properties, dict) or len(properties) == 0:
+            raise ApiException("properties dictionary may not be empty")
+
+        source = properties.get('source')
+
+        if not isinstance(source, self.UNICODE_STRING) or len(source.strip()) == 0 or source not in DECISION_SOURCES:
+            raise ApiException("decision 'source' must be one of [%s]" % ", ".join(DECISION_SOURCES))
+
+        properties.update({'source': source.upper()})
+
+        if source == 'MANUAL_REVIEW' and \
+                ('analyst' not in properties or len(properties.get('analyst')) == 0):
+            raise ApiException("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
 
 
     def get_user_decisions(self, user_id, timeout=None):

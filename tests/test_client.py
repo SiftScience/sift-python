@@ -343,7 +343,7 @@ class TestSiftPythonClient(unittest.TestCase):
     def test_apply_decision_to_user_ok(self):
         user_id = '54321'
         mock_response = mock.Mock()
-        applyDecisionRequest = {
+        apply_decision_request = {
                 'decision_id': 'user_looks_ok_legacy',
                 'source': 'MANUAL_REVIEW',
                 'analyst': 'analyst@biz.com',
@@ -365,8 +365,8 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.headers = response_with_data_header()
         with mock.patch('requests.post') as mock_post:
             mock_post.return_value = mock_response
-            response = self.sift_client.apply_user_decision(user_id, applyDecisionRequest)
-            data = json.dumps(applyDecisionRequest)
+            response = self.sift_client.apply_user_decision(user_id, apply_decision_request)
+            data = json.dumps(apply_decision_request)
             mock_post.assert_called_with(
                 'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/decisions' % user_id,
                 auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
