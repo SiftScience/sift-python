@@ -319,9 +319,9 @@ class Client(object):
 
         Args:
             entity_type: only return decisions applicable to entity type {USER|ORDER}
-            limit: number of query results (decisions) to return [default: 100]
-            start_from: result set offset for use in pagination [default: 0]
-            abuse_types: csv of abuse_types by which to filter returned decisions (optional)
+            limit: number of query results (decisions) to return [optional, default: 100]
+            start_from: result set offset for use in pagination [optional, default: 0]
+            abuse_types: comma-separated list of abuse_types used to filter returned decisions (optional)
 
         Returns:
             A sift.client.Response object containing array of decisions if call succeeded
@@ -364,7 +364,7 @@ class Client(object):
             properties:
                 decision_id: decision to apply to user
                 source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
-                analyst: id or email, required if `source: MANUAL_REVIEW`
+                analyst: id or email, required if 'source: MANUAL_REVIEW'
                 time: in millis when decision was applied
         Returns
             A sift.client.Response object if the call succeeded, else raises an ApiException
