@@ -16,6 +16,7 @@ import sift.version
 
 API_URL = 'https://api.siftscience.com'
 API3_URL = 'https://api3.siftscience.com'
+DECISION_SOURCES = ['MANUAL_REVIEW', 'AUTOMATED_RULE', 'CHARGEBACK']
 
 
 class Client(object):
@@ -313,6 +314,137 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
+    def get_decisions(self, entity_type, limit=None, start_from=None, abuse_types=None, timeout=None):
+        """Get decisions available to customer
+
+        Args:
+            entity_type: only return decisions applicable to entity type {USER|ORDER}
+            limit: number of query results (decisions) to return [optional, default: 100]
+            start_from: result set offset for use in pagination [optional, default: 0]
+            abuse_types: comma-separated list of abuse_types used to filter returned decisions (optional)
+
+        Returns:
+            A sift.client.Response object containing array of decisions if call succeeded
+            Otherwise raises an ApiException
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        params = {}
+
+        if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0 \
+                or entity_type.lower() not in ['user', 'order']:
+            raise ApiException("entity_type must be one of {user, order}")
+
+        params['entity_type'] = entity_type
+
+        if limit:
+            params['limit'] = limit
+
+        if start_from:
+            params['from'] = start_from
+
+        if abuse_types:
+            params['abuse_types'] = abuse_types
+
+        try:
+            return Response(requests.get(self._get_decisions_url(self.account_id), params=params,
+                                         auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                                         headers={'User-Agent': self._user_agent()}, timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+    def apply_user_decision(self, user_id, properties, timeout=None):
+        """Apply decision to user
+
+        Args:
+            user_id: id of user
+            properties:
+                decision_id: decision to apply to user
+                source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
+                analyst: id or email, required if 'source: MANUAL_REVIEW'
+                time: in millis when decision was applied
+        Returns
+            A sift.client.Response object if the call succeeded, else raises an ApiException
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        self._validate_apply_decision_request(properties, user_id)
+
+        try:
+            return Response(requests.post(
+                self._user_decisions_url(self.account_id, user_id),
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+    def apply_order_decision(self, user_id, order_id, properties, timeout=None):
+        """Apply decision to order
+
+        Args:
+            user_id: id of user
+            order_id: id of order
+            properties:
+                decision_id: decision to apply to user
+                source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
+                analyst: id or email, required if 'source: MANUAL_REVIEW'
+                description: free form text (optional)
+                time: in millis when decision was applied (optional)
+        Returns
+            A sift.client.Response object if the call succeeded, else raises an ApiException
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+
+        if order_id is None or not isinstance(order_id, self.UNICODE_STRING) or \
+                        len(order_id.strip()) == 0:
+            raise ApiException("order_id must be a string")
+
+        self._validate_apply_decision_request(properties, user_id)
+
+        try:
+            return Response(requests.post(
+                self._order_apply_decisions_url(self.account_id, user_id, order_id),
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+    def _validate_apply_decision_request(self, properties, user_id):
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+
+        if not isinstance(properties, dict) or len(properties) == 0:
+            raise ApiException("properties dictionary may not be empty")
+
+        source = properties.get('source')
+
+        if not isinstance(source, self.UNICODE_STRING) or len(source.strip()) == 0 or source not in DECISION_SOURCES:
+            raise ApiException("decision 'source' must be one of [%s]" % ", ".join(DECISION_SOURCES))
+
+        properties.update({'source': source.upper()})
+
+        if source == 'MANUAL_REVIEW' and \
+                ('analyst' not in properties or len(properties.get('analyst')) == 0):
+            raise ApiException("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
+
 
     def get_user_decisions(self, user_id, timeout=None):
         """Gets the decisions for a user.
@@ -385,12 +517,17 @@ class Client(object):
     def _workflow_status_url(self, account_id, run_id):
         return API3_URL + '/v3/accounts/%s/workflows/runs/%s' % (account_id, run_id)
 
+    def _get_decisions_url(self, account_id):
+        return API3_URL + '/v3/accounts/%s/decisions' % (account_id)
+
     def _user_decisions_url(self, account_id, user_id):
         return API3_URL + '/v3/accounts/%s/users/%s/decisions' % (account_id, user_id)
 
     def _order_decisions_url(self, account_id, order_id):
         return API3_URL + '/v3/accounts/%s/orders/%s/decisions' % (account_id, order_id)
 
+    def _order_apply_decisions_url(self, account_id, user_id, order_id):
+        return API3_URL + '/v3/accounts/%s/users/%s/orders/%s/decisions' % (account_id, user_id, order_id)
 
 class Response(object):
 
