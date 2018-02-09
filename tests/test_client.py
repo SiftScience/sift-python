@@ -400,6 +400,12 @@ class TestSiftPythonClient(unittest.TestCase):
         except Exception as e:
             assert(isinstance(e, sift.client.ApiException))
 
+    def test_apply_decision_to_session(self):
+        try:
+            self.sift_client.apply_session_decision("user_id", None, {})
+        except Exception as e:
+            assert(isinstance(e, sift.client.ApiException))
+
     def test_validate_apply_decision_request_no_analyst_fails(self):
         apply_decision_request = {
             'decision_id': 'user_looks_ok_legacy',
@@ -521,6 +527,42 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.is_ok())
             assert(response.http_status_code == 200)
             assert(response.body['entity']['type'] == 'order')
+
+    def test_apply_decision_to_session_ok(self):
+        user_id = '54321'
+        session_id = 'gigtleqddo84l8cm15qe4il'
+        mock_response = mock.Mock()
+        apply_decision_request = {
+                'decision_id': 'session_looks_bad_ato',
+                'source': 'AUTOMATED_RULE',
+                'time': 1481569575
+            }
+
+        apply_decision_response_json = '{' \
+                                    '"entity": {' \
+                                        '"id": "54321",' \
+                                        '"type": "login"'    \
+                                    '},' \
+                                    '"decision": {' \
+                                        '"id":"session_looks_bad_ato"' \
+                                    '},' \
+                                    '"time":"1481569575"}'
+
+        mock_response.content = apply_decision_response_json
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.apply_session_decision(user_id, session_id, apply_decision_request)
+            data = json.dumps(apply_decision_request)
+            mock_post.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/sessions/%s/decisions' % (user_id,session_id),
+                auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
+            assert(isinstance(response, sift.client.Response))
+            assert(response.is_ok())
+            assert(response.http_status_code == 200)
+            assert(response.body['entity']['type'] == 'login')
 
     def test_label_user_ok(self):
         user_id = '54321'
