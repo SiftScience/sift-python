@@ -440,13 +440,13 @@ class TestSiftPythonClient(unittest.TestCase):
         except Exception as e:
             assert(isinstance(e, sift.client.ApiException))
 
-    def test_apply_decision_to_order(self):
+    def test_apply_decision_to_order_fails_with_no_order_id(self):
         try:
             self.sift_client.apply_order_decision("user_id", None, {})
         except Exception as e:
             assert(isinstance(e, sift.client.ApiException))
 
-    def test_apply_decision_to_session(self):
+    def test_apply_decision_to_session_fails_with_no_session_id(self):
         try:
             self.sift_client.apply_session_decision("user_id", None, {})
         except Exception as e:
