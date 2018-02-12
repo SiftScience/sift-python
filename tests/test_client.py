@@ -352,9 +352,9 @@ class TestSiftPythonClient(unittest.TestCase):
             '{' \
                 '"data": [' \
                     '{' \
-                        '"id": "block_user",' \
-                        '"name" : "Block user",' \
-                        '"description": "user has a different billing and shipping addresses",' \
+                        '"id": "block_session",' \
+                        '"name" : "Block session",' \
+                        '"description": "session has problems",' \
                         '"entity_type": "session",' \
                         '"abuse_type": "legacy",' \
                         '"category": "block",' \
@@ -379,18 +379,18 @@ class TestSiftPythonClient(unittest.TestCase):
             response = self.sift_client.get_decisions(entity_type="session",
                                                       limit=10,
                                                       start_from=None,
-                                                      abuse_types="legacy,payment_abuse",
+                                                      abuse_types="account_takeover",
                                                       timeout=3)
             mock_get.assert_called_with(
                 'https://api3.siftscience.com/v3/accounts/ACCT/decisions',
                 headers=mock.ANY,
                 auth=mock.ANY,
-                params={'entity_type':'session','limit':10,'abuse_types':'legacy,payment_abuse'},
+                params={'entity_type':'session','limit':10,'abuse_types':'account_takeover'},
                 timeout=3)
 
             assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
-            assert(response.body['data'][0]['id'] == 'block_user')
+            assert(response.body['data'][0]['id'] == 'block_session')
 
     def test_apply_decision_to_user_ok(self):
         user_id = '54321'
