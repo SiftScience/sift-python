@@ -1,3 +1,9 @@
+3.2.0.0 2018-02-12
+==================
+
+-   Add session level decisions in Apply Decisions APIs.
+-   Add support for filtering get decisions by entity type session.
+
 3.1.0.0 2017-01-17
 ==================
 
