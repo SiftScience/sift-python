@@ -1,3 +1,9 @@
+4.0.0.0 2018-02-23
+==================
+
+-   V205 APIs are now called by default -- this is an incompatible change
+    (use version='204' to call the previous API version)
+
 3.2.0.0 2018-02-12
 ==================
 
