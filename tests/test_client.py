@@ -947,9 +947,9 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch('requests.get') as mock_get:
             mock_get.return_value = mock_response
 
-            response = self.sift_client.get_content_decisions('example_content')
+            response = self.sift_client.get_content_decisions('example_user', 'example_content')
             mock_get.assert_called_with(
-                'https://api3.siftscience.com/v3/accounts/ACCT/content/example_content/decisions',
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/example_user/content/example_content/decisions',
                 headers=mock.ANY, auth=mock.ANY, timeout=mock.ANY)
 
             assert(isinstance(response, sift.client.Response))

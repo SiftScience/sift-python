@@ -502,10 +502,12 @@ class Client(object):
             raise ApiException(str(e))
 
 
-    def get_content_decisions(self, content_id, timeout=None):
+    def get_content_decisions(self, user_id, content_id, timeout=None):
         """Gets the decisions for a piece of content.
 
         Args:
+            user_id: The ID of the owner of the content.
+
             content_id: The ID of a piece of content.
 
         Returns:
@@ -514,14 +516,17 @@ class Client(object):
 
         """
         if not isinstance(content_id, self.UNICODE_STRING) or len(content_id.strip()) == 0:
-            raise ApiException("order_id must be a string")
+            raise ApiException("content_id must be a string")
+
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
 
         if timeout is None:
             timeout = self.timeout
 
         try:
             return Response(requests.get(
-                self._content_decisions_url(self.account_id, content_id),
+                self._content_decisions_url(self.account_id, user_id, content_id),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
                 timeout=timeout))
@@ -634,8 +639,8 @@ class Client(object):
     def _order_decisions_url(self, account_id, order_id):
         return API3_URL + '/v3/accounts/%s/orders/%s/decisions' % (account_id, order_id)
 
-    def _content_decisions_url(self, account_id, content_id):
-        return API3_URL + '/v3/accounts/%s/content/%s/decisions' % (account_id, content_id)
+    def _content_decisions_url(self, account_id, user_id, content_id):
+        return API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' % (account_id, user_id, content_id)
 
     def _order_apply_decisions_url(self, account_id, user_id, order_id):
         return API3_URL + '/v3/accounts/%s/users/%s/orders/%s/decisions' % (account_id, user_id, order_id)
