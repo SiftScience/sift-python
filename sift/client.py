@@ -318,7 +318,7 @@ class Client(object):
         """Get decisions available to customer
 
         Args:
-            entity_type: only return decisions applicable to entity type {USER|ORDER|SESSION}
+            entity_type: only return decisions applicable to entity type {USER|ORDER|SESSION|CONTENT}
             limit: number of query results (decisions) to return [optional, default: 100]
             start_from: result set offset for use in pagination [optional, default: 0]
             abuse_types: comma-separated list of abuse_types used to filter returned decisions (optional)
@@ -334,7 +334,7 @@ class Client(object):
         params = {}
 
         if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0 \
-                or entity_type.lower() not in ['user', 'order', 'session']:
+                or entity_type.lower() not in ['user', 'order', 'session', 'content']:
             raise ApiException("entity_type must be one of {user, order, session, content}")
 
         params['entity_type'] = entity_type
