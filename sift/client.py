@@ -507,7 +507,6 @@ class Client(object):
 
         Args:
             user_id: The ID of the owner of the content.
-
             content_id: The ID of a piece of content.
 
         Returns:
