@@ -318,7 +318,7 @@ class Client(object):
         """Get decisions available to customer
 
         Args:
-            entity_type: only return decisions applicable to entity type {USER|ORDER|SESSION}
+            entity_type: only return decisions applicable to entity type {USER|ORDER|SESSION|CONTENT}
             limit: number of query results (decisions) to return [optional, default: 100]
             start_from: result set offset for use in pagination [optional, default: 0]
             abuse_types: comma-separated list of abuse_types used to filter returned decisions (optional)
@@ -334,8 +334,8 @@ class Client(object):
         params = {}
 
         if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0 \
-                or entity_type.lower() not in ['user', 'order', 'session']:
-            raise ApiException("entity_type must be one of {user, order, session}")
+                or entity_type.lower() not in ['user', 'order', 'session', 'content']:
+            raise ApiException("entity_type must be one of {user, order, session, content}")
 
         params['entity_type'] = entity_type
 
@@ -502,6 +502,38 @@ class Client(object):
             raise ApiException(str(e))
 
 
+    def get_content_decisions(self, user_id, content_id, timeout=None):
+        """Gets the decisions for a piece of content.
+
+        Args:
+            user_id: The ID of the owner of the content.
+            content_id: The ID of a piece of content.
+
+        Returns:
+            A sift.client.Response object if the call succeeded.
+            Otherwise, raises an ApiException.
+
+        """
+        if not isinstance(content_id, self.UNICODE_STRING) or len(content_id.strip()) == 0:
+            raise ApiException("content_id must be a string")
+
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+
+        if timeout is None:
+            timeout = self.timeout
+
+        try:
+            return Response(requests.get(
+                self._content_decisions_url(self.account_id, user_id, content_id),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+
     def apply_session_decision(self, user_id, session_id, properties, timeout=None):
         """Apply decision to session
 
@@ -542,6 +574,46 @@ class Client(object):
             raise ApiException(str(e))
 
 
+    def apply_content_decision(self, user_id, content_id, properties, timeout=None):
+        """Apply decision to content
+
+        Args:
+            user_id: id of user
+            content_id: id of content
+            properties:
+                decision_id: decision to apply to session
+                source: {one of MANUAL_REVIEW | AUTOMATED_RULE | CHARGEBACK}
+                analyst: id or email, required if 'source: MANUAL_REVIEW'
+                description: free form text (optional)
+                time: in millis when decision was applied (optional)
+        Returns
+            A sift.client.Response object if the call succeeded, else raises an ApiException
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+
+        if content_id is None or not isinstance(content_id, self.UNICODE_STRING) or \
+                        len(content_id.strip()) == 0:
+            raise ApiException("content_id must be a string")
+
+        self._validate_apply_decision_request(properties, user_id)
+
+        try:
+            return Response(requests.post(
+                self._content_apply_decisions_url(self.account_id, user_id, content_id),
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+
     def _user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (sift.version.API_VERSION, sift.version.VERSION)
 
@@ -566,11 +638,17 @@ class Client(object):
     def _order_decisions_url(self, account_id, order_id):
         return API3_URL + '/v3/accounts/%s/orders/%s/decisions' % (account_id, order_id)
 
+    def _content_decisions_url(self, account_id, user_id, content_id):
+        return API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' % (account_id, user_id, content_id)
+
     def _order_apply_decisions_url(self, account_id, user_id, order_id):
         return API3_URL + '/v3/accounts/%s/users/%s/orders/%s/decisions' % (account_id, user_id, order_id)
 
     def _session_apply_decisions_url(self, account_id, user_id, session_id):
         return API3_URL + '/v3/accounts/%s/users/%s/sessions/%s/decisions' % (account_id, user_id, session_id)
+
+    def _content_apply_decisions_url(self, account_id, user_id, content_id):
+        return API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' % (account_id, user_id, content_id)
 
 class Response(object):
 
