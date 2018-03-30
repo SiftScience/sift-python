@@ -144,6 +144,12 @@ except sift.client.ApiException:
   # request failed
 
 
+# Get the latest decisions for a piece of content
+try:
+  response = client.get_order_decisions('example_user', example_content');
+except sift.client.ApiException:
+  # request failed
+
 
 # Get the latest decisions for a piece of content
 try:
