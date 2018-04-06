@@ -1,4 +1,4 @@
-4.0.1 2018-03-30
+4.0.1 2018-04-06
 ==================
 
 - Updated documentation in CHANGES.md and README.md
