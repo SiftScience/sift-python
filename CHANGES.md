@@ -1,3 +1,8 @@
+4.0.1 2018-03-30
+==================
+
+- Updated documentation in CHANGES.md and README.md
+
 4.0.0.0 2018-03-30
 ==================
 
