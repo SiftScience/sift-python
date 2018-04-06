@@ -48,7 +48,7 @@ Please see
 [the CHANGELOG](https://github.com/SiftScience/sift-python/blob/master/CHANGES.md)
 for a history of all changes.
 
-Note, that in v2.0.0.0, the API semantics were changed to raise an
+Note, that in v2.0.0, the API semantics were changed to raise an
 exception in the case of error to be more pythonic. Client code will
 need to be updated to catch `sift.client.ApiException` exceptions.
 
@@ -142,7 +142,6 @@ try:
   response = client.get_order_decisions('example_order');
 except sift.client.ApiException:
   # request failed
-
 
 
 # Get the latest decisions for a piece of content
