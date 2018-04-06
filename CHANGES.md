@@ -15,7 +15,7 @@
 INCOMPATIBLE CHANGES INTRODUCED IN API V205:
 - `$create_content` and `$update_content` have significantly changed, and the old format will be rejected
 - `$send_message` and `$submit_review` events are no longer valid
-- V205 improves server-side event data validation.  In V204 and earlier, server-side validation accepts some events that did not conform to the published APIs in our [developer documentation](https://siftscience.com/developers/docs/curl/events-api).  V205 does not modify existing event APIs, but may reject invalid event data that were previously accepted.  **Please test your integration on V205 in sandbox before using in production.**
+- V205 improves server-side event data validation. In V204 and earlier, server-side validation accepted some events that did not conform to the published APIs in our [developer documentation](https://siftscience.com/developers/docs/curl/events-api). V205 does not modify existing event APIs other than those mentioned above, but may reject invalid event data that were previously accepted. **Please test your integration on V205 in sandbox before using in production.**
 
 3.2.0.0 2018-02-12
 ==================
