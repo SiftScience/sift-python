@@ -20,11 +20,11 @@ Get the latest released package from pip:
 
 Python 2:
 
-    pip install sift
+    pip install Sift
 
 Python 3:
 
-    pip3 install sift
+    pip3 install Sift
 
 or install newest source directly from GitHub:
 
