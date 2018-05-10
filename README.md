@@ -65,91 +65,91 @@ sift.api_key = '<your API key here>'
 sift.account_id = '<your account ID here>'
 client = sift.Client()
 
-user_id = "23056"   # User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
-
+# User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
+user_id = "23056"
 
 # Track a transaction event -- note this is a blocking call
 properties = {
-  "$user_id" : user_id, 
-  "$user_email" : "buyer@gmail.com", 
-  "$seller_user_id" : "2371", 
-  "seller_user_email" : "seller@gmail.com", 
-  "$transaction_id" : "573050", 
-  "$payment_method" : {
-    "$payment_type"    : "$credit_card",
-    "$payment_gateway" : "$braintree",
-    "$card_bin"        : "542486",
-    "$card_last4"      : "4444"             
-  }, 
-  "$currency_code" : "USD",
-  "$amount" : 15230000,
+    "$user_id": user_id,
+    "$user_email": "buyer@gmail.com",
+    "$seller_user_id": "2371",
+    "seller_user_email": "seller@gmail.com",
+    "$transaction_id": "573050",
+    "$payment_method": {
+        "$payment_type": "$credit_card",
+        "$payment_gateway": "$braintree",
+        "$card_bin": "542486",
+        "$card_last4": "4444"
+    },
+    "$currency_code": "USD",
+    "$amount": 15230000,
 }
 
 try:
-  response = client.track("$transaction", properties)
-  if response.is_ok():
-    print "Successfully tracked event"
+    response = client.track("$transaction", properties)
+    if response.is_ok():
+        print "Successfully tracked event"
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 
 # Request a score for the user with user_id 23056
 try:
-  response = client.score(user_id)
-  s = json.dumps(response.body)
-  print s
+    response = client.score(user_id)
+    s = json.dumps(response.body)
+    print s
 
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 
 try:
-  # Label the user with user_id 23056 as Bad with all optional fields
-  response = client.label(user_id, {
-    "$is_bad" : True,
-    "$abuse_type" : "payment_abuse",
-    "$description" : "Chargeback issued",
-    "$source" : "Manual Review",
-    "$analyst" : "analyst.name@your_domain.com"
-  })
+    # Label the user with user_id 23056 as Bad with all optional fields
+    response = client.label(user_id, {
+        "$is_bad": True,
+        "$abuse_type": "payment_abuse",
+        "$description": "Chargeback issued",
+        "$source": "Manual Review",
+        "$analyst": "analyst.name@your_domain.com"
+    })
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 
 # Remove a label from a user with user_id 23056
 try:
-  response = client.unlabel(user_id, abuse_type='content_abuse')
+    response = client.unlabel(user_id, abuse_type='content_abuse')
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 
 # Get the status of a workflow run
 try:
-  response = client.get_workflow_status('my_run_id');
+    response = client.get_workflow_status('my_run_id')
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 
 # Get the latest decisions for a user
 try:
-  response = client.get_user_decisions('example_user');
+    response = client.get_user_decisions('example_user')
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 
 # Get the latest decisions for an order
 try:
-  response = client.get_order_decisions('example_order');
+    response = client.get_order_decisions('example_order')
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 
 # Get the latest decisions for a piece of content
 try:
-  response = client.get_content_decisions('example_user', 'example_content');
+    response = client.get_content_decisions('example_user', 'example_content')
 except sift.client.ApiException:
-  # request failed
-
+    # request failed
+    pass
 ```
 
 
