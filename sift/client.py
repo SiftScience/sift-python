@@ -45,7 +45,7 @@ class Client(object):
                 this from https://siftscience.com/console/account/profile .
 
             version: The version of the Sift Science API to call.  Defaults to
-                the latest version ('204').
+                the latest version ('205').
 
         """
         if not isinstance(api_url, str) or len(api_url.strip()) == 0:
