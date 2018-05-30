@@ -533,6 +533,35 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
+    def get_session_decisions(self, user_id, session_id, timeout=None):
+        """Gets the decisions for a user's session.
+
+        Args:
+            user_id: The ID of a user.
+            session_id: The ID of a session
+
+        Returns:
+            A sift.client.Response object if the call succeeded.
+            Otherwise, raises an ApiException.
+
+        """
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+        if not isinstance(session_id, self.UNICODE_STRING) or len(session_id.strip()) == 0:
+            raise ApiException("session_id must be a string")
+
+        if timeout is None:
+            timeout = self.timeout
+
+        try:
+            return Response(requests.get(
+                self._session_decisions_url(self.account_id, user_id, session_id),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
 
     def apply_session_decision(self, user_id, session_id, properties, timeout=None):
         """Apply decision to session
@@ -637,6 +666,9 @@ class Client(object):
 
     def _order_decisions_url(self, account_id, order_id):
         return API3_URL + '/v3/accounts/%s/orders/%s/decisions' % (account_id, order_id)
+
+    def _session_decisions_url(self, account_id, user_id, session_id):
+        return API3_URL + '/v3/accounts/%s/users/%s/sessions/%s/decisions' % (account_id, user_id, session_id)
 
     def _content_decisions_url(self, account_id, user_id, content_id):
         return API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' % (account_id, user_id, content_id)

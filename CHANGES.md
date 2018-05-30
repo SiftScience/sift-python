@@ -1,3 +1,8 @@
+4.1.0.0 2018-06-01
+==================
+
+-   Add get session level decisions in Get Decisions APIs.
+
 4.0.1 2018-04-06
 ==================
 
@@ -86,4 +91,3 @@ INCOMPATIBLE CHANGES INTRODUCED IN API V205:
 ==================
 
 -   Just the Python REST client itself.
-
