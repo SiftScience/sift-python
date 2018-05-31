@@ -538,7 +538,7 @@ class Client(object):
 
         Args:
             user_id: The ID of a user.
-            session_id: The ID of a session
+            session_id: The ID of a session.
 
         Returns:
             A sift.client.Response object if the call succeeded.
