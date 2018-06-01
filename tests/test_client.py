@@ -452,6 +452,12 @@ class TestSiftPythonClient(unittest.TestCase):
         except Exception as e:
             assert(isinstance(e, sift.client.ApiException))
 
+    def test_get_session_decisions_fails_with_no_session_id(self):
+        try:
+            self.sift_client.get_session_decisions("user_id", None)
+        except Exception as e:
+            assert(isinstance(e, sift.client.ApiException))
+
     def test_apply_decision_to_content_fails_with_no_content_id(self):
         try:
             self.sift_client.apply_content_decision("user_id", None, {})
@@ -936,6 +942,25 @@ class TestSiftPythonClient(unittest.TestCase):
             assert(response.is_ok())
             assert(response.body['decisions']['payment_abuse']['decision']['id'] == 'decision7')
             assert(response.body['decisions']['promotion_abuse']['decision']['id'] == 'good_order')
+
+    def test_get_session_decisions(self):
+        mock_response = mock.Mock()
+        mock_response.content = '{"decisions":{"account_takeover": {"decision": {"id": "session_decision"},"time": 1461963839151,"webhook_succeeded": true}}}'
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch('requests.get') as mock_get:
+            mock_get.return_value = mock_response
+
+            response = self.sift_client.get_session_decisions('example_user','example_session')
+            mock_get.assert_called_with(
+                'https://api3.siftscience.com/v3/accounts/ACCT/users/example_user/sessions/example_session/decisions',
+                headers=mock.ANY, auth=mock.ANY, timeout=mock.ANY)
+
+            assert(isinstance(response, sift.client.Response))
+            assert(response.is_ok())
+            assert(response.body['decisions']['account_takeover']['decision']['id'] == 'session_decision')
 
     def test_get_content_decisions(self):
         mock_response = mock.Mock()

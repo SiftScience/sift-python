@@ -144,6 +144,13 @@ except sift.client.ApiException:
     # request failed
     pass
 
+# Get the latest decisions for a session
+try:
+    response = client.get_session_decisions('example_user', 'example_session')
+except sift.client.ApiException:
+    # request failed
+    pass
+
 # Get the latest decisions for a piece of content
 try:
     response = client.get_content_decisions('example_user', 'example_content')
