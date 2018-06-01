@@ -945,7 +945,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_get_session_decisions(self):
         mock_response = mock.Mock()
-        mock_response.content = '{"decisions":{"account_abuse": {"decision": {"id": "session_decision"},"time": 1461963839151,"webhook_succeeded": true}}}'
+        mock_response.content = '{"decisions":{"account_takeover": {"decision": {"id": "session_decision"},"time": 1461963839151,"webhook_succeeded": true}}}'
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
@@ -960,7 +960,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
             assert(isinstance(response, sift.client.Response))
             assert(response.is_ok())
-            assert(response.body['decisions']['account_abuse']['decision']['id'] == 'session_decision')
+            assert(response.body['decisions']['account_takeover']['decision']['id'] == 'session_decision')
 
     def test_get_content_decisions(self):
         mock_response = mock.Mock()
