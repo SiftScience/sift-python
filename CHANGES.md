@@ -1,6 +1,6 @@
 4.1.1.0 2018-07-05
 ==================
--   Adds new query parameter force_workflow_run
+-   Add new query parameter force_workflow_run
 
 4.1.0.0 2018-06-01
 ==================
