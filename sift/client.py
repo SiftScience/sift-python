@@ -76,6 +76,7 @@ class Client(object):
             return_score=False,
             return_action=False,
             return_workflow_status=False,
+            force_workflow_run=False,
             abuse_types=None,
             timeout=None,
             version=None):
@@ -101,6 +102,8 @@ class Client(object):
             return_workflow_status: Whether the API response should
                  include the status of any workflow run as a result of
                  the tracked event.
+            
+            force_workflow_run: TODO:(rlong) Add after Rishabh adds documentation.
 
             abuse_types(optional): List of abuse types, specifying for which abuse types a score
                  should be returned (if scores were requested).  If not specified, a score will
@@ -148,6 +151,9 @@ class Client(object):
 
         if return_workflow_status:
             params['return_workflow_status'] = 'true'
+
+        if force_workflow_run:
+            params['force_workflow_run'] = 'true'
 
         try:
             response = requests.post(
