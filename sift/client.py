@@ -230,8 +230,6 @@ class Client(object):
                  should be returned (if scores were requested).  If not specified, a score will
                  be returned for every abuse_type to which you are subscribed.
 
-            version(optional): Use a different version of the Sift Science API for this call.
-
         Returns:
             A sift.client.Response object if the score call succeeded, or raises
             an ApiException.
