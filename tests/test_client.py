@@ -327,6 +327,34 @@ class TestSiftPythonClient(unittest.TestCase):
             assert('latest_decisions' in response.body)
 
 
+    def test_get_user_score_with_abuse_types_ok(self):
+        """Test the GET /{version}/users/{userId}/score?abuse_types=... API, i.e. client.get_user_score()
+        """
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = USER_SCORE_RESPONSE_JSON
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch('requests.get') as mock_get:
+            mock_get.return_value = mock_response
+            response = self.sift_client.get_user_score('12345',
+                                                       abuse_types=['payment_abuse', 'content_abuse'],
+                                                       timeout=test_timeout)
+            mock_get.assert_called_with(
+                'https://api.siftscience.com/v205/users/12345/score',
+                params={'api_key': self.test_key, 'abuse_types': 'payment_abuse,content_abuse'},
+                headers=mock.ANY,
+                timeout=test_timeout)
+            assert(isinstance(response, sift.client.Response))
+            assert(response.is_ok())
+            assert(response.api_error_message == "OK")
+            assert(response.body['entity_id'] == '12345')
+            assert(response.body['scores']['content_abuse']['score'] == 0.14)
+            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert('latest_decisions' in response.body)
+
+
     def test_rescore_user_ok(self):
         """Test the POST /{version}/users/{userId}/score API, i.e. client.rescore_user()
         """
@@ -342,6 +370,34 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_post.assert_called_with(
                 'https://api.siftscience.com/v205/users/12345/score',
                 params={'api_key': self.test_key},
+                headers=mock.ANY,
+                timeout=test_timeout)
+            assert(isinstance(response, sift.client.Response))
+            assert(response.is_ok())
+            assert(response.api_error_message == "OK")
+            assert(response.body['entity_id'] == '12345')
+            assert(response.body['scores']['content_abuse']['score'] == 0.14)
+            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert('latest_decisions' in response.body)
+
+
+    def test_rescore_user_with_abuse_types_ok(self):
+        """Test the POST /{version}/users/{userId}/score?abuse_types=... API, i.e. client.rescore_user()
+        """
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = USER_SCORE_RESPONSE_JSON
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch('requests.post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.rescore_user('12345',
+                                                     abuse_types=['payment_abuse', 'content_abuse'],
+                                                     timeout=test_timeout)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v205/users/12345/score',
+                params={'api_key': self.test_key, 'abuse_types': 'payment_abuse,content_abuse'},
                 headers=mock.ANY,
                 timeout=test_timeout)
             assert(isinstance(response, sift.client.Response))
