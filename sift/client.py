@@ -18,6 +18,10 @@ API_URL = 'https://api.siftscience.com'
 API3_URL = 'https://api3.siftscience.com'
 DECISION_SOURCES = ['MANUAL_REVIEW', 'AUTOMATED_RULE', 'CHARGEBACK']
 
+def _quote_path(s):
+    # by default, urllib.quote doesn't escape forward slash; pass the
+    # optional arg to override this
+    return urllib.quote(s, '')
 
 class Client(object):
 
@@ -656,37 +660,45 @@ class Client(object):
         return self.url + '/v%s/events' % version
 
     def _score_url(self, user_id, version):
-        return self.url + '/v%s/score/%s' % (version, urllib.quote(user_id))
+        return self.url + '/v%s/score/%s' % (version, _quote_path(user_id))
 
     def _label_url(self, user_id, version):
-        return self.url + '/v%s/users/%s/labels' % (version, urllib.quote(user_id))
+        return self.url + '/v%s/users/%s/labels' % (version, _quote_path(user_id))
 
     def _workflow_status_url(self, account_id, run_id):
-        return API3_URL + '/v3/accounts/%s/workflows/runs/%s' % (account_id, run_id)
+        return (API3_URL + '/v3/accounts/%s/workflows/runs/%s' %
+                (_quote_path(account_id), _quote_path(run_id)))
 
     def _get_decisions_url(self, account_id):
-        return API3_URL + '/v3/accounts/%s/decisions' % (account_id)
+        return API3_URL + '/v3/accounts/%s/decisions' % (_quote_path(account_id),)
 
     def _user_decisions_url(self, account_id, user_id):
-        return API3_URL + '/v3/accounts/%s/users/%s/decisions' % (account_id, user_id)
+        return (API3_URL + '/v3/accounts/%s/users/%s/decisions' %
+                (_quote_path(account_id), _quote_path(user_id)))
 
     def _order_decisions_url(self, account_id, order_id):
-        return API3_URL + '/v3/accounts/%s/orders/%s/decisions' % (account_id, order_id)
+        return (API3_URL + '/v3/accounts/%s/orders/%s/decisions' %
+                (_quote_path(account_id), _quote_path(order_id)))
 
     def _session_decisions_url(self, account_id, user_id, session_id):
-        return API3_URL + '/v3/accounts/%s/users/%s/sessions/%s/decisions' % (account_id, user_id, session_id)
+        return (API3_URL + '/v3/accounts/%s/users/%s/sessions/%s/decisions' %
+                (_quote_path(account_id), _quote_path(user_id), _quote_path(session_id)))
 
     def _content_decisions_url(self, account_id, user_id, content_id):
-        return API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' % (account_id, user_id, content_id)
+        return (API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' %
+                (_quote_path(account_id), _quote_path(user_id), _quote_path(content_id)))
 
     def _order_apply_decisions_url(self, account_id, user_id, order_id):
-        return API3_URL + '/v3/accounts/%s/users/%s/orders/%s/decisions' % (account_id, user_id, order_id)
+        return (API3_URL + '/v3/accounts/%s/users/%s/orders/%s/decisions' %
+                (_quote_path(account_id), _quote_path(user_id), _quote_path(order_id)))
 
     def _session_apply_decisions_url(self, account_id, user_id, session_id):
-        return API3_URL + '/v3/accounts/%s/users/%s/sessions/%s/decisions' % (account_id, user_id, session_id)
+        return (API3_URL + '/v3/accounts/%s/users/%s/sessions/%s/decisions' %
+                (_quote_path(account_id), _quote_path(user_id), _quote_path(session_id)))
 
     def _content_apply_decisions_url(self, account_id, user_id, content_id):
-        return API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' % (account_id, user_id, content_id)
+        return (API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' %
+                (_quote_path(account_id), _quote_path(user_id), _quote_path(content_id)))
 
 class Response(object):
 
