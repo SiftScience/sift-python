@@ -213,6 +213,89 @@ class Client(object):
             raise ApiException(str(e))
 
 
+    def get_user_score(self, user_id, timeout=None, abuse_types=None):
+        """Fetches the latest score(s) computed for the specified user and abuse types from the Sift Science API.
+        As opposed to client.score() and client.rescore_user(), this *does not* compute a new score for the user; it
+        simply fetches the latest score(s) which have computed. These scores may be arbitrarily old.
+
+        This call is blocking. See https://siftscience.com/developers/docs/python/score-api/get-score for more details.
+
+        Args:
+            user_id:  A user's id. This id should be the same as the user_id used in
+                event calls.
+
+            timeout(optional): Use a custom timeout (in seconds) for this call.
+
+            abuse_types(optional): List of abuse types, specifying for which abuse types a score
+                 should be returned (if scores were requested).  If not specified, a score will
+                 be returned for every abuse_type to which you are subscribed.
+
+        Returns:
+            A sift.client.Response object if the score call succeeded, or raises
+            an ApiException.
+        """
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+
+        if timeout is None:
+            timeout = self.timeout
+
+        headers = {'User-Agent': self._user_agent()}
+        params = {'api_key': self.api_key}
+        if abuse_types:
+            params['abuse_types'] = ','.join(abuse_types)
+
+        try:
+            response = requests.get(
+                self._user_score_url(user_id, self.version),
+                headers=headers,
+                timeout=timeout,
+                params=params)
+            return Response(response)
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+
+    def rescore_user(self, user_id, timeout=None, abuse_types=None):
+        """Rescores the specified user for the specified abuse types and returns the resulting score(s).
+        This call is blocking. See https://siftscience.com/developers/docs/python/score-api/rescore for more details.
+
+        Args:
+            user_id:  A user's id. This id should be the same as the user_id used in
+                event calls.
+
+            timeout(optional): Use a custom timeout (in seconds) for this call.
+
+            abuse_types(optional): List of abuse types, specifying for which abuse types a score
+                 should be returned (if scores were requested).  If not specified, a score will
+                 be returned for every abuse_type to which you are subscribed.
+
+        Returns:
+            A sift.client.Response object if the score call succeeded, or raises
+            an ApiException.
+        """
+        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
+            raise ApiException("user_id must be a string")
+
+        if timeout is None:
+            timeout = self.timeout
+
+        headers = {'User-Agent': self._user_agent()}
+        params = {'api_key': self.api_key}
+        if abuse_types:
+            params['abuse_types'] = ','.join(abuse_types)
+
+        try:
+            response = requests.post(
+                self._user_score_url(user_id, self.version),
+                headers=headers,
+                timeout=timeout,
+                params=params)
+            return Response(response)
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e))
+
+
     def label(self, user_id, properties, timeout=None, version=None):
         """Labels a user as either good or bad through the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/labels_api.html
@@ -657,6 +740,9 @@ class Client(object):
 
     def _score_url(self, user_id, version):
         return self.url + '/v%s/score/%s' % (version, urllib.quote(user_id))
+
+    def _user_score_url(self, user_id, version):
+        return self.url + '/v%s/users/%s/score' % (version, urllib.quote(user_id))
 
     def _label_url(self, user_id, version):
         return self.url + '/v%s/users/%s/labels' % (version, urllib.quote(user_id))
