@@ -8,8 +8,10 @@ import requests.auth
 import sys
 if sys.version_info[0] < 3:
     import urllib
+    _UNICODE_STRING = basestring
 else:
     import urllib.parse as urllib
+    _UNICODE_STRING = str
 
 import sift
 import sift.version
@@ -18,10 +20,12 @@ API_URL = 'https://api.siftscience.com'
 API3_URL = 'https://api3.siftscience.com'
 DECISION_SOURCES = ['MANUAL_REVIEW', 'AUTOMATED_RULE', 'CHARGEBACK']
 
+
 def _quote_path(s):
     # by default, urllib.quote doesn't escape forward slash; pass the
     # optional arg to override this
     return urllib.quote(s, '')
+
 
 class Client(object):
 
@@ -53,14 +57,12 @@ class Client(object):
                 the latest version ('205').
 
         """
-        if not isinstance(api_url, str) or len(api_url.strip()) == 0:
-            raise ApiException("api_url must be a string")
+        _assert_non_empty_unicode(api_url, 'api_url')
 
         if api_key is None:
             api_key = sift.api_key
 
-        if not isinstance(api_key, str) or len(api_key.strip()) == 0:
-            raise ApiException("valid api_key is required")
+        _assert_non_empty_unicode(api_key, 'api_key')
 
         self.session = session or requests.Session()
         self.api_key = api_key
@@ -68,11 +70,6 @@ class Client(object):
         self.timeout = timeout
         self.account_id = account_id or sift.account_id
         self.version = version
-        if sys.version_info[0] < 3:
-            self.UNICODE_STRING = basestring
-        else:
-            self.UNICODE_STRING = str
-
 
     def track(
             self,
@@ -124,11 +121,8 @@ class Client(object):
             raises an ApiException.
 
         """
-        if not isinstance(event, self.UNICODE_STRING) or len(event.strip()) == 0:
-            raise ApiException("event must be a string")
-
-        if not isinstance(properties, dict) or len(properties) == 0:
-            raise ApiException("properties dictionary may not be empty")
+        _assert_non_empty_unicode(event, 'event')
+        _assert_non_empty_dict(properties, 'properties')
 
         headers = {'Content-type': 'application/json',
                    'Accept': '*/*',
@@ -172,7 +166,6 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-
     def score(self, user_id, timeout=None, abuse_types=None, version=None):
         """Retrieves a user's fraud score from the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/score_api.html
@@ -194,8 +187,7 @@ class Client(object):
             A sift.client.Response object if the score call succeeded, or raises
             an ApiException.
         """
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -218,7 +210,6 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-
     def get_user_score(self, user_id, timeout=None, abuse_types=None):
         """Fetches the latest score(s) computed for the specified user and abuse types from the Sift Science API.
         As opposed to client.score() and client.rescore_user(), this *does not* compute a new score for the user; it
@@ -240,8 +231,7 @@ class Client(object):
             A sift.client.Response object if the score call succeeded, or raises
             an ApiException.
         """
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -261,7 +251,6 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-
     def rescore_user(self, user_id, timeout=None, abuse_types=None):
         """Rescores the specified user for the specified abuse types and returns the resulting score(s).
         This call is blocking. See https://siftscience.com/developers/docs/python/score-api/rescore for more details.
@@ -280,8 +269,7 @@ class Client(object):
             A sift.client.Response object if the score call succeeded, or raises
             an ApiException.
         """
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -300,7 +288,6 @@ class Client(object):
             return Response(response)
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
-
 
     def label(self, user_id, properties, timeout=None, version=None):
         """Labels a user as either good or bad through the Sift Science API.
@@ -321,8 +308,7 @@ class Client(object):
             A sift.client.Response object if the label call succeeded, otherwise
             raises an ApiException.
         """
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
 
         if version is None:
             version = self.version
@@ -333,7 +319,6 @@ class Client(object):
             path=self._label_url(user_id, version),
             timeout=timeout,
             version=version)
-
 
     def unlabel(self, user_id, timeout=None, abuse_type=None, version=None):
         """unlabels a user through the Sift Science API.
@@ -355,8 +340,7 @@ class Client(object):
             A sift.client.Response object if the unlabel call succeeded, otherwise
             raises an ApiException.
         """
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -381,7 +365,6 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-
     def get_workflow_status(self, run_id, timeout=None):
         """Gets the status of a workflow run.
 
@@ -393,8 +376,7 @@ class Client(object):
             Otherwise, raises an ApiException.
 
         """
-        if not isinstance(run_id, self.UNICODE_STRING) or len(run_id.strip()) == 0:
-            raise ApiException("run_id must be a string")
+        _assert_non_empty_unicode(run_id, 'run_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -428,9 +410,9 @@ class Client(object):
 
         params = {}
 
-        if not isinstance(entity_type, self.UNICODE_STRING) or len(entity_type.strip()) == 0 \
-                or entity_type.lower() not in ['user', 'order', 'session', 'content']:
-            raise ApiException("entity_type must be one of {user, order, session, content}")
+        _assert_non_empty_unicode(entity_type, 'entity_type')
+        if entity_type.lower() not in ['user', 'order', 'session', 'content']:
+            raise ValueError("entity_type must be one of {user, order, session, content}")
 
         params['entity_type'] = entity_type
 
@@ -502,10 +484,8 @@ class Client(object):
         if timeout is None:
             timeout = self.timeout
 
-
-        if order_id is None or not isinstance(order_id, self.UNICODE_STRING) or \
-                        len(order_id.strip()) == 0:
-            raise ApiException("order_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
+        _assert_non_empty_unicode(order_id, 'order_id')
 
         self._validate_apply_decision_request(properties, user_id)
 
@@ -523,23 +503,23 @@ class Client(object):
             raise ApiException(str(e))
 
     def _validate_apply_decision_request(self, properties, user_id):
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
 
-        if not isinstance(properties, dict) or len(properties) == 0:
-            raise ApiException("properties dictionary may not be empty")
+        if not isinstance(properties, dict):
+            raise TypeError("properties must be a dict")
+        elif not properties:
+            raise ValueError("properties dictionary may not be empty")
 
         source = properties.get('source')
 
-        if not isinstance(source, self.UNICODE_STRING) or len(source.strip()) == 0 or source not in DECISION_SOURCES:
-            raise ApiException("decision 'source' must be one of [%s]" % ", ".join(DECISION_SOURCES))
+        _assert_non_empty_unicode(source, 'source', error_cls=ValueError)
+        if source not in DECISION_SOURCES:
+            raise ValueError("decision 'source' must be one of [{0}]".format(", ".join(DECISION_SOURCES)))
 
         properties.update({'source': source.upper()})
 
-        if source == 'MANUAL_REVIEW' and \
-                ('analyst' not in properties or len(properties.get('analyst')) == 0):
-            raise ApiException("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
-
+        if source == 'MANUAL_REVIEW' and not properties.get('analyst', None):
+            raise ValueError("must provide 'analyst' for decision 'source':'MANUAL_REVIEW'")
 
     def get_user_decisions(self, user_id, timeout=None):
         """Gets the decisions for a user.
@@ -552,8 +532,7 @@ class Client(object):
             Otherwise, raises an ApiException.
 
         """
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -568,7 +547,6 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-
     def get_order_decisions(self, order_id, timeout=None):
         """Gets the decisions for an order.
 
@@ -580,8 +558,7 @@ class Client(object):
             Otherwise, raises an ApiException.
 
         """
-        if not isinstance(order_id, self.UNICODE_STRING) or len(order_id.strip()) == 0:
-            raise ApiException("order_id must be a string")
+        _assert_non_empty_unicode(order_id, 'order_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -596,7 +573,6 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
 
-
     def get_content_decisions(self, user_id, content_id, timeout=None):
         """Gets the decisions for a piece of content.
 
@@ -609,11 +585,8 @@ class Client(object):
             Otherwise, raises an ApiException.
 
         """
-        if not isinstance(content_id, self.UNICODE_STRING) or len(content_id.strip()) == 0:
-            raise ApiException("content_id must be a string")
-
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
+        _assert_non_empty_unicode(content_id, 'content_id')
+        _assert_non_empty_unicode(user_id, 'user_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -640,10 +613,8 @@ class Client(object):
             Otherwise, raises an ApiException.
 
         """
-        if not isinstance(user_id, self.UNICODE_STRING) or len(user_id.strip()) == 0:
-            raise ApiException("user_id must be a string")
-        if not isinstance(session_id, self.UNICODE_STRING) or len(session_id.strip()) == 0:
-            raise ApiException("session_id must be a string")
+        _assert_non_empty_unicode(user_id, 'user_id')
+        _assert_non_empty_unicode(session_id, 'session_id')
 
         if timeout is None:
             timeout = self.timeout
@@ -677,10 +648,7 @@ class Client(object):
         if timeout is None:
             timeout = self.timeout
 
-
-        if session_id is None or not isinstance(session_id, self.UNICODE_STRING) or \
-                        len(session_id.strip()) == 0:
-            raise ApiException("session_id must be a string")
+            _assert_non_empty_unicode(session_id, 'session_id')
 
         self._validate_apply_decision_request(properties, user_id)
 
@@ -696,7 +664,6 @@ class Client(object):
 
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
-
 
     def apply_content_decision(self, user_id, content_id, properties, timeout=None):
         """Apply decision to content
@@ -717,10 +684,7 @@ class Client(object):
         if timeout is None:
             timeout = self.timeout
 
-
-        if content_id is None or not isinstance(content_id, self.UNICODE_STRING) or \
-                        len(content_id.strip()) == 0:
-            raise ApiException("content_id must be a string")
+        _assert_non_empty_unicode(content_id, 'content_id')
 
         self._validate_apply_decision_request(properties, user_id)
 
@@ -736,7 +700,6 @@ class Client(object):
 
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
-
 
     def _user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (sift.version.API_VERSION, sift.version.VERSION)
@@ -788,6 +751,7 @@ class Client(object):
         return (API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' %
                 (_quote_path(account_id), _quote_path(user_id), _quote_path(content_id)))
 
+
 class Response(object):
 
     HTTP_CODES_WITHOUT_BODY = [204, 304]
@@ -818,7 +782,7 @@ class Response(object):
                 not_json_warning = "Failed to parse json response from {}.  HTTP status code: {}.".format(self.url, self.http_status_code)
                 raise ApiException(not_json_warning)
             finally:
-                if (int(self.http_status_code) < 200 or int(self.http_status_code) >= 300):
+                if int(self.http_status_code) < 200 or int(self.http_status_code) >= 300:
                     non_2xx_warning = "{} returned non-2XX http status code {}".format(self.url, self.http_status_code)
                     if self.api_error_message:
                         non_2xx_warning += " with error message: {}".format(self.api_error_message)
@@ -844,3 +808,24 @@ class Response(object):
 class ApiException(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
+
+
+
+def _assert_non_empty_unicode(val, name, error_cls=None):
+    error = False
+    if not isinstance(val, _UNICODE_STRING):
+        error_cls = error_cls or TypeError
+        error = True
+    elif not val:
+        error_cls = error_cls or ValueError
+        error = True
+
+    if error:
+        raise error_cls('{0} must be a non-empty string'.format(name))
+
+
+def _assert_non_empty_dict(val, name):
+    if not isinstance(val, dict):
+        raise TypeError('{0} must be a non-empty dict'.format(name))
+    elif not val:
+        raise ValueError('{0} must be a non-empty dict'.format(name))
