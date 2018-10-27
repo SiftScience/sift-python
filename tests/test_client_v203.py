@@ -95,20 +95,20 @@ class TestSiftPythonClient(unittest.TestCase):
         self.sift_client_v204 = sift.Client(self.test_key)
 
     def test_track_requires_valid_event(self):
-        self.assertRaises(sift.client.ApiException, self.sift_client.track, None, {})
-        self.assertRaises(sift.client.ApiException, self.sift_client.track, '', {})
-        self.assertRaises(sift.client.ApiException, self.sift_client_v204.track, 42, {'version':'203'})
+        self.assertRaises(TypeError, self.sift_client.track, None, {})
+        self.assertRaises(ValueError, self.sift_client.track, '', {})
+        self.assertRaises(TypeError, self.sift_client_v204.track, 42, {'version': '203'})
 
     def test_track_requires_properties(self):
         event = 'custom_event'
-        self.assertRaises(sift.client.ApiException, self.sift_client.track, event, None, {})
-        self.assertRaises(sift.client.ApiException, self.sift_client_v204.track, event, 42, {'version':'203'})
-        self.assertRaises(sift.client.ApiException, self.sift_client.track, event, {})
+        self.assertRaises(TypeError, self.sift_client.track, event, None, {})
+        self.assertRaises(TypeError, self.sift_client_v204.track, event, 42, {'version': '203'})
+        self.assertRaises(ValueError, self.sift_client.track, event, {})
 
     def test_score_requires_user_id(self):
-        self.assertRaises(sift.client.ApiException, self.sift_client_v204.score, None, {'version':'203'})
-        self.assertRaises(sift.client.ApiException, self.sift_client.score, '', {})
-        self.assertRaises(sift.client.ApiException, self.sift_client.score, 42, {})
+        self.assertRaises(TypeError, self.sift_client_v204.score, None, {'version': '203'})
+        self.assertRaises(ValueError, self.sift_client.score, '', {})
+        self.assertRaises(TypeError, self.sift_client.score, 42, {})
 
     def test_event_ok(self):
         event = '$transaction'
@@ -126,7 +126,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -149,7 +149,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=test_timeout,
                 params={})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -168,7 +168,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 params={'api_key': self.test_key},
                 headers=mock.ANY,
                 timeout=mock.ANY)
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -188,7 +188,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 params={'api_key': self.test_key},
                 headers=mock.ANY,
                 timeout=test_timeout)
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -211,7 +211,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={'return_score': 'true'})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -239,7 +239,7 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_post.assert_called_with(
                 'https://api.siftscience.com/v203/users/%s/labels' % user_id,
                 data=data, headers=mock.ANY, timeout=mock.ANY, params={})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -268,7 +268,7 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_post.assert_called_with(
                 'https://api.siftscience.com/v203/users/%s/labels' % user_id,
                 data=data, headers=mock.ANY, timeout=test_timeout, params={})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -285,7 +285,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={'api_key': self.test_key})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
 
     def test_unicode_string_parameter_support(self):
@@ -326,7 +326,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={'api_key': self.test_key})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
 
     def test_label_user__with_special_chars_ok(self):
@@ -355,7 +355,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={})
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
@@ -375,7 +375,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 params={'api_key': self.test_key},
                 headers=mock.ANY,
                 timeout=mock.ANY)
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
             assert(response.body['score'] == 0.55)
@@ -385,31 +385,25 @@ class TestSiftPythonClient(unittest.TestCase):
         with mock.patch.object(self.sift_client.session, 'post') as mock_post:
             mock_post.side_effect = mock.Mock(
                 side_effect=requests.exceptions.RequestException("Failed"))
-            try:
-                response = self.sift_client.track(
-                    '$transaction', valid_transaction_properties())
-            except Exception as e:
-                assert(isinstance(e, sift.client.ApiException))
+            self.assertRaises(
+                sift.client.ApiException, self.sift_client.track,
+                '$transaction', valid_transaction_properties())
 
     def test_exception_during_score_call(self):
         warnings.simplefilter("always")
         with mock.patch.object(self.sift_client.session, 'get') as mock_get:
             mock_get.side_effect = mock.Mock(
                 side_effect=requests.exceptions.RequestException("Failed"))
-            try:
-                response = self.sift_client.score('Fred')
-            except Exception as e:
-                assert(isinstance(e, sift.client.ApiException))
+            self.assertRaises(
+                sift.client.ApiException, self.sift_client.score, 'Fred')
 
     def test_exception_during_unlabel_call(self):
         warnings.simplefilter("always")
         with mock.patch.object(self.sift_client.session, 'delete') as mock_delete:
             mock_delete.side_effect = mock.Mock(
                 side_effect=requests.exceptions.RequestException("Failed"))
-            try:
-                response = self.sift_client.unlabel('Fred')
-            except Exception as e:
-                assert(isinstance(e, sift.client.ApiException))
+            self.assertRaises(
+                sift.client.ApiException, self.sift_client.unlabel, 'Fred')
 
     def test_return_actions_on_track(self):
         event = '$transaction'
@@ -432,7 +426,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=mock.ANY,
                 params={'return_action': 'true'})
 
-            assert(isinstance(response, sift.client.Response))
+            self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_status == 0)
             assert(response.api_error_message == "OK")
