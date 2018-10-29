@@ -24,6 +24,7 @@ setup(
     description='Python bindings for Sift Science\'s API',
     version=version_mod.VERSION,
     url='https://siftscience.com',
+    python_requires=">=2.7",
 
     author='Sift Science',
     author_email='support@siftscience.com',
