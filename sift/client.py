@@ -58,11 +58,7 @@ class Client(object):
         if not isinstance(api_key, str) or len(api_key.strip()) == 0:
             raise ApiException("valid api_key is required")
 
-        if session is None:
-            session = requests.Session()
-        session.auth = (api_key, '')
-        self.session = session
-
+        self.session = session or requests.Session()
         self.api_key = api_key
         self.url = api_url
         self.timeout = timeout
@@ -402,6 +398,7 @@ class Client(object):
         try:
             return Response(self.session.get(
                 self._workflow_status_url(self.account_id, run_id),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
                 timeout=timeout))
 
@@ -444,7 +441,8 @@ class Client(object):
 
         try:
             return Response(self.session.get(self._get_decisions_url(self.account_id), params=params,
-                                         headers={'User-Agent': self._user_agent()}, timeout=timeout))
+                                             auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                                             headers={'User-Agent': self._user_agent()}, timeout=timeout))
 
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
@@ -472,6 +470,7 @@ class Client(object):
             return Response(self.session.post(
                 self._user_decisions_url(self.account_id, user_id),
                 data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'Content-type': 'application/json',
                          'Accept': '*/*',
                          'User-Agent': self._user_agent()},
@@ -510,6 +509,7 @@ class Client(object):
             return Response(self.session.post(
                 self._order_apply_decisions_url(self.account_id, user_id, order_id),
                 data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'Content-type': 'application/json',
                          'Accept': '*/*',
                          'User-Agent': self._user_agent()},
@@ -557,6 +557,7 @@ class Client(object):
         try:
             return Response(self.session.get(
                 self._user_decisions_url(self.account_id, user_id),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
                 timeout=timeout))
 
@@ -584,6 +585,7 @@ class Client(object):
         try:
             return Response(self.session.get(
                 self._order_decisions_url(self.account_id, order_id),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
                 timeout=timeout))
 
@@ -615,6 +617,7 @@ class Client(object):
         try:
             return Response(self.session.get(
                 self._content_decisions_url(self.account_id, user_id, content_id),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
                 timeout=timeout))
 
@@ -644,6 +647,7 @@ class Client(object):
         try:
             return Response(self.session.get(
                 self._session_decisions_url(self.account_id, user_id, session_id),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
                 timeout=timeout))
 
@@ -680,6 +684,7 @@ class Client(object):
             return Response(self.session.post(
                 self._session_apply_decisions_url(self.account_id, user_id, session_id),
                 data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'Content-type': 'application/json',
                          'Accept': '*/*',
                          'User-Agent': self._user_agent()},
@@ -719,6 +724,7 @@ class Client(object):
             return Response(self.session.post(
                 self._content_apply_decisions_url(self.account_id, user_id, content_id),
                 data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'Content-type': 'application/json',
                          'Accept': '*/*',
                          'User-Agent': self._user_agent()},
