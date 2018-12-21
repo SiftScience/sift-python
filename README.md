@@ -1,4 +1,4 @@
-# Sift Science Python Bindings ![TravisCI](https://travis-ci.org/SiftScience/sift-python.png?branch=master)
+# Sift Science Python Bindings [![Build Status](https://travis-ci.org/SiftScience/sift-python.svg?branch=master)](https://travis-ci.org/SiftScience/sift-python)
 
 Bindings for Sift Science's APIs -- including the
 [Events](https://siftscience.com/resources/references/events-api.html),
