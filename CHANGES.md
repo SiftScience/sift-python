@@ -1,3 +1,25 @@
+5.0.0 2019-01-02
+================
+- Add connection pooling
+
+INCOMPATIBLE CHANGES INTRODUCED IN 5.0.0:
+
+- Removed support for Python 2.6
+
+- Fix url encoding for all endpoints
+
+  Previously, encoding user ids in URLs was inconsistent between endpoints, encoded for some
+  endpoints, unencoded for others. Additionally, when encoded in the URL path, forward slashes
+  weren't encoded. Callers with workarounds for this bug must remove these workarounds when
+  upgrading to 5.0.0.
+
+- Improved error handling
+
+  Previously, illegal arguments passed to methods like `Client.track()` and failed calls resulting
+  from server-side errors both raised `ApiExceptions`. Illegal arguments validated in the client
+  now raise either `TypeErrors` or `ValueErrors`. Server-side errors still raise `ApiExceptions`,
+  and `ApiException` has been augmented with metadata for handling the error.
+
 4.3.0.0 2018-07-31
 ==================
 -   Add support for rescore_user and get_user_score APIs
