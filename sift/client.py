@@ -27,7 +27,8 @@ class Client(object):
             api_url=API_URL,
             timeout=2.0,
             account_id=None,
-            version=sift.version.API_VERSION):
+            version=sift.version.API_VERSION,
+            session=None):
         """Initialize the client.
 
         Args:
@@ -57,6 +58,7 @@ class Client(object):
         if not isinstance(api_key, str) or len(api_key.strip()) == 0:
             raise ApiException("valid api_key is required")
 
+        self.session = session or requests.Session()
         self.api_key = api_key
         self.url = api_url
         self.timeout = timeout
@@ -102,7 +104,7 @@ class Client(object):
             return_workflow_status: Whether the API response should
                  include the status of any workflow run as a result of
                  the tracked event.
-            
+
             force_workflow_run: TODO:(rlong) Add after Rishabh adds documentation.
 
             abuse_types(optional): List of abuse types, specifying for which abuse types a score
@@ -156,7 +158,7 @@ class Client(object):
             params['force_workflow_run'] = 'true'
 
         try:
-            response = requests.post(
+            response = self.session.post(
                 path,
                 data=json.dumps(properties),
                 headers=headers,
@@ -203,7 +205,7 @@ class Client(object):
             params['abuse_types'] = ','.join(abuse_types)
 
         try:
-            response = requests.get(
+            response = self.session.get(
                 self._score_url(user_id, version),
                 headers=headers,
                 timeout=timeout,
@@ -246,7 +248,7 @@ class Client(object):
             params['abuse_types'] = ','.join(abuse_types)
 
         try:
-            response = requests.get(
+            response = self.session.get(
                 self._user_score_url(user_id, self.version),
                 headers=headers,
                 timeout=timeout,
@@ -286,7 +288,7 @@ class Client(object):
             params['abuse_types'] = ','.join(abuse_types)
 
         try:
-            response = requests.post(
+            response = self.session.post(
                 self._user_score_url(user_id, self.version),
                 headers=headers,
                 timeout=timeout,
@@ -365,7 +367,7 @@ class Client(object):
 
         try:
 
-            response = requests.delete(
+            response = self.session.delete(
                 self._label_url(user_id, version),
                 headers=headers,
                 timeout=timeout,
@@ -394,7 +396,7 @@ class Client(object):
             timeout = self.timeout
 
         try:
-            return Response(requests.get(
+            return Response(self.session.get(
                 self._workflow_status_url(self.account_id, run_id),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
@@ -438,9 +440,9 @@ class Client(object):
             params['abuse_types'] = abuse_types
 
         try:
-            return Response(requests.get(self._get_decisions_url(self.account_id), params=params,
-                                         auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
-                                         headers={'User-Agent': self._user_agent()}, timeout=timeout))
+            return Response(self.session.get(self._get_decisions_url(self.account_id), params=params,
+                                             auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                                             headers={'User-Agent': self._user_agent()}, timeout=timeout))
 
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e))
@@ -465,7 +467,7 @@ class Client(object):
         self._validate_apply_decision_request(properties, user_id)
 
         try:
-            return Response(requests.post(
+            return Response(self.session.post(
                 self._user_decisions_url(self.account_id, user_id),
                 data=json.dumps(properties),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
@@ -504,7 +506,7 @@ class Client(object):
         self._validate_apply_decision_request(properties, user_id)
 
         try:
-            return Response(requests.post(
+            return Response(self.session.post(
                 self._order_apply_decisions_url(self.account_id, user_id, order_id),
                 data=json.dumps(properties),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
@@ -553,7 +555,7 @@ class Client(object):
             timeout = self.timeout
 
         try:
-            return Response(requests.get(
+            return Response(self.session.get(
                 self._user_decisions_url(self.account_id, user_id),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
@@ -581,7 +583,7 @@ class Client(object):
             timeout = self.timeout
 
         try:
-            return Response(requests.get(
+            return Response(self.session.get(
                 self._order_decisions_url(self.account_id, order_id),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
@@ -613,7 +615,7 @@ class Client(object):
             timeout = self.timeout
 
         try:
-            return Response(requests.get(
+            return Response(self.session.get(
                 self._content_decisions_url(self.account_id, user_id, content_id),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
@@ -643,7 +645,7 @@ class Client(object):
             timeout = self.timeout
 
         try:
-            return Response(requests.get(
+            return Response(self.session.get(
                 self._session_decisions_url(self.account_id, user_id, session_id),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
                 headers={'User-Agent': self._user_agent()},
@@ -679,7 +681,7 @@ class Client(object):
         self._validate_apply_decision_request(properties, user_id)
 
         try:
-            return Response(requests.post(
+            return Response(self.session.post(
                 self._session_apply_decisions_url(self.account_id, user_id, session_id),
                 data=json.dumps(properties),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
@@ -719,7 +721,7 @@ class Client(object):
         self._validate_apply_decision_request(properties, user_id)
 
         try:
-            return Response(requests.post(
+            return Response(self.session.post(
                 self._content_apply_decisions_url(self.account_id, user_id, content_id),
                 data=json.dumps(properties),
                 auth=requests.auth.HTTPBasicAuth(self.api_key, ''),

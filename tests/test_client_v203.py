@@ -117,7 +117,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.track(event, valid_transaction_properties())
             mock_post.assert_called_with(
@@ -139,7 +139,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client_v204.session, 'post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client_v204.track(
                 event, valid_transaction_properties(), timeout=test_timeout, version='203')
@@ -160,10 +160,10 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.get') as mock_post:
-            mock_post.return_value = mock_response
+        with mock.patch.object(self.sift_client_v204.session, 'get') as mock_get:
+            mock_get.return_value = mock_response
             response = self.sift_client_v204.score('12345', version='203')
-            mock_post.assert_called_with(
+            mock_get.assert_called_with(
                 'https://api.siftscience.com/v203/score/12345',
                 params={'api_key': self.test_key},
                 headers=mock.ANY,
@@ -180,10 +180,10 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.get') as mock_post:
-            mock_post.return_value = mock_response
+        with mock.patch.object(self.sift_client.session, 'get') as mock_get:
+            mock_get.return_value = mock_response
             response = self.sift_client.score('12345', test_timeout)
-            mock_post.assert_called_with(
+            mock_get.assert_called_with(
                 'https://api.siftscience.com/v203/score/12345',
                 params={'api_key': self.test_key},
                 headers=mock.ANY,
@@ -201,7 +201,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.track(
                 event, valid_transaction_properties(), return_score=True)
@@ -224,7 +224,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.label(user_id, valid_label_properties())
             properties = {
@@ -252,7 +252,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client_v204.session, 'post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client_v204.label(
                 user_id, valid_label_properties(), test_timeout, version='203')
@@ -277,7 +277,7 @@ class TestSiftPythonClient(unittest.TestCase):
         user_id = '54321'
         mock_response = mock.Mock()
         mock_response.status_code = 204
-        with mock.patch('requests.delete') as mock_delete:
+        with mock.patch.object(self.sift_client.session, 'delete') as mock_delete:
             mock_delete.return_value = mock_response
             response = self.sift_client.unlabel(user_id)
             mock_delete.assert_called_with(
@@ -300,7 +300,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
             user_id = u'23056'
 
-            with mock.patch('requests.post') as mock_post:
+            with mock.patch.object(self.sift_client.session, 'post') as mock_post:
                 mock_post.return_value = mock_response
                 assert(
                     self.sift_client.track(
@@ -310,15 +310,15 @@ class TestSiftPythonClient(unittest.TestCase):
                     self.sift_client.label(
                         user_id,
                         valid_label_properties()))
-            with mock.patch('requests.get') as mock_post:
-                mock_post.return_value = mock_response
+            with mock.patch.object(self.sift_client.session, 'get') as mock_get:
+                mock_get.return_value = mock_response
                 assert(self.sift_client.score(user_id))
 
     def test_unlabel_user_with_special_chars_ok(self):
         user_id = "54321=.-_+@:&^%!$"
         mock_response = mock.Mock()
         mock_response.status_code = 204
-        with mock.patch('requests.delete') as mock_delete:
+        with mock.patch.object(self.sift_client_v204.session, 'delete') as mock_delete:
             mock_delete.return_value = mock_response
             response = self.sift_client_v204.unlabel(user_id, version='203')
             mock_delete.assert_called_with(
@@ -336,7 +336,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
             mock_post.return_value = mock_response
             response = self.sift_client.label(
                 user_id, valid_label_properties())
@@ -367,10 +367,10 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
-        with mock.patch('requests.get') as mock_post:
-            mock_post.return_value = mock_response
+        with mock.patch.object(self.sift_client.session, 'get') as mock_get:
+            mock_get.return_value = mock_response
             response = self.sift_client.score(user_id)
-            mock_post.assert_called_with(
+            mock_get.assert_called_with(
                 'https://api.siftscience.com/v203/score/%s' % urllib.quote(user_id),
                 params={'api_key': self.test_key},
                 headers=mock.ANY,
@@ -382,7 +382,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_exception_during_track_call(self):
         warnings.simplefilter("always")
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
             mock_post.side_effect = mock.Mock(
                 side_effect=requests.exceptions.RequestException("Failed"))
             try:
@@ -393,7 +393,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_exception_during_score_call(self):
         warnings.simplefilter("always")
-        with mock.patch('requests.get') as mock_get:
+        with mock.patch.object(self.sift_client.session, 'get') as mock_get:
             mock_get.side_effect = mock.Mock(
                 side_effect=requests.exceptions.RequestException("Failed"))
             try:
@@ -403,7 +403,7 @@ class TestSiftPythonClient(unittest.TestCase):
 
     def test_exception_during_unlabel_call(self):
         warnings.simplefilter("always")
-        with mock.patch('requests.delete') as mock_delete:
+        with mock.patch.object(self.sift_client.session, 'delete') as mock_delete:
             mock_delete.side_effect = mock.Mock(
                 side_effect=requests.exceptions.RequestException("Failed"))
             try:
@@ -420,7 +420,7 @@ class TestSiftPythonClient(unittest.TestCase):
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
 
-        with mock.patch('requests.post') as mock_post:
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
             mock_post.return_value = mock_response
 
             response = self.sift_client.track(
