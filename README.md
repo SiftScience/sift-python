@@ -59,6 +59,7 @@ Here's an example:
 
 ```python
 
+import json
 import sift.client
 
 sift.api_key = '<your API key here>'
