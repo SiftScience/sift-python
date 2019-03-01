@@ -62,9 +62,7 @@ Here's an example:
 import json
 import sift.client
 
-sift.api_key = '<your API key here>'
-sift.account_id = '<your account ID here>'
-client = sift.Client()
+client = sift.Client(api_key='<your API key here>', account_id='<your account ID here>')
 
 # User ID's may only contain a-z, A-Z, 0-9, =, ., -, _, +, @, :, &, ^, %, !, $
 user_id = "23056"
