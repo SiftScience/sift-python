@@ -1,3 +1,6 @@
+5.0.1 2019-03-07
+- Update metadata in setup.py
+
 5.0.0 2019-01-08
 ================
 - Add connection pooling
