@@ -7,9 +7,9 @@ import unittest
 import sys
 import requests.exceptions
 if sys.version_info[0] < 3:
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 else:
-    import urllib.parse as urllib
+    import urllib.parse
 
 
 def valid_transaction_properties():
@@ -852,12 +852,12 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_response.status_code = 200
             mock_response.headers = response_with_data_header()
 
-            user_id = u'23056'
+            user_id = '23056'
 
             with mock.patch.object(self.sift_client.session, 'post') as mock_post:
                 mock_post.return_value = mock_response
                 assert(self.sift_client.track(
-                    u'$transaction',
+                    '$transaction',
                     valid_transaction_properties()))
                 assert(self.sift_client.label(
                     user_id,
@@ -865,7 +865,7 @@ class TestSiftPythonClient(unittest.TestCase):
             with mock.patch.object(self.sift_client.session, 'get') as mock_get:
                 mock_get.return_value = mock_response
                 assert(self.sift_client.score(
-                    user_id, abuse_types=[u'payment_abuse', 'content_abuse']))
+                    user_id, abuse_types=['payment_abuse', 'content_abuse']))
 
     def test_unlabel_user_with_special_chars_ok(self):
         user_id = "54321=.-_+@:&^%!$"
@@ -875,7 +875,7 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_delete.return_value = mock_response
             response = self.sift_client.unlabel(user_id)
             mock_delete.assert_called_with(
-                'https://api.siftscience.com/v205/users/%s/labels' % urllib.quote(user_id),
+                'https://api.siftscience.com/v205/users/%s/labels' % urllib.parse.quote(user_id),
                 headers=mock.ANY,
                 timeout=mock.ANY,
                 params={'api_key': self.test_key})
@@ -903,7 +903,7 @@ class TestSiftPythonClient(unittest.TestCase):
             properties.update({'$api_key': self.test_key, '$type': '$label'})
             data = json.dumps(properties)
             mock_post.assert_called_with(
-                'https://api.siftscience.com/v205/users/%s/labels' % urllib.quote(user_id),
+                'https://api.siftscience.com/v205/users/%s/labels' % urllib.parse.quote(user_id),
                 data=data,
                 headers=mock.ANY,
                 timeout=mock.ANY,
@@ -924,7 +924,7 @@ class TestSiftPythonClient(unittest.TestCase):
             mock_get.return_value = mock_response
             response = self.sift_client.score(user_id, abuse_types=['legacy'])
             mock_get.assert_called_with(
-                'https://api.siftscience.com/v205/score/%s' % urllib.quote(user_id),
+                'https://api.siftscience.com/v205/score/%s' % urllib.parse.quote(user_id),
                 params={'api_key': self.test_key, 'abuse_types': 'legacy'},
                 headers=mock.ANY,
                 timeout=mock.ANY)

@@ -7,10 +7,10 @@ import requests
 import requests.auth
 import sys
 if sys.version_info[0] < 3:
-    import urllib
-    _UNICODE_STRING = basestring
+    import urllib.request, urllib.parse, urllib.error
+    _UNICODE_STRING = str
 else:
-    import urllib.parse as urllib
+    import urllib.parse
     _UNICODE_STRING = str
 
 import sift
@@ -24,7 +24,7 @@ DECISION_SOURCES = ['MANUAL_REVIEW', 'AUTOMATED_RULE', 'CHARGEBACK']
 def _quote_path(s):
     # by default, urllib.quote doesn't escape forward slash; pass the
     # optional arg to override this
-    return urllib.quote(s, '')
+    return urllib.parse.quote(s, '')
 
 
 class Client(object):
@@ -733,7 +733,7 @@ class Client(object):
         return self.url + '/v%s/score/%s' % (version, _quote_path(user_id))
 
     def _user_score_url(self, user_id, version):
-        return self.url + '/v%s/users/%s/score' % (version, urllib.quote(user_id))
+        return self.url + '/v%s/users/%s/score' % (version, urllib.parse.quote(user_id))
 
     def _label_url(self, user_id, version):
         return self.url + '/v%s/users/%s/labels' % (version, _quote_path(user_id))
@@ -798,7 +798,7 @@ class Response(object):
                     self.api_status = self.body['status']
                 if 'error_message' in self.body:
                     self.api_error_message = self.body['error_message']
-                if 'request' in self.body.keys() and isinstance(self.body['request'], str):
+                if 'request' in list(self.body.keys()) and isinstance(self.body['request'], str):
                     self.request = json.loads(self.body['request'])
             except ValueError:
                 raise ApiException(
