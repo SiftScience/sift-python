@@ -7,7 +7,9 @@ import requests
 import requests.auth
 import sys
 if sys.version_info[0] < 3:
-    import urllib.request, urllib.parse, urllib.error
+    import urllib.request
+    import urllib.parse
+    import urllib.error
     _UNICODE_STRING = str
 else:
     import urllib.parse
@@ -18,7 +20,16 @@ import sift.version
 
 API_URL = 'https://api.siftscience.com'
 API3_URL = 'https://api3.siftscience.com'
+API_URL_VERIFICATION = 'https://api.sift.com/v1.1/verification/'
+
 DECISION_SOURCES = ['MANUAL_REVIEW', 'AUTOMATED_RULE', 'CHARGEBACK']
+
+VERIFIED_EVENTS = [
+    "$add_item_to_cart", "$add_promotion", "$content_status",
+    "$create_account", "$create_content", "$create_order", "$flag_content",
+    "$login", "$order_status", "$remove_item_from_cart", "$transaction", "$transaction",
+    "$update_account", "$update_content", "$update_order", "$update_password"
+]
 
 
 def _quote_path(s):
@@ -417,7 +428,8 @@ class Client(object):
 
         _assert_non_empty_unicode(entity_type, 'entity_type')
         if entity_type.lower() not in ['user', 'order', 'session', 'content']:
-            raise ValueError("entity_type must be one of {user, order, session, content}")
+            raise ValueError(
+                "entity_type must be one of {user, order, session, content}")
 
         params['entity_type'] = entity_type
 
@@ -434,7 +446,8 @@ class Client(object):
 
         try:
             return Response(self.session.get(url, params=params,
-                                             auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                                             auth=requests.auth.HTTPBasicAuth(
+                                                 self.api_key, ''),
                                              headers={'User-Agent': self._user_agent()}, timeout=timeout))
 
         except requests.exceptions.RequestException as e:
@@ -497,7 +510,8 @@ class Client(object):
 
         self._validate_apply_decision_request(properties, user_id)
 
-        url = self._order_apply_decisions_url(self.account_id, user_id, order_id)
+        url = self._order_apply_decisions_url(
+            self.account_id, user_id, order_id)
 
         try:
             return Response(self.session.post(
@@ -524,12 +538,14 @@ class Client(object):
 
         _assert_non_empty_unicode(source, 'source', error_cls=ValueError)
         if source not in DECISION_SOURCES:
-            raise ValueError("decision 'source' must be one of [{0}]".format(", ".join(DECISION_SOURCES)))
+            raise ValueError("decision 'source' must be one of [{0}]".format(
+                ", ".join(DECISION_SOURCES)))
 
         properties.update({'source': source.upper()})
 
         if source == 'MANUAL_REVIEW' and not properties.get('analyst', None):
-            raise ValueError("must provide 'analyst' for decision 'source': 'MANUAL_REVIEW'")
+            raise ValueError(
+                "must provide 'analyst' for decision 'source': 'MANUAL_REVIEW'")
 
     def get_user_decisions(self, user_id, timeout=None):
         """Gets the decisions for a user.
@@ -670,7 +686,8 @@ class Client(object):
 
         self._validate_apply_decision_request(properties, user_id)
 
-        url = self._session_apply_decisions_url(self.account_id, user_id, session_id)
+        url = self._session_apply_decisions_url(
+            self.account_id, user_id, session_id)
 
         try:
             return Response(self.session.post(
@@ -708,7 +725,8 @@ class Client(object):
 
         self._validate_apply_decision_request(properties, user_id)
 
-        url = self._content_apply_decisions_url(self.account_id, user_id, content_id)
+        url = self._content_apply_decisions_url(
+            self.account_id, user_id, content_id)
 
         try:
             return Response(self.session.post(
@@ -722,6 +740,221 @@ class Client(object):
 
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
+
+    def check(self, properties, timeout=None,  version=None):
+        """The check call is used for sending the OTP provided by the end user to Sift. 
+        Sift then compares the OTP, checks rate limits and responds with a decision whether the user should be able to proceed or not.
+        This call is blocking.  Check out https://sift.com/developers/docs/curl/verification-api/check
+        for more information on our check response structure.
+
+        Args:
+
+            properties:
+                $user_id: id of user
+                $code: The code the user sent to the customer for validation..
+                $verified_event(optional): This will be the event type that triggered the verification. 
+                $verified_entity_id(optional): The ID of the entity impacted by the event being verified.
+
+            timeout(optional): Use a custom timeout (in seconds) for this call.
+            version(optional): Use a different version of the Sift Science API for this call.
+
+        Returns:
+            A sift.client.Response object if the check call succeeded, or raises
+            an ApiException.
+        """
+        if timeout is None:
+            timeout = self.timeout
+
+        self._validate_check_request(properties)
+
+        url = self._check_url()
+
+        try:
+            return Response(self.session.post(
+                url,
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+    def _validate_check_request(self, properties):
+        """ This method is used to validate arguments passed to the check method. """
+
+        if not isinstance(properties, dict):
+            raise TypeError("properties must be a dict")
+        elif not properties:
+            raise ValueError("properties dictionary may not be empty")
+
+        user_id = properties.get('$user_id')
+        _assert_non_empty_unicode(user_id, 'user_id', error_cls=ValueError)
+
+        otp_code = properties.get('$code')
+        if otp_code is None:
+            raise ValueError("Code is required")
+
+        if otp_code and type(otp_code) != int:
+            raise ValueError("Code should be  a number")
+
+        verified_event = properties.get('$verified_event')
+        if (verified_event and verified_event not in VERIFIED_EVENTS):
+            raise ValueError(" 'verified_event' must be one of [{0}]".format(
+                ", ".join(VERIFIED_EVENTS)))
+
+        verified_entity_id = properties.get('$verified_entity_id')
+        _assert_non_empty_unicode(
+            verified_entity_id, 'verified_entity_id', error_cls=ValueError)
+
+    def send(self, properties, timeout=None,  version=None):
+        """The send call  triggers the generation of a OTP code that is stored by Sift and emails the code to the user.
+        This call is blocking.  Check out https://sift.com/developers/docs/curl/verification-api/send
+        for more information on our send response structure.
+
+        Args:
+
+            properties: 
+
+                $user_id: User ID of user being verified, e.g. johndoe123.
+                $send_to: The phone / email to send the OTP to.
+                $verification_type: The channel used for verification
+                $brand_name(optional): Name of the brand of product or service the user interacts with.
+                $language(optional): Language of the content of the web site.
+                $event: 
+                    $session_id:  The session being verified. See $verification in the Sift Events API documentation.
+                    $verified_event: The type of the reserved event being verified.
+                    $reason(optional): The trigger for the verification. See $verification in the Sift Events API documentation.
+                    $ip(optional): The user’s IP address.
+                    $browser: 
+                        $user_agent: The user agent of the browser that is verifying. Represented by the $browser object.
+                                     Use this field if the client is a browser. Note: cannot be used in conjunction with $app.
+
+
+            timeout(optional): Use a custom timeout (in seconds) for this call.
+
+            version(optional): Use a different version of the Sift Science API for this call.
+
+        Returns:
+            A sift.client.Response object if the send call succeeded, or raises an ApiException.
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        self._validate_send_request(properties)
+
+        url = self._send_url()
+
+        try:
+            return Response(self.session.post(
+                url,
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+    def _validate_send_request(self, properties):
+        """ This method is used to validate arguments passed to the send method. """
+
+        if not isinstance(properties, dict):
+            raise TypeError("properties must be a dict")
+        elif not properties:
+            raise ValueError("properties dictionary may not be empty")
+
+        user_id = properties.get('$user_id')
+        _assert_non_empty_unicode(user_id, 'user_id', error_cls=ValueError)
+
+        send_to = properties.get('$send_to')
+        _assert_non_empty_unicode(send_to, 'send_to', error_cls=ValueError)
+
+        verification_type = properties.get('$verification_type')
+        _assert_non_empty_unicode(
+            verification_type, 'verification_type', error_cls=ValueError)
+
+        event = properties.get('$event')
+        if not isinstance(event, dict):
+            raise TypeError("$event must be a dict")
+        elif not event:
+            raise ValueError("$event dictionary may not be empty")
+
+        session_id = event.get('$session_id')
+        _assert_non_empty_unicode(
+            session_id, 'session_id', error_cls=ValueError)
+
+        verified_event = event.get('$verified_event')
+        _assert_non_empty_unicode(
+            verified_event, 'verified_event', error_cls=ValueError)
+        if (verified_event and verified_event not in VERIFIED_EVENTS):
+            raise ValueError(" 'verified_event' must be one of [{0}]".format(
+                ", ".join(VERIFIED_EVENTS)))
+
+    def resend(self, properties, timeout=None,  version=None):
+        """A user can ask for a new OTP (one-time password) if they haven’t received the previous one, or in case the previous OTP expired. 
+        The /resend call generates a new OTP and sends it to the original recipient with the same settings (template, verified event info).
+        This call is blocking.  Check out https://sift.com/developers/docs/curl/verification-api/resend
+        for more information on our check response structure.
+
+        Args:
+            properties: 
+                user_id:  A user's id. This id should be the same as the user_id used in event calls.
+                verified_event(optional): This will be the event type that triggered the verification. 
+                verified_entity_id(optional): The ID of the entity impacted by the event being verified.
+
+            timeout(optional): Use a custom timeout (in seconds) for this call.
+
+            version(optional): Use a different version of the Sift Science API for this call.
+
+        Returns:
+            A sift.client.Response object if the send call succeeded, or raises
+            an ApiException.
+        """
+        if timeout is None:
+            timeout = self.timeout
+
+        self._validate_resend_request(properties)
+
+        url = self._resend_url()
+
+        try:
+            return Response(self.session.post(
+                url,
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+    def _validate_resend_request(self, properties):
+        """ This method is used to validate arguments passed to the resend method. """
+
+        if not isinstance(properties, dict):
+            raise TypeError("properties must be a dict")
+        elif not properties:
+            raise ValueError("properties dictionary may not be empty")
+
+        user_id = properties.get('$user_id')
+        _assert_non_empty_unicode(user_id, 'user_id', error_cls=ValueError)
+
+        verified_event = properties.get('$verified_event')
+        if (verified_event and verified_event not in VERIFIED_EVENTS):
+            raise ValueError(" 'verified_event' must be one of [{0}]".format(
+                ", ".join(VERIFIED_EVENTS)))
+
+        verified_entity_id = properties.get('$verified_entity_id')
+        _assert_non_empty_unicode(
+            verified_entity_id, 'verified_entity_id', error_cls=ValueError)
 
     def _user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (sift.version.API_VERSION, sift.version.VERSION)
@@ -773,6 +1006,15 @@ class Client(object):
         return (API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' %
                 (_quote_path(account_id), _quote_path(user_id), _quote_path(content_id)))
 
+    def _check_url(self):
+        return (API_URL_VERIFICATION + 'check')
+
+    def _send_url(self):
+        return (API_URL_VERIFICATION + 'send')
+
+    def _resend_url(self):
+        return (API_URL_VERIFICATION + 'resend')
+
 
 class Response(object):
 
@@ -812,7 +1054,8 @@ class Response(object):
             finally:
                 if int(self.http_status_code) < 200 or int(self.http_status_code) >= 300:
                     raise ApiException(
-                        '{0} returned non-2XX http status code {1}'.format(self.url, self.http_status_code),
+                        '{0} returned non-2XX http status code {1}'.format(
+                            self.url, self.http_status_code),
                         url=self.url,
                         http_status_code=self.http_status_code,
                         body=self.body,
