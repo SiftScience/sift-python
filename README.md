@@ -7,7 +7,6 @@ and
 [Score](https://sift.com/resources/references/score-api.html)
 APIs.
 
-
 ## Installation
 
 Set up a virtual environment with virtualenv (otherwise you will need
@@ -36,7 +35,6 @@ Python 3:
 
     pip3 install git+https://github.com/SiftScience/sift-python
 
-
 ## Documentation
 
 Please see [here](https://sift.com/developers/docs/python/events-api/overview) for the
@@ -51,7 +49,6 @@ for a history of all changes.
 Note, that in v2.0.0, the API semantics were changed to raise an
 exception in the case of error to be more pythonic. Client code will
 need to be updated to catch `sift.client.ApiException` exceptions.
-
 
 ## Usage
 
@@ -156,8 +153,61 @@ try:
 except sift.client.ApiException:
     # request failed
     pass
-```
 
+# The send call  triggers the generation of a OTP code that is stored by Sift and emails the code to the user.
+
+send_properties = {
+            "$user_id": "billy_jones_301",
+            "$send_to":	"billy_jones_301@gmail.com",
+            "$verification_type": "$email",
+            "$brand_name": "MyTopBrand",
+            "$language": "en",
+            "$event": {
+                "$session_id": "09f7f361575d11ff",
+                "$verified_event": "$login",
+                "$reason": "$automated_rule",
+                "$ip": "192.168.1.1",
+                "$browser": {
+                    "$user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+                }
+            }
+        }
+
+try:
+    response = client.send(send_properties)
+except sift.client.ApiException:
+    # request failed
+    pass
+
+# The check call is used for sending the OTP provided by the end user to Sift.
+check_properties = {
+        "$user_id" : "billy_jones_301",
+        "$code": 123456,
+        "$verified_event": "$login",
+        "$verified_entity_id": "SOME_SESSION_ID"
+    }
+
+try:
+    response = client.check(check_properties)
+except sift.client.ApiException:
+    # request failed
+    pass
+
+# The resend call generates a new OTP and sends it to the original recipient with the same settings
+resend_properties = {
+        "$user_id": "billy_jones_301",
+        "$verified_event": "$login",
+        "$verified_entity_id": "SOME_SESSION_ID"
+    }
+
+try:
+    response = client.resend(resend_properties)
+except sift.client.ApiException:
+    # request failed
+    pass
+
+
+```
 
 ## Testing
 
