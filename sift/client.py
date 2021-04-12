@@ -1073,7 +1073,7 @@ class Response(object):
         if self.http_status_code in self.HTTP_CODES_WITHOUT_BODY:
             return 204 == self.http_status_code
 
-        # NOTE: Responses from /v3/... endpoints do not contain an API status.
+        # note: Responses from /v3/... endpoints do not contain an API status.
         if self.api_status:
             return self.api_status == 0
 
