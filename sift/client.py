@@ -827,10 +827,10 @@ class Client(object):
                     $session_id:  The session being verified. See $verification in the Sift Events API documentation.
                     $verified_event: The type of the reserved event being verified.
                     $reason(optional): The trigger for the verification. See $verification in the Sift Events API documentation.
-                    $ip(optional): The user’s IP address.
-                    $browser: 
+                    $ip(optional): The user's IP address.
+                    $browser:
                         $user_agent: The user agent of the browser that is verifying. Represented by the $browser object.
-                                     Use this field if the client is a browser. Note: cannot be used in conjunction with $app.
+                                     Use this field if the client is a browser.
 
 
             timeout(optional): Use a custom timeout (in seconds) for this call.
