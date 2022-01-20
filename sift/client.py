@@ -7,7 +7,7 @@ import requests
 import requests.auth
 import sys
 if sys.version_info[0] < 3:
-    import urllib.request, urllib.parse, urllib.error
+    import six.moves.urllib as urllib 
     _UNICODE_STRING = str
 else:
     import urllib.parse

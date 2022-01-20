@@ -7,7 +7,7 @@ import unittest
 import sys
 import requests.exceptions
 if sys.version_info[0] < 3:
-    import urllib.request, urllib.parse, urllib.error
+    import six.moves.urllib as urllib 
 else:
     import urllib.parse
 
