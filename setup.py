@@ -33,6 +33,7 @@ setup(
     packages=['sift'],
     install_requires=[
         "requests >= 0.14.1",
+        "six >= 1.16.0",
     ],
     extras_require={
         'test': [
