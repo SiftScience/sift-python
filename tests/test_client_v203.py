@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 import warnings
 import json
 import mock
@@ -7,7 +8,7 @@ import unittest
 import sys
 import requests.exceptions
 if sys.version_info[0] < 3:
-    import urllib.request, urllib.parse, urllib.error
+    import six.moves.urllib as urllib 
 else:
     import urllib.parse
 
@@ -16,7 +17,7 @@ def valid_transaction_properties():
     return {
         '$buyer_user_id': '123456',
         '$seller_user_id': '654321',
-        '$amount': 1253200,
+        '$amount': Decimal('1253200.0'),
         '$currency_code': 'USD',
         '$time': int(datetime.datetime.now().strftime('%s')),
         '$transaction_id': 'my_transaction_id',

@@ -2,12 +2,13 @@
 See: https://siftscience.com/docs/references/events-api
 """
 
+import decimal
 import json
 import requests
 import requests.auth
 import sys
 if sys.version_info[0] < 3:
-    import urllib.request, urllib.parse, urllib.error
+    import six.moves.urllib as urllib 
     _UNICODE_STRING = str
 else:
     import urllib.parse
@@ -26,6 +27,11 @@ def _quote_path(s):
     # optional arg to override this
     return urllib.parse.quote(s, '')
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return (str(o),)
+        return super(DecimalEncoder, self).default(o)
 
 class Client(object):
 
@@ -158,7 +164,7 @@ class Client(object):
         try:
             response = self.session.post(
                 path,
-                data=json.dumps(properties),
+                data=json.dumps(properties, cls=DecimalEncoder),
                 headers=headers,
                 timeout=timeout,
                 params=params)
