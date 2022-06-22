@@ -77,20 +77,20 @@ def score_response_json():
 
 
 def workflow_statuses_json():
-    return """ {
-        "route" : {
-            "name" : "my route"
+    return """{
+      "route" : {
+        "name" : "my route"
+      },
+      "history": [
+        {
+          "app": "decision",
+          "name": "Order Looks OK",
+          "state": "running",
+          "config": {
+            "decision_id": "order_looks_ok_payment_abuse"
+          }
         }
-        "history": [
-            {
-                "app": "decision",
-                "name": "Order Looks OK",
-                "state": "running",
-                "config": {
-                    "decision_id": "order_looks_ok_payment_abuse"
-                }
-            }
-        ]
+      ]
     }"""
 
 # A sample response from the /{version}/users/{userId}/score API.
