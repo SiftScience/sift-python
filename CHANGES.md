@@ -1,3 +1,9 @@
+5.1.0 2022-06-22
+- Added return_route_info query parameter 
+
+5.0.2 2022-01-24
+- Fix usage of urllib for Python 2.7
+
 5.0.1 2019-03-07
 - Update metadata in setup.py
 

@@ -85,6 +85,7 @@ class Client(object):
             return_score=False,
             return_action=False,
             return_workflow_status=False,
+            return_route_info=False,
             force_workflow_run=False,
             abuse_types=None,
             timeout=None,
@@ -111,6 +112,9 @@ class Client(object):
             return_workflow_status: Whether the API response should
                  include the status of any workflow run as a result of
                  the tracked event.
+
+            return_route_info: Whether to get the route information from the Workflow Decision.
+                This parameter must be used with the return_workflow_status query parameter.
 
             force_workflow_run: TODO:(rlong) Add after Rishabh adds documentation.
 
@@ -157,6 +161,9 @@ class Client(object):
 
         if return_workflow_status:
             params['return_workflow_status'] = 'true'
+
+        if return_route_info:
+            params['return_route_info'] = 'true'
 
         if force_workflow_run:
             params['force_workflow_run'] = 'true'
