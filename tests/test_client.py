@@ -3,6 +3,7 @@ import json
 import sys
 import unittest
 import warnings
+from decimal import Decimal
 
 import mock
 import requests.exceptions
@@ -19,7 +20,7 @@ def valid_transaction_properties():
     return {
         '$buyer_user_id': '123456',
         '$seller_user_id': '654321',
-        '$amount': 1253200,
+        '$amount': Decimal('1253200.0'),
         '$currency_code': 'USD',
         '$time': int(datetime.datetime.now().strftime('%s')),
         '$transaction_id': 'my_transaction_id',
