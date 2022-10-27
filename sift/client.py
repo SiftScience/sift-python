@@ -2,12 +2,13 @@
 See: https://siftscience.com/docs/references/events-api
 """
 
+import decimal
 import json
 import requests
 import requests.auth
 import sys
 if sys.version_info[0] < 3:
-    import urllib.request, urllib.parse, urllib.error
+    import six.moves.urllib as urllib 
     _UNICODE_STRING = str
 else:
     import urllib.parse
@@ -26,6 +27,11 @@ def _quote_path(s):
     # optional arg to override this
     return urllib.parse.quote(s, '')
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return (str(o),)
+        return super(DecimalEncoder, self).default(o)
 
 class Client(object):
 
@@ -79,6 +85,7 @@ class Client(object):
             return_score=False,
             return_action=False,
             return_workflow_status=False,
+            return_route_info=False,
             force_workflow_run=False,
             abuse_types=None,
             timeout=None,
@@ -105,6 +112,9 @@ class Client(object):
             return_workflow_status: Whether the API response should
                  include the status of any workflow run as a result of
                  the tracked event.
+
+            return_route_info: Whether to get the route information from the Workflow Decision.
+                This parameter must be used with the return_workflow_status query parameter.
 
             force_workflow_run: TODO:(rlong) Add after Rishabh adds documentation.
 
@@ -152,13 +162,16 @@ class Client(object):
         if return_workflow_status:
             params['return_workflow_status'] = 'true'
 
+        if return_route_info:
+            params['return_route_info'] = 'true'
+
         if force_workflow_run:
             params['force_workflow_run'] = 'true'
 
         try:
             response = self.session.post(
                 path,
-                data=json.dumps(properties),
+                data=json.dumps(properties, cls=DecimalEncoder),
                 headers=headers,
                 timeout=timeout,
                 params=params)
@@ -723,6 +736,112 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
 
+    def create_psp_merchant_profile(self, properties, timeout=None):
+        """Create a new PSP Merchant profile
+        Args:
+            properties: A dict of merchant profile data.
+        Returns
+            A sift.client.Response object if the call succeeded, else raises an ApiException
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        url = self._psp_merchant_url(self.account_id)
+
+        try:
+            return Response(self.session.post(
+                url,
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+    def update_psp_merchant_profile(self, merchant_id, properties, timeout=None):
+        """Update already existing PSP Merchant profile
+        Args:
+            merchant_id: id of merchant
+            properties: A dict of merchant profile data.
+        Returns
+            A sift.client.Response object if the call succeeded, else raises an ApiException
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        url = self._psp_merchant_id_url(self.account_id, merchant_id)
+
+        try:
+            return Response(self.session.put(
+                url,
+                data=json.dumps(properties),
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'Content-type': 'application/json',
+                         'Accept': '*/*',
+                         'User-Agent': self._user_agent()},
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+    def get_psp_merchant_profiles(self, batch_token=None, batch_size=None, timeout=None):
+        """Gets all PSP merchant profiles.
+
+        Returns:
+            A sift.client.Response object if the call succeeded.
+            Otherwise, raises an ApiException.
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        url = self._psp_merchant_url(self.account_id)
+        params = {}
+
+        if batch_size:
+            params['batch_size'] = batch_size
+
+        if batch_token:
+            params['batch_token'] = batch_token
+        try:
+            return Response(self.session.get(
+                url,
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'User-Agent': self._user_agent()},
+                params=params,
+                timeout=timeout))
+
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+    def get_a_psp_merchant_profile(self, merchant_id, timeout=None):
+        """Gets a PSP merchant profile using merchant id.
+
+        Returns:
+            A sift.client.Response object if the call succeeded.
+            Otherwise, raises an ApiException.
+        """
+
+        if timeout is None:
+            timeout = self.timeout
+
+        url = self._psp_merchant_id_url(self.account_id, merchant_id)
+
+        try:
+            return Response(self.session.get(
+                url,
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''),
+                headers={'User-Agent': self._user_agent()},
+                timeout=timeout))
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+
     def _user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (sift.version.API_VERSION, sift.version.VERSION)
 
@@ -772,6 +891,14 @@ class Client(object):
     def _content_apply_decisions_url(self, account_id, user_id, content_id):
         return (API3_URL + '/v3/accounts/%s/users/%s/content/%s/decisions' %
                 (_quote_path(account_id), _quote_path(user_id), _quote_path(content_id)))
+
+    def _psp_merchant_url(self, account_id):
+        return (self.url + '/v3/accounts/%s/psp_management/merchants' %
+                (_quote_path(account_id)))
+
+    def _psp_merchant_id_url(self, account_id, merchant_id):
+        return (self.url + '/v3/accounts/%s/psp_management/merchants/%s' %
+                (_quote_path(account_id), _quote_path(merchant_id)))
 
 
 class Response(object):
