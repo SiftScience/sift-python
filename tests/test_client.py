@@ -11,7 +11,7 @@ import requests.exceptions
 import sift
 
 if sys.version_info[0] < 3:
-    import six.moves.urllib as urllib
+    import six.moves.urllib as urllib 
 else:
     import urllib.parse
 
@@ -143,7 +143,6 @@ def workflow_statuses_json():
         }
       ]
     }"""
-
 
 # A sample response from the /{version}/users/{userId}/score API.
 USER_SCORE_RESPONSE_JSON = """{
@@ -535,6 +534,35 @@ class TestSiftPythonClient(unittest.TestCase):
             assert (response.api_status == 0)
             assert (response.api_error_message == "OK")
             assert (response.body['workflow_statuses']['route']['name'] == 'my route')
+
+    def test_sync_workflow_ok(self):
+        event = '$transaction'
+        mock_response = mock.Mock()
+        mock_response.content = ('{"status": 0, "error_message": "OK", "workflow_statuses": %s}'
+                                 % workflow_statuses_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.track(
+                event,
+                valid_transaction_properties(),
+                return_workflow_status=True,
+                return_route_info=True,
+                abuse_types=['payment_abuse', 'content_abuse', 'legacy'])
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v205/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={'return_workflow_status': 'true', 'return_route_info': 'true',
+                        'abuse_types': 'payment_abuse,content_abuse,legacy'})
+            self.assertIsInstance(response, sift.client.Response)
+            assert(response.is_ok())
+            assert(response.api_status == 0)
+            assert(response.api_error_message == "OK")
+            assert(response.body['workflow_statuses']['route']['name'] == 'my route')
 
     def test_get_decisions_fails(self):
         with self.assertRaises(ValueError):
