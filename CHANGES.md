@@ -1,3 +1,6 @@
+5.2.0 2022-11-07
+- Update  PSP Merchant Management API
+
 5.1.0 2022-06-22
 - Added return_route_info query parameter 
 - Fixed decimal amount json serialization bug 

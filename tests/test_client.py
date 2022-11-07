@@ -46,6 +46,56 @@ def valid_label_properties():
     }
 
 
+def valid_psp_merchant_properties():
+    return {
+        "$id": "api-key-1",
+        "$name": "Wonderful Payments Inc.",
+        "$description": "Wonderful Payments payment provider.",
+        "$address": {
+            "$name": "Alany",
+            "$address_1": "Big Payment blvd, 22",
+            "$address_2": "apt, 8",
+            "$city": "New Orleans",
+            "$region": "NA",
+            "$country": "US",
+            "$zipcode": "76830",
+            "$phone": "0394888320",
+        },
+        "$category": "1002",
+        "$service_level": "Platinum",
+        "$status": "active",
+        "$risk_profile": {
+            "$level": "low",
+            "$score": 10
+        }
+    }
+
+
+def valid_psp_merchant_properties_response():
+    return """{
+        "id":"api-key-1",
+        "name": "Wonderful Payments Inc.",
+        "description": "Wonderful Payments payment provider.",
+        "category": "1002",
+        "service_level": "Platinum",
+        "status": "active",
+        "risk_profile": {
+            "level": "low",
+            "score": "10"
+        },
+        "address": {
+            "name": "Alany",
+            "address_1": "Big Payment blvd, 22",
+            "address_2": "apt, 8",
+            "city": "New Orleans",
+            "region": "NA",
+            "country": "US",
+            "zipcode": "76830",
+            "phone": "0394888320"
+        }
+    }"""
+
+
 def score_response_json():
     return """{
       "status": 0,
@@ -200,13 +250,13 @@ class TestSiftPythonClient(unittest.TestCase):
         client2 = sift.Client(local_api_key)
 
         # test that global api key is assigned
-        assert(client1.api_key == sift.api_key)
+        assert (client1.api_key == sift.api_key)
         # test that local api key is assigned
-        assert(client2.api_key == local_api_key)
+        assert (client2.api_key == local_api_key)
 
         client2 = sift.Client()
         # test that client2 is assigned a new object with global api_key
-        assert(client2.api_key == sift.api_key)
+        assert (client2.api_key == sift.api_key)
 
     def test_constructor_requires_valid_api_key(self):
         self.assertRaises(TypeError, sift.Client, None)
@@ -253,9 +303,9 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=mock.ANY,
                 params={})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
 
     def test_event_with_timeout_param_ok(self):
         event = '$transaction'
@@ -276,9 +326,9 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=test_timeout,
                 params={})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
 
     def test_score_ok(self):
         mock_response = mock.Mock()
@@ -295,11 +345,11 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_error_message == "OK")
-            assert(response.body['score'] == 0.85)
-            assert(response.body['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['score'] == 0.85)
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
 
     def test_score_with_timeout_param_ok(self):
         test_timeout = 5
@@ -317,11 +367,11 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=test_timeout)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_error_message == "OK")
-            assert(response.body['score'] == 0.85)
-            assert(response.body['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['score'] == 0.85)
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
 
     def test_get_user_score_ok(self):
         """Test the GET /{version}/users/{userId}/score API, i.e. client.get_user_score()
@@ -341,12 +391,12 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=test_timeout)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_error_message == "OK")
-            assert(response.body['entity_id'] == '12345')
-            assert(response.body['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
-            assert('latest_decisions' in response.body)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['entity_id'] == '12345')
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert ('latest_decisions' in response.body)
 
     def test_get_user_score_with_abuse_types_ok(self):
         """Test the GET /{version}/users/{userId}/score?abuse_types=... API, i.e. client.get_user_score()
@@ -368,12 +418,12 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=test_timeout)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_error_message == "OK")
-            assert(response.body['entity_id'] == '12345')
-            assert(response.body['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
-            assert('latest_decisions' in response.body)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['entity_id'] == '12345')
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert ('latest_decisions' in response.body)
 
     def test_rescore_user_ok(self):
         """Test the POST /{version}/users/{userId}/score API, i.e. client.rescore_user()
@@ -393,12 +443,12 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=test_timeout)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_error_message == "OK")
-            assert(response.body['entity_id'] == '12345')
-            assert(response.body['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
-            assert('latest_decisions' in response.body)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['entity_id'] == '12345')
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert ('latest_decisions' in response.body)
 
     def test_rescore_user_with_abuse_types_ok(self):
         """Test the POST /{version}/users/{userId}/score?abuse_types=... API, i.e. client.rescore_user()
@@ -420,12 +470,12 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=test_timeout)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_error_message == "OK")
-            assert(response.body['entity_id'] == '12345')
-            assert(response.body['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
-            assert('latest_decisions' in response.body)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['entity_id'] == '12345')
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert ('latest_decisions' in response.body)
 
     def test_sync_score_ok(self):
         event = '$transaction'
@@ -449,12 +499,41 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=mock.ANY,
                 params={'return_score': 'true', 'abuse_types': 'payment_abuse,content_abuse,legacy'})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
-            assert(response.body['score_response']['score'] == 0.85)
-            assert(response.body['score_response']['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['score_response']['scores']['payment_abuse']['score'] == 0.97)
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
+            assert (response.body['score_response']['score'] == 0.85)
+            assert (response.body['score_response']['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['score_response']['scores']['payment_abuse']['score'] == 0.97)
+
+    def test_sync_workflow_ok(self):
+        event = '$transaction'
+        mock_response = mock.Mock()
+        mock_response.content = ('{"status": 0, "error_message": "OK", "workflow_statuses": %s}'
+                                 % workflow_statuses_json())
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.track(
+                event,
+                valid_transaction_properties(),
+                return_workflow_status=True,
+                return_route_info=True,
+                abuse_types=['payment_abuse', 'content_abuse', 'legacy'])
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v205/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={'return_workflow_status': 'true', 'return_route_info': 'true',
+                        'abuse_types': 'payment_abuse,content_abuse,legacy'})
+            self.assertIsInstance(response, sift.client.Response)
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
+            assert (response.body['workflow_statuses']['route']['name'] == 'my route')
 
     def test_sync_workflow_ok(self):
         event = '$transaction'
@@ -534,8 +613,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=3)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.body['data'][0]['id'] == 'block_user')
+            assert (response.is_ok())
+            assert (response.body['data'][0]['id'] == 'block_user')
 
     def test_get_decisions_entity_session(self):
         mock_response = mock.Mock()
@@ -581,19 +660,19 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=3)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.body['data'][0]['id'] == 'block_session')
+            assert (response.is_ok())
+            assert (response.body['data'][0]['id'] == 'block_session')
 
     def test_apply_decision_to_user_ok(self):
         user_id = '54321'
         mock_response = mock.Mock()
         apply_decision_request = {
-                'decision_id': 'user_looks_ok_legacy',
-                'source': 'MANUAL_REVIEW',
-                'analyst': 'analyst@biz.com',
-                'description': 'called user and verified account',
-                'time': 1481569575
-             }
+            'decision_id': 'user_looks_ok_legacy',
+            'source': 'MANUAL_REVIEW',
+            'analyst': 'analyst@biz.com',
+            'description': 'called user and verified account',
+            'time': 1481569575
+        }
         apply_decision_response_json = """
         {
             "entity": {
@@ -619,17 +698,17 @@ class TestSiftPythonClient(unittest.TestCase):
                 auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.body['entity']['type'] == 'user')
-            assert(response.http_status_code == 200)
-            assert(response.is_ok())
+            assert (response.body['entity']['type'] == 'user')
+            assert (response.http_status_code == 200)
+            assert (response.is_ok())
 
     def test_validate_no_user_id_string_fails(self):
         apply_decision_request = {
-                'decision_id': 'user_looks_ok_legacy',
-                'source': 'MANUAL_REVIEW',
-                'analyst': 'analyst@biz.com',
-                'description': 'called user and verified account',
-             }
+            'decision_id': 'user_looks_ok_legacy',
+            'source': 'MANUAL_REVIEW',
+            'analyst': 'analyst@biz.com',
+            'description': 'called user and verified account',
+        }
         with self.assertRaises(TypeError):
             self.sift_client._validate_apply_decision_request(apply_decision_request, 123)
 
@@ -709,10 +788,10 @@ class TestSiftPythonClient(unittest.TestCase):
         order_id = '43210'
         mock_response = mock.Mock()
         apply_decision_request = {
-                'decision_id': 'order_looks_bad_payment_abuse',
-                'source': 'AUTOMATED_RULE',
-                'time': 1481569575
-            }
+            'decision_id': 'order_looks_bad_payment_abuse',
+            'source': 'AUTOMATED_RULE',
+            'time': 1481569575
+        }
 
         apply_decision_response_json = """
         {
@@ -739,19 +818,19 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/orders/%s/decisions' % (user_id, order_id),
                 auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.http_status_code == 200)
-            assert(response.body['entity']['type'] == 'order')
+            assert (response.is_ok())
+            assert (response.http_status_code == 200)
+            assert (response.body['entity']['type'] == 'order')
 
     def test_apply_decision_to_session_ok(self):
         user_id = '54321'
         session_id = 'gigtleqddo84l8cm15qe4il'
         mock_response = mock.Mock()
         apply_decision_request = {
-                'decision_id': 'session_looks_bad_ato',
-                'source': 'AUTOMATED_RULE',
-                'time': 1481569575
-            }
+            'decision_id': 'session_looks_bad_ato',
+            'source': 'AUTOMATED_RULE',
+            'time': 1481569575
+        }
 
         apply_decision_response_json = """
         {
@@ -778,19 +857,19 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/sessions/%s/decisions' % (user_id, session_id),
                 auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.http_status_code == 200)
-            assert(response.body['entity']['type'] == 'login')
+            assert (response.is_ok())
+            assert (response.http_status_code == 200)
+            assert (response.body['entity']['type'] == 'login')
 
     def test_apply_decision_to_content_ok(self):
         user_id = '54321'
         content_id = 'listing-1231'
         mock_response = mock.Mock()
         apply_decision_request = {
-                'decision_id': 'content_looks_bad_content_abuse',
-                'source': 'AUTOMATED_RULE',
-                'time': 1481569575
-            }
+            'decision_id': 'content_looks_bad_content_abuse',
+            'source': 'AUTOMATED_RULE',
+            'time': 1481569575
+        }
 
         apply_decision_response_json = """
         {
@@ -817,9 +896,9 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api3.siftscience.com/v3/accounts/ACCT/users/%s/content/%s/decisions' % (user_id, content_id),
                 auth=mock.ANY, data=data, headers=mock.ANY, timeout=mock.ANY)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.http_status_code == 200)
-            assert(response.body['entity']['type'] == 'create_content')
+            assert (response.is_ok())
+            assert (response.http_status_code == 200)
+            assert (response.body['entity']['type'] == 'create_content')
 
     def test_label_user_ok(self):
         user_id = '54321'
@@ -844,9 +923,9 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v205/users/%s/labels' % user_id,
                 data=data, headers=mock.ANY, timeout=mock.ANY, params={})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
 
     def test_label_user_with_timeout_param_ok(self):
         user_id = '54321'
@@ -873,9 +952,9 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v205/users/%s/labels' % user_id,
                 data=data, headers=mock.ANY, timeout=test_timeout, params={})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
 
     def test_unlabel_user_ok(self):
         user_id = '54321'
@@ -890,7 +969,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=mock.ANY,
                 params={'api_key': self.test_key, 'abuse_type': 'account_abuse'})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
+            assert (response.is_ok())
 
     def test_unicode_string_parameter_support(self):
         # str is unicode in python 3, so no need to check as this was covered
@@ -906,15 +985,15 @@ class TestSiftPythonClient(unittest.TestCase):
 
             with mock.patch.object(self.sift_client.session, 'post') as mock_post:
                 mock_post.return_value = mock_response
-                assert(self.sift_client.track(
+                assert (self.sift_client.track(
                     '$transaction',
                     valid_transaction_properties()))
-                assert(self.sift_client.label(
+                assert (self.sift_client.label(
                     user_id,
                     valid_label_properties()))
             with mock.patch.object(self.sift_client.session, 'get') as mock_get:
                 mock_get.return_value = mock_response
-                assert(self.sift_client.score(
+                assert (self.sift_client.score(
                     user_id, abuse_types=['payment_abuse', 'content_abuse']))
 
     def test_unlabel_user_with_special_chars_ok(self):
@@ -930,7 +1009,7 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=mock.ANY,
                 params={'api_key': self.test_key})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
+            assert (response.is_ok())
 
     def test_label_user__with_special_chars_ok(self):
         user_id = '54321=.-_+@:&^%!$'
@@ -959,9 +1038,9 @@ class TestSiftPythonClient(unittest.TestCase):
                 timeout=mock.ANY,
                 params={})
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
 
     def test_score__with_special_user_id_chars_ok(self):
         user_id = '54321=.-_+@:&^%!$'
@@ -979,11 +1058,11 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY,
                 timeout=mock.ANY)
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_error_message == "OK")
-            assert(response.body['score'] == 0.85)
-            assert(response.body['scores']['content_abuse']['score'] == 0.14)
-            assert(response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['score'] == 0.85)
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
 
     def test_exception_during_track_call(self):
         warnings.simplefilter("always")
@@ -1031,15 +1110,15 @@ class TestSiftPythonClient(unittest.TestCase):
                 params={'return_action': 'true'})
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.api_status == 0)
-            assert(response.api_error_message == "OK")
+            assert (response.is_ok())
+            assert (response.api_status == 0)
+            assert (response.api_error_message == "OK")
 
             actions = response.body["score_response"]['actions']
-            assert(actions)
-            assert(actions[0]['action'])
-            assert(actions[0]['action']['id'] == 'freds_action')
-            assert(actions[0]['triggers'])
+            assert (actions)
+            assert (actions[0]['action'])
+            assert (actions[0]['action']['id'] == 'freds_action')
+            assert (actions[0]['triggers'])
 
     def test_get_workflow_status(self):
         mock_response = mock.Mock()
@@ -1096,8 +1175,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY, auth=mock.ANY, timeout=3)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.body['state'] == 'running')
+            assert (response.is_ok())
+            assert (response.body['state'] == 'running')
 
     def test_get_user_decisions(self):
         mock_response = mock.Mock()
@@ -1127,8 +1206,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY, auth=mock.ANY, timeout=mock.ANY)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.body['decisions']['payment_abuse']['decision']['id'] == 'user_decision')
+            assert (response.is_ok())
+            assert (response.body['decisions']['payment_abuse']['decision']['id'] == 'user_decision')
 
     def test_get_order_decisions(self):
         mock_response = mock.Mock()
@@ -1165,9 +1244,9 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY, auth=mock.ANY, timeout=mock.ANY)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.body['decisions']['payment_abuse']['decision']['id'] == 'decision7')
-            assert(response.body['decisions']['promotion_abuse']['decision']['id'] == 'good_order')
+            assert (response.is_ok())
+            assert (response.body['decisions']['payment_abuse']['decision']['id'] == 'decision7')
+            assert (response.body['decisions']['promotion_abuse']['decision']['id'] == 'good_order')
 
     def test_get_session_decisions(self):
         mock_response = mock.Mock()
@@ -1197,8 +1276,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY, auth=mock.ANY, timeout=mock.ANY)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.body['decisions']['account_takeover']['decision']['id'] == 'session_decision')
+            assert (response.is_ok())
+            assert (response.body['decisions']['account_takeover']['decision']['id'] == 'session_decision')
 
     def test_get_content_decisions(self):
         mock_response = mock.Mock()
@@ -1228,8 +1307,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 headers=mock.ANY, auth=mock.ANY, timeout=mock.ANY)
 
             self.assertIsInstance(response, sift.client.Response)
-            assert(response.is_ok())
-            assert(response.body['decisions']['content_abuse']['decision']['id'] == 'content_looks_bad_content_abuse')
+            assert (response.is_ok())
+            assert (response.body['decisions']['content_abuse']['decision']['id'] == 'content_looks_bad_content_abuse')
 
     def test_provided_session(self):
         session = mock.Mock()
@@ -1245,6 +1324,91 @@ class TestSiftPythonClient(unittest.TestCase):
         event = '$transaction'
         client.track(event, valid_transaction_properties())
         session.post.assert_called_once()
+
+    def test_get_psp_merchant_profile(self):
+        """Test the GET /{version}/accounts/{accountId}/scorepsp_management/merchants?batch_type=..."""
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = valid_psp_merchant_properties_response()
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch.object(self.sift_client.session, 'get') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.get_psp_merchant_profiles(
+                timeout=test_timeout)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v3/accounts/ACCT/psp_management/merchants',
+                params={},
+                headers=mock.ANY, auth=mock.ANY,
+                timeout=test_timeout)
+            self.assertIsInstance(response, sift.client.Response)
+            assert ('address' in response.body)
+
+    def test_get_psp_merchant_profile_id(self):
+        """Test the GET /{version}/accounts/{accountId}/scorepsp_management/merchants/{merchantId}
+        """
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = valid_psp_merchant_properties_response()
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch.object(self.sift_client.session, 'get') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.get_a_psp_merchant_profile(
+                merchant_id='api-key-1', timeout=test_timeout)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v3/accounts/ACCT/psp_management/merchants/api-key-1',
+                headers=mock.ANY,
+                auth=mock.ANY,
+                timeout=test_timeout)
+            self.assertIsInstance(response, sift.client.Response)
+            assert ('address' in response.body)
+
+    def test_create_psp_merchant_profile(self):
+        mock_response = mock.Mock()
+        mock_response.content = valid_psp_merchant_properties_response()
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
+            mock_post.return_value = mock_response
+
+            response = self.sift_client.create_psp_merchant_profile(
+                valid_psp_merchant_properties())
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v3/accounts/ACCT/psp_management/merchants',
+                data=json.dumps(valid_psp_merchant_properties()),
+                headers=mock.ANY,
+                auth=mock.ANY,
+                timeout=mock.ANY)
+
+            self.assertIsInstance(response, sift.client.Response)
+            assert ('address' in response.body)
+
+    def test_update_psp_merchant_profile(self):
+        mock_response = mock.Mock()
+        mock_response.content = valid_psp_merchant_properties_response()
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch.object(self.sift_client.session, 'put') as mock_post:
+            mock_post.return_value = mock_response
+
+            response = self.sift_client.update_psp_merchant_profile('api-key-1',
+                                                                    valid_psp_merchant_properties())
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v3/accounts/ACCT/psp_management/merchants/api-key-1',
+                data=json.dumps(valid_psp_merchant_properties()),
+                headers=mock.ANY,
+                auth=mock.ANY,
+                timeout=mock.ANY)
+
+            self.assertIsInstance(response, sift.client.Response)
+            assert ('address' in response.body)
 
 
 def main():

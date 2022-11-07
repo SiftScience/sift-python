@@ -1,2 +1,2 @@
-VERSION = '5.1.0'
+VERSION = '5.2.0'
 API_VERSION = '205'
