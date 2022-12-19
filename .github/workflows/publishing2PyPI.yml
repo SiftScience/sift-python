@@ -1,0 +1,154 @@
+name: publishing2PyPI
+on:
+  workflow_dispatch:
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Get remote tags
+        run: |
+          TAGS=NOT_SET
+          TAGS=$(gh api \
+          -H "Accept: application/vnd.github+json" \
+          /repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/git/matching-refs/ | jq -c '.[] | select (.ref | startswith("refs/tags"))' | jq -c '.ref' | cut -d'/' -f3 | cut -d'"' -f1)
+          [[ $TAGS == "NOT_SET" ]] && echo "Failed to set Remote Tags" && exit 1
+          echo "remote_tags=$(echo $TAGS)" >> $GITHUB_ENV
+      - name: Get package version
+        run: |
+          VERSION=NOT_SET
+          VERSION=$(cat ./sift/version.py | grep -E -i '^VERSION.*' | cut -d'=' -f2 | cut -d\' -f2)
+          [[ $VERSION == "NOT_SET" ]] && echo "Version in version.py NOT_SET" && exit 1
+          echo "curr_version=$(echo $VERSION)" >> $GITHUB_ENV
+          mkdir -p ./curr_version
+          echo "curr_version=$(echo $VERSION)" > ./curr_version/curr_version.txt
+      - uses: actions/upload-artifact@v2
+        with:
+          name: curr_version
+          path: ./curr_version/curr_version.txt
+      - name: Compare package version and remote tags
+        run: |
+          for TAG in $remote_tags; do
+            if [[ $TAG == *"$curr_version"* ]]; then
+              echo "Version $curr_version alredy exists in $TAG"
+              exit 1
+            fi
+          done
+  upload_on_test_PYPI:
+    needs: check_version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Configure pypirc
+        run: |
+          cat << EOF > ~/.pypirc
+          [distutils]
+          index-servers =
+            testpypi
+          [testpypi]
+          username=${{ secrets.USER_T }}
+          password=${{ secrets.PASS_T }}
+          EOF
+      - name: Create distribution files
+        run: |
+          python3 setup.py sdist
+      - uses: actions/download-artifact@v2
+        with:
+          name: curr_version
+      - name: Save curr_version from file to env var
+        run: |
+          v=$(cat ./curr_version.txt | grep curr_version | cut -d'=' -f2)
+          echo "curr_version=$(echo $v)" >> $GITHUB_ENV
+      - name: Upload distribution files
+        run: |
+          python3 -m pip install --user --upgrade twine
+          ls  dist/ | xargs  -I % python3 -m twine upload --repository testpypi dist/%
+      - name: Download and check new package version
+        run: |
+          pip3 install -i https://test.pypi.org/simple/ Sift
+          pip3 show Sift | grep "Version: $curr_version" > /dev/null
+          if [ $? != 0 ]; then echo "packege with version $curr_version does not exist"; fi
+  upload_on_PYPI:
+    needs: upload_on_test_PYPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Configure pypirc
+        run: |
+          cat << EOF > ~/.pypirc
+          [distutils]
+          index-servers =
+            pypi
+          [pypi]
+          username=${{ secrets.USER }}
+          password=${{ secrets.PASS }}
+          EOF
+      - name: Create distribution files
+        run: |
+          python3 setup.py sdist
+      - uses: actions/download-artifact@v2
+        with:
+          name: curr_version
+      - name: Save curr_version from file to env var
+        run: |
+          v=$(cat ./curr_version.txt | grep curr_version | cut -d'=' -f2)
+          echo "curr_version=$(echo $v)" >> $GITHUB_ENV
+      - name: Upload distribution files
+        run: |
+          python3 -m pip install --user --upgrade twine
+          ls  dist/ | xargs  -I % python3 -m twine upload --repository pypi dist/%
+      - name: Download and check new package version
+        run: |
+          pip3 install Sift
+          pip3 show Sift | grep "Version: $curr_version" > /dev/null
+          if [ $? != 0 ]; then echo "packege with version $curr_version does not exist"; fi
+  create_release:
+    needs: upload_on_PYPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v2
+        with:
+          name: curr_version
+      - name: Save curr_version from file to env var
+        run: |
+          v=$(cat ./curr_version.txt | grep curr_version | cut -d'=' -f2)
+          echo "curr_version=$(echo $v)" >> $GITHUB_ENV
+      - name: Read Changes
+        run: |
+          VERSION=${{ env.curr_version }}
+          start='false'
+          pattern="^(\d+\.?){3,}\s.*"
+          out=""
+          while read -r line; do 
+            if [[ $start == 'true' ]]; then 
+              echo $line | grep -P $pattern > /dev/null && break
+              if [[ ! -z "$line" ]]; then
+                ln=$(echo $line | cut -d'-' -f2)
+                out="${out}${ln}<br/>"
+              fi 
+            fi
+            [[ $line == $VERSION* ]] && start='true'
+          done < ./CHANGES.md
+          
+          echo "changes=$(echo $out)" >> $GITHUB_ENV
+      - name: Create Release
+        run: |
+          gh api \
+          --method POST \
+          -H "Accept: application/vnd.github+json" \
+          /repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases \
+          -f tag_name="v${{ env.curr_version }}" \
+          -f name="Version ${{ env.curr_version }}" \
+          -f body="$changes" \
+          -F draft=false \
+          -F prerelease=false \
+          -F generate_release_notes=false 
