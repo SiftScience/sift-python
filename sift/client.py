@@ -10,7 +10,6 @@ import sys
 
 if sys.version_info[0] < 3:
     import six.moves.urllib as urllib
-
     _UNICODE_STRING = str
 else:
     import urllib.parse
@@ -30,6 +29,11 @@ def _quote_path(s):
     # optional arg to override this
     return urllib.parse.quote(s, '')
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return (str(o),)
+        return super(DecimalEncoder, self).default(o)
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
@@ -853,6 +857,7 @@ class Client(object):
                 timeout=timeout))
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
+
 
     def _user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (sift.version.API_VERSION, sift.version.VERSION)

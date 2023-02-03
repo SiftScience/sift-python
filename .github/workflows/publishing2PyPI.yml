@@ -1,0 +1,44 @@
+name: publishing2PyPI
+on:
+  release:
+    types: [published]
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest  
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Get package version
+        run: |
+          VERSION=NOT_SET
+          VERSION=$(cat ./sift/version.py | grep -E -i '^VERSION.*' | cut -d'=' -f2 | cut -d\' -f2)
+          [[ $VERSION == "NOT_SET" ]] && echo "Version in version.py NOT_SET" && exit 1
+          echo "curr_version=$(echo $VERSION)" >> $GITHUB_ENV
+      - name: Compare package version and Releas tag
+        run: |
+          TAG=${GITHUB_REF##*/}
+          if [[ $TAG != *"$curr_version"* ]]; then
+            echo "Version $curr_version does not match tag $TAG" 
+            exit 1
+          fi
+      - name: Configure pypirc
+        run: |
+          cat << EOF > ~/.pypirc
+          [distutils]
+          index-servers =
+            pypi
+          [pypi]
+          username=${{ secrets.USER }}
+          password=${{ secrets.PASS }}
+          EOF
+      - name: Create distribution files
+        run: |
+          python3 setup.py sdist
+      - name: Upload distribution files
+        run: |
+          python3 -m pip install --user --upgrade twine
+          ls  dist/ | xargs  -I % python3 -m twine upload --repository pypi dist/%

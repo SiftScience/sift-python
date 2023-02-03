@@ -10,8 +10,8 @@ except ImportError:
 here = os.path.abspath(os.path.dirname(__file__))
 
 try:
-    README = open(os.path.join(here, 'README.rst')).read()
-    CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+    README = open(os.path.join(here, 'README.md')).read()
+    CHANGES = open(os.path.join(here, 'CHANGES.md')).read()
 except Exception:
     README = ''
     CHANGES = ''
@@ -28,11 +28,13 @@ setup(
 
     author='Sift Science',
     author_email='support@siftscience.com',
+    long_description_content_type="text/markdown",
     long_description=README + '\n\n' + CHANGES,
 
     packages=['sift'],
     install_requires=[
         "requests >= 0.14.1",
+        "six >= 1.16.0",
     ],
     extras_require={
         'test': [
