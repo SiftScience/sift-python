@@ -7,11 +7,14 @@ import json
 import requests
 import requests.auth
 import sys
+
 if sys.version_info[0] < 3:
-    import six.moves.urllib as urllib 
+    import six.moves.urllib as urllib
+
     _UNICODE_STRING = str
 else:
     import urllib.parse
+
     _UNICODE_STRING = str
 
 import sift
@@ -27,11 +30,13 @@ def _quote_path(s):
     # optional arg to override this
     return urllib.parse.quote(s, '')
 
+
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, decimal.Decimal):
             return (str(o),)
         return super(DecimalEncoder, self).default(o)
+
 
 class Client(object):
 
@@ -89,7 +94,8 @@ class Client(object):
             force_workflow_run=False,
             abuse_types=None,
             timeout=None,
-            version=None):
+            version=None,
+            include_score_percentiles=False):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.  Check out https://siftscience.com/resources/references/events-api
         for more information on what types of events you can send and fields you can add to the
@@ -125,6 +131,9 @@ class Client(object):
             timeout(optional): Use a custom timeout (in seconds) for this call.
 
             version(optional): Use a different version of the Sift Science API for this call.
+
+            include_score_percentiles(optional) : Whether to add new parameter in the query parameter.
+                if include_score_percentiles is true then add a new parameter called fields in the query parameter
 
         Returns:
             A sift.client.Response object if the track call succeeded, otherwise
@@ -167,6 +176,10 @@ class Client(object):
 
         if force_workflow_run:
             params['force_workflow_run'] = 'true'
+
+        if include_score_percentiles:
+            field_types = ['SCORE_PERCENTILES']
+            params['fields'] = ','.join(field_types)
 
         try:
             response = self.session.post(
@@ -841,7 +854,6 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
 
-
     def _user_agent(self):
         return 'SiftScience/v%s sift-python/%s' % (sift.version.API_VERSION, sift.version.VERSION)
 
@@ -902,7 +914,6 @@ class Client(object):
 
 
 class Response(object):
-
     HTTP_CODES_WITHOUT_BODY = [204, 304]
 
     def __init__(self, http_response):
@@ -950,7 +961,7 @@ class Response(object):
     def __str__(self):
         return ('{%s "http_status_code": %s}' %
                 ('' if self.body is None else '"body": ' +
-                 json.dumps(self.body) + ',', str(self.http_status_code)))
+                                              json.dumps(self.body) + ',', str(self.http_status_code)))
 
     def is_ok(self):
 
