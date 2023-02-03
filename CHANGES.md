@@ -1,3 +1,6 @@
+5.3.0 2023-02-03
+- Added support for score_percentiles
+
 5.2.0 2022-11-07
 - Update  PSP Merchant Management API
 
