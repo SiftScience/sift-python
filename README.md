@@ -92,6 +92,33 @@ except sift.client.ApiException:
     # request failed
     pass
 
+# Track a transaсtion event and receive a score with percentiles in response (sync flow).
+# Note: `return_score` or `return_workflow_status` must be set `True`.
+properties = {
+    "$user_id": user_id,
+    "$user_email": "buyer@gmail.com",
+    "$seller_user_id": "2371",
+    "seller_user_email": "seller@gmail.com",
+    "$transaction_id": "573050",
+    "$payment_method": {
+        "$payment_type": "$credit_card",
+        "$payment_gateway": "$braintree",
+        "$card_bin": "542486",
+        "$card_last4": "4444"
+    },
+    "$currency_code": "USD",
+    "$amount": 15230000,
+}
+
+try:
+    response = client.track("$transaction", properties, return_score=True, include_score_percentiles=True, abuse_types=["promotion_abuse", "content_abuse", "payment_abuse"])
+    if response.is_ok():
+        score_response = response.body["score_response"]
+        print(score_response)
+except sift.client.ApiException:
+    # request failed
+    pass
+
 # Request a score for the user with user_id 23056
 try:
     response = client.score(user_id)
