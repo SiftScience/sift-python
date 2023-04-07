@@ -3,34 +3,48 @@ version: 2.1
 orbs:
   python: circleci/python@2.1.1
 
+commands:
+  install-dependencies-run-tests:
+    steps:
+      - run:
+          name: Install test dependencies
+          command: |
+            pip install mock==5.0.1
+            pip install requests==2.28.2
+      - run:
+          name: Run tests
+          command: python -m unittest discover
+
 jobs:
   build-and-test-python3:
     docker:
       - image: cimg/python:3.10.2
     steps:
       - checkout
-      - run:
-          name: Install test dependencies
-          command: |
-            pip install mock
-            pip install requests
-      - run:
-          name: Run tests
-          command: python -m unittest discover
+      - install-dependencies-run-tests
+#      - run:
+#          name: Install test dependencies
+#          command: |
+#            pip install mock==5.0.1
+#            pip install requests==2.28.2
+#      - run:
+#          name: Run tests
+#          command: python -m unittest discover
 
   build-and-test-python2:
     docker:
       - image: cimg/python:2.7.18
     steps:
       - checkout
-      - run:
-          name: Install test dependencies
-          command: |
-            pip install mock
-            pip install requests
-      - run:
-          name: Run tests
-          command: python -m unittest discover
+      - install-dependencies-run-tests
+#      - run:
+#          name: Install test dependencies
+#          command: |
+#            pip install mock==5.0.1
+#            pip install requests==2.28.2
+#      - run:
+#          name: Run tests
+#          command: python -m unittest discover
 
 workflows:
   build-and-test-wf:
