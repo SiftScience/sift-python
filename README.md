@@ -183,8 +183,57 @@ try:
 except sift.client.ApiException:
     # request failed
     pass
-```
 
+# The send call triggers the generation of a OTP code that is stored by Sift and email/sms the code to the user.
+send_properties = {
+	"$user_id": "billy_jones_301",
+	"$send_to": "billy_jones_301@gmail.com",
+	"$verification_type": "$email",
+	"$brand_name": "MyTopBrand",
+	"$language": "en",
+	"$event": {
+		"$session_id": "SOME_SESSION_ID",
+		"$verified_event": "$login",
+		"$verified_entity_id": "SOME_SESSION_ID",
+		"$reason": "$automated_rule",
+		"$ip": "192.168.1.1",
+		"$browser": {
+			"$user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+		}
+	}
+}
+try:
+    response = client.verification_send(send_properties)
+except sift.client.ApiException:
+    # request failed
+    pass
+
+# The resend call generates a new OTP and sends it to the original recipient with the same settings
+resend_properties = {
+	"$user_id": "billy_jones_301",
+	"$verified_event": "$login",
+	"$verified_entity_id": "SOME_SESSION_ID"
+}
+try:
+    response = client.verification_resend(resend_properties)
+except sift.client.ApiException:
+    # request failed
+    pass
+
+# The check call is used for verifying the OTP provided by the end user to Sift.
+check_properties = {
+	"$user_id": "billy_jones_301",
+    "$code": 123456,
+	"$verified_event": "$login",
+	"$verified_entity_id": "SOME_SESSION_ID"
+}
+try:
+    response = client.verification_check(check_properties)
+except sift.client.ApiException:
+    # request failed
+    pass
+
+```
 
 ## Testing
 
