@@ -944,7 +944,7 @@ class Client(object):
             properties: 
 
                 $user_id: User ID of user being verified, e.g. johndoe123.
-                $verified_event: This will be the event type that triggered the verification.
+                $verified_event(optional): This will be the event type that triggered the verification.
                 $verified_entity_id(optional): The ID of the entity impacted by the event being verified.
 
             timeout(optional): Use a custom timeout (in seconds) for this call.
