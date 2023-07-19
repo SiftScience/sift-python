@@ -7,10 +7,6 @@ import sift
 import sys
 
 import requests.exceptions
-if sys.version_info[0] < 3:
-    import six.moves.urllib as urllib 
-else:
-    import urllib.parse
 
 def valid_verification_send_properties():
     return {
@@ -19,6 +15,7 @@ def valid_verification_send_properties():
         "$verification_type": "$email",
         "$brand_name": "MyTopBrand",
         "$language": "en",
+        "$site_country": "Country Name",
         "$event": {
             "$session_id": "SOME_SESSION_ID",
             "$verified_event": "$login",
