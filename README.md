@@ -191,7 +191,7 @@ send_properties = {
 	"$verification_type": "$email",
 	"$brand_name": "MyTopBrand",
 	"$language": "en",
-	"$site_country": "Country Name",
+	"$site_country": "IN",
 	"$event": {
 		"$session_id": "SOME_SESSION_ID",
 		"$verified_event": "$login",
