@@ -209,7 +209,7 @@ except sift.client.ApiException:
     # request failed
     pass
 
-# The resend call generates a new OTP and sends it to the original recipient with the same settings
+# The resend call generates a new OTP and sends it to the original recipient with the same settings.
 resend_properties = {
 	"$user_id": "billy_jones_301",
 	"$verified_event": "$login",
