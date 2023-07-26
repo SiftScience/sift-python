@@ -934,7 +934,7 @@ class Client(object):
             session_id, 'session_id', error_cls=ValueError)
     
     def verification_resend(self, properties, timeout=None,  version=None):
-        """A user can ask for a new OTP (one-time password) if they haven’t received the previous one,
+        """A user can ask for a new OTP (one-time password) if they haven't received the previous one,
         or in case the previous OTP expired.
         This call is blocking. Check out https://sift.com/developers/docs/python/verification-api/resend
         for more information on our send response structure.
