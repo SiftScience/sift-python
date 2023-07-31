@@ -1,3 +1,6 @@
+5.4.0 2023-07-26
+- Support for Verification API
+
 5.3.0 2023-02-03
 - Added support for score_percentiles
 
