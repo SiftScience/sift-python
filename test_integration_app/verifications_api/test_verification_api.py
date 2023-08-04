@@ -1,11 +1,10 @@
 import sift
 
 from os import environ as env
-
-# Get the value of API_KEY from environment variable
+ # Get the value of API_KEY from environment variable
 api_key = env['API_KEY']
+client = sift.Client(api_key = api_key)
 
-client = sift.Client(api_key = api_key, account_id = 'ACCT')
 
 def test_verification_send():
     sendProperties = {
@@ -30,9 +29,11 @@ def test_verification_send():
     }
     
     response = client.verification_send(sendProperties)
-    print(response)
-     
-def test_verification_resend():
+    assert(response.is_ok())
+    assert response.api_status == 0, "api_status should be 0"
+    assert response.api_error_message == "OK", "api_error_message should be OK"
+        
+def test_verification_resend():    
     resendProperties = {
         '$user_id': 'haneeshv@exalture.com',
         '$verified_event': '$login',
@@ -40,21 +41,19 @@ def test_verification_resend():
     } 
 
     response = client.verification_resend(resendProperties)
-    print(response)
+    assert(response.is_ok())
+    assert response.api_status == 0, "api_status should be 0"
+    assert response.api_error_message == "OK", "api_error_message should be OK"
 
-def test_verification_check():
+def test_verification_check(code):
     checkProperties = {
         '$user_id': 'haneeshv@exalture.com',
-        '$code': '354290',
+        '$code': code,
         '$verified_event': '$login',
         '$verified_entity_id': "SOME_SESSION_ID"
     }
 
     response = client.verification_check(checkProperties)
-    print(response)
-
-# test_verification_send()
-
-# test_verification_resend()
-
-test_verification_check()
+    assert(response.is_ok())
+    assert response.api_status == 0, "api_status should be 0"
+    assert response.api_error_message == "OK", "api_error_message should be OK"
