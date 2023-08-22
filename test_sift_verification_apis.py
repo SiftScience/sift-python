@@ -45,17 +45,17 @@ checkProperties = {
 } 
 
 def test_verification_send():
-  client = sift.Client(api_key='ccd68efbe25809bc', account_id='ACCT')
+  client = sift.Client(api_key='valid-api-key', account_id='ACCT')
   response = client.verification_send(sendProperties)
   print(response)
      
 def test_verification_resend():
-  client = sift.Client(api_key='ccd68efbe25809bc', account_id='ACCT')
+  client = sift.Client(api_key='valid-api-key', account_id='ACCT')
   response = client.verification_resend(resendProperties)
   print(response)
 
 def test_verification_check():
-  client = sift.Client(api_key='ccd68efbe25809bc', account_id='ACCT')
+  client = sift.Client(api_key='valid-api-key', account_id='ACCT')
   response = client.verification_check(checkProperties)
   print(response)
 
