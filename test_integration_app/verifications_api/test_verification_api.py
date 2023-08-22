@@ -6,7 +6,7 @@ api_key = env['API_KEY']
 client = sift.Client(api_key = api_key)
 
 
-def test_verification_send():
+def send():
     sendProperties = {
         '$user_id': 'haneeshv@exalture.com',
         '$send_to': 'haneeshv@exalture.com',
@@ -33,7 +33,7 @@ def test_verification_send():
     assert response.api_status == 0, "api_status should be 0"
     assert response.api_error_message == "OK", "api_error_message should be OK"
         
-def test_verification_resend():    
+def resend():    
     resendProperties = {
         '$user_id': 'haneeshv@exalture.com',
         '$verified_event': '$login',
@@ -45,7 +45,7 @@ def test_verification_resend():
     assert response.api_status == 0, "api_status should be 0"
     assert response.api_error_message == "OK", "api_error_message should be OK"
 
-def test_verification_check(code):
+def check(code):
     checkProperties = {
         '$user_id': 'haneeshv@exalture.com',
         '$code': code,
