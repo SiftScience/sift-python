@@ -180,8 +180,7 @@ class Client(object):
             params['force_workflow_run'] = 'true'
 
         if include_score_percentiles:
-            field_types = ['SCORE_PERCENTILES']
-            params['fields'] = ','.join(field_types)
+            params['fields'] = 'SCORE_PERCENTILES'
         try:
             response = self.session.post(
                 path,
@@ -231,8 +230,7 @@ class Client(object):
             params['abuse_types'] = ','.join(abuse_types)
 
         if include_score_percentiles:
-            field_types = ['SCORE_PERCENTILES']
-            params['fields'] = ','.join(field_types)
+            params['fields'] = 'SCORE_PERCENTILES'
 
         url = self._score_url(user_id, version)
 
@@ -282,8 +280,7 @@ class Client(object):
             params['abuse_types'] = ','.join(abuse_types)
 
         if include_score_percentiles:
-            field_types = ['SCORE_PERCENTILES']
-            params['fields'] = ','.join(field_types)
+            params['fields'] = 'SCORE_PERCENTILES'
 
         try:
             response = self.session.get(
