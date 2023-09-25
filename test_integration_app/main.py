@@ -3,127 +3,91 @@ from decisions_api import test_decisions_api
 from workflows_api import test_workflows_api
 from score_api import test_score_api
 from verifications_api import test_verification_api
-from labels_api import test_labels_api
 from psp_merchant_api import test_psp_merchant_api
 
-#Events APIs
+class Utils:
+    def isOK(self, response):
+        if(hasattr(response, 'status')):
+            return ((response.status == 0) and ((response.http_status_code == 200) or (response.http_status_code == 201)))
+        else:
+            return ((response.http_status_code == 200) or (response.http_status_code == 201))
 
-# test_events_api.add_item_to_cart()
+def runAllMethods():
+    objUtils = Utils()
+    objEvents = test_events_api.EventsAPI()
+    ObjDecision = test_decisions_api.DecisionAPI()
+    objScore = test_score_api.ScoreAPI()
+    objWorkflow = test_workflows_api.WorkflowsAPI()
+    objVerification = test_verification_api.VerificationAPI()
+    objPSPMerchant = test_psp_merchant_api.PSPMerchantAPI()
 
-# test_events_api.add_promotion()
+    #Events APIs
 
-# test_events_api.chargeback()
+    assert (objUtils.isOK(objEvents.add_item_to_cart()) == True)
+    assert (objUtils.isOK(objEvents.add_promotion()) == True)
+    assert (objUtils.isOK(objEvents.chargeback()) == True)
+    assert (objUtils.isOK(objEvents.content_status()) == True)
+    assert (objUtils.isOK(objEvents.create_account()) == True)
+    assert (objUtils.isOK(objEvents.create_content_comment()) == True)
+    assert (objUtils.isOK(objEvents.create_content_listing()) == True)
+    assert (objUtils.isOK(objEvents.create_content_message()) == True)
+    assert (objUtils.isOK(objEvents.create_content_post()) == True)
+    assert (objUtils.isOK(objEvents.create_content_profile()) == True)
+    assert (objUtils.isOK(objEvents.create_content_review()) == True)
+    assert (objUtils.isOK(objEvents.create_order()) == True)
+    assert (objUtils.isOK(objEvents.flag_content()) == True)
+    assert (objUtils.isOK(objEvents.link_session_to_user()) == True)
+    assert (objUtils.isOK(objEvents.login()) == True)
+    assert (objUtils.isOK(objEvents.logout()) == True)
+    assert (objUtils.isOK(objEvents.order_status()) == True)
+    assert (objUtils.isOK(objEvents.remove_item_from_cart()) == True)
+    assert (objUtils.isOK(objEvents.security_notification()) == True)
+    assert (objUtils.isOK(objEvents.transaction()) == True)
+    assert (objUtils.isOK(objEvents.update_account()) == True)
+    assert (objUtils.isOK(objEvents.update_content_comment()) == True)
+    assert (objUtils.isOK(objEvents.update_content_listing()) == True)
+    assert (objUtils.isOK(objEvents.update_content_message()) == True)
+    assert (objUtils.isOK(objEvents.update_content_post()) == True)
+    assert (objUtils.isOK(objEvents.update_content_profile()) == True)
+    assert (objUtils.isOK(objEvents.update_content_review()) == True)
+    assert (objUtils.isOK(objEvents.update_order()) == True)
+    assert (objUtils.isOK(objEvents.update_password()) == True)
+    assert (objUtils.isOK(objEvents.verification()) == True)
+        
+    # Decision APIs
 
-# test_events_api.content_status()
+    assert (objUtils.isOK(ObjDecision.apply_user_decision()) == False)
+    assert (objUtils.isOK(ObjDecision.apply_order_decision()) == False)
+    assert (objUtils.isOK(ObjDecision.apply_session_decision()) == False)
+    assert (objUtils.isOK(ObjDecision.apply_content_decision()) == False)
+    assert (objUtils.isOK(ObjDecision.get_user_decisions()) == True)
+    assert (objUtils.isOK(ObjDecision.get_order_decisions()) == True)
+    assert (objUtils.isOK(ObjDecision.get_content_decisions()) == True)
+    assert (objUtils.isOK(ObjDecision.get_session_decisions()) == True)
+    assert (objUtils.isOK(ObjDecision.get_decisions()) == True)
 
-# test_events_api.create_account()
+    # Workflows APIs
 
-# test_events_api.create_content_comment()
+    assert (objUtils.isOK(objWorkflow.synchronous_workflows()) == True)
 
-# test_events_api.create_content_listing()
+    # Score APIs
 
-# test_events_api.create_content_message()
+    assert (objUtils.isOK(objScore.get_user_score()) == False)
 
-# test_events_api.create_content_post()
+    # Verification APIs
 
-# test_events_api.create_content_profile()
+    assert (objUtils.isOK(objVerification.send()) == True)
+    assert (objUtils.isOK(objVerification.resend()) == True)
+    assert (objUtils.isOK(objVerification.check()) == True)
 
-# test_events_api.create_content_review()
+    # PSP Merchant APIs
 
-# test_events_api.create_order()
+    assert (objUtils.isOK(objPSPMerchant.create_merchant()) == True)
+    assert (objUtils.isOK(objPSPMerchant.edit_merchant()) == True)
+    assert (objUtils.isOK(objPSPMerchant.get_a_merchant_profile()) == True)
+    assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles()) == True)
+    assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles(batch_size=10, batch_token=None)) == True)
 
-# test_events_api.flag_content()
 
-# test_events_api.link_session_to_user()
+runAllMethods()
 
-# test_events_api.login()
-
-# test_events_api.logout()
-
-# test_events_api.order_status()
-
-# test_events_api.remove_item_from_cart()
-
-# test_events_api.security_notification()
-
-# test_events_api.transaction()
-
-# test_events_api.update_account()
-
-# test_events_api.update_content_comment()
-
-# test_events_api.update_content_listing()
-
-# test_events_api.update_content_message()
-
-# test_events_api.update_content_post()
-
-# test_events_api.update_content_profile()
-
-# test_events_api.update_content_review()
-
-# test_events_api.update_order()
-
-# test_events_api.update_password()
-
-# test_events_api.verification()
-
-# Decision APIs
-
-# test_decisions_api.apply_user_decision_request()
-
-# test_decisions_api.apply_order_decision_request()
-
-# test_decisions_api.apply_session_decision()
-
-# test_decisions_api.apply_content_decision()
-
-# test_decisions_api.get_user_decisions()
-
-# test_decisions_api.get_order_decisions()
-
-# test_decisions_api.get_content_decisions()
-
-# test_decisions_api.get_session_decisions()
-
-# test_decisions_api.get_decisions("session") #user, order, content, session
-
-# Workflows APIs
-
-# test_workflows_api.get_workflow_status("workflow_run_id")
-
-# Score APIs
-
-# test_score_api.create_order_with_return_score()
-
-# test_score_api.get_score()
-
-# test_score_api.get_user_score()
-
-# test_score_api.rescore_user()
-
-# Labeling
-
-# test_labels_api.user_label()
-
-# test_labels_api.user_unlabel()
-
-# Verification APIs
-
-# test_verification_api.send()
-
-# test_verification_api.resend()
-
-# test_verification_api.check("271571")
-
-# PSP Merchant APIs
-
-# test_psp_merchant_api.create_merchant()
-
-# test_psp_merchant_api.edit_merchant()
-
-# test_psp_merchant_api.get_a_merchant_profile()
-
-# test_psp_merchant_api.get_merchant_profiles()
-
-test_psp_merchant_api.get_merchant_profiles(batch_size=2, batch_token="64d0a6a5afb931525995e75b")
