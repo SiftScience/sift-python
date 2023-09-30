@@ -4,11 +4,10 @@ import random # define the random module
 
 from os import environ as env
 
-
 class PSPMerchantAPI():
   # Get the value of API_KEY and ACCOUNT_ID from environment variable
   api_key = env['API_KEY']
-  account_id = env['ACCT']
+  account_id = env['ACCOUNT_ID']
 
   client = sift.Client(api_key = api_key, account_id = account_id)
   
@@ -68,5 +67,4 @@ class PSPMerchantAPI():
 
   def get_merchant_profiles(self, batch_token = None, batch_size = None):
     return self.client.get_psp_merchant_profiles(batch_token, batch_size)
-  
   

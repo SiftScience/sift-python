@@ -1,4 +1,5 @@
 import sift
+import globals
 
 from os import environ as env
 
@@ -6,11 +7,14 @@ class VerificationAPI():
     # Get the value of API_KEY from environment variable
     api_key = env['API_KEY']
     client = sift.Client(api_key = api_key)
-    
+    globals.initialize()
+    user_id = globals.user_id
+    user_email = globals.user_email
+  
     def send(self):
         sendProperties = {
-            '$user_id': 'billy_jones_301',
-            '$send_to': 'billy_jones_301@gmail.com',
+            '$user_id': self.user_id,
+            '$send_to': self.user_email,
             '$verification_type': '$email',
             '$brand_name': 'MyTopBrand',
             '$language': 'en',
@@ -32,7 +36,7 @@ class VerificationAPI():
             
     def resend(self):    
         resendProperties = {
-            '$user_id': 'billy_jones_301',
+            '$user_id': self.user_id,
             '$verified_event': '$login',
             '$verified_entity_id': 'SOME_SESSION_ID'
         } 
@@ -40,10 +44,9 @@ class VerificationAPI():
 
     def check(self):
         checkProperties = {
-            '$user_id': 'billy_jones_301',
+            '$user_id': self.user_id,
             '$code': '123456',
             '$verified_event': '$login',
             '$verified_entity_id': "SOME_SESSION_ID"
         }
         return self.client.verification_check(checkProperties)
-

@@ -1,17 +1,20 @@
 import sift
+import globals
 
 from os import environ as env
-
 
 class EventsAPI():
   # Get the value of API_KEY from environment variable
   api_key = env['API_KEY']
   client = sift.Client(api_key = api_key)
+  globals.initialize()
+  user_id = globals.user_id
+  user_email = globals.user_email
   
   def add_item_to_cart(self):
     add_item_to_cart_properties = {       
       # Required Fields
-      "$user_id"           : "billy_jones_301",
+      "$user_id"           : self.user_id,
       # Supported Fields
       "$session_id" : "gigtleqddo84l8cm15qe4il",
       "$item"       : {
@@ -44,7 +47,7 @@ class EventsAPI():
   def add_promotion(self):
     add_promotion_properties = {
       # Required fields.
-      "$user_id"    : "billy_jones_301",
+      "$user_id"    : self.user_id,
       # Supported fields.
       "$promotions" : [
         # Example of a promotion for monetary discounts off good or services
@@ -75,7 +78,7 @@ class EventsAPI():
       "$order_id"          : "ORDER-123124124",
       "$transaction_id"    : "719637215",
       # Recommended Fields
-      "$user_id"           : "billy_jones_301",
+      "$user_id"           : self.user_id,
       "$chargeback_state"  : "$lost",
       "$chargeback_reason" : "$duplicate"
     }
@@ -85,7 +88,7 @@ class EventsAPI():
     # Sample $content_status event
     content_status_properties = {
       # Required Fields
-      "$user_id"    : "billy_jones_301",
+      "$user_id"    : self.user_id,
       "$content_id" : "9671500641",
       "$status"     : "$paused",
 
@@ -102,10 +105,10 @@ class EventsAPI():
     # Sample $create_account event
     create_account_properties = {
       # Required Fields
-      "$user_id"    : "billy_jones_301",
+      "$user_id"    : self.user_id,
       # Supported Fields
       "$session_id"                : "gigtleqddo84l8cm15qe4il",
-      "$user_email"                : "billjones1@example.com",
+      "$user_email"                : self.user_email,
       "$verification_phone_number" : "+123456789012",
       "$name"                      : "Bill Jones",
       "$phone"                     : "1-415-555-6040",
@@ -172,7 +175,7 @@ class EventsAPI():
     # Sample $create_content event for comments
     comment_properties = {
       # Required fields
-      "$user_id"                : "fyw3989sjpqr71",
+      "$user_id"                : self.user_id,
       "$content_id"             : "comment-23412",
 
       # Recommended fields
@@ -207,7 +210,7 @@ class EventsAPI():
     # Sample $create_content event for listings
     listing_properties = {
       # Required fields
-      "$user_id"                : "fyw3989sjpqr71",
+      "$user_id"                : self.user_id,
       "$content_id"             : "listing-23412",
 
       # Recommended fields
@@ -266,7 +269,7 @@ class EventsAPI():
     # Sample $create_content event for messages
     message_properties = {
         # Required fields
-        "$user_id"                 : "fyw3989sjpqr71",
+        "$user_id"                 : self.user_id,
         "$content_id"              : "message-23412",
 
         # Recommended fields
@@ -301,7 +304,7 @@ class EventsAPI():
     # Sample $create_content event for posts
     post_properties = {
       # Required fields
-      "$user_id"              : "fyw3989sjpqr71",
+      "$user_id"              : self.user_id,
       "$content_id"           : "post-23412",
 
       # Recommended fields
@@ -353,7 +356,7 @@ class EventsAPI():
     # Sample $create_content event for reviews
     profile_properties = {
       # Required fields
-      "$user_id"              : "fyw3989sjpqr71",
+      "$user_id"              : self.user_id,
       "$content_id"           : "profile-23412",
 
       # Recommended fields
@@ -399,7 +402,7 @@ class EventsAPI():
     # Sample $create_content event for reviews
     review_properties = {
       # Required fields
-      "$user_id"                  : "fyw3989sjpqr71",
+      "$user_id"                  : self.user_id,
       "$content_id"               : "review-23412",
 
       # Recommended fields
@@ -444,11 +447,11 @@ class EventsAPI():
     # Sample $create_order event
     order_properties = {
       # Required Fields
-      "$user_id"                   : "billy_jones_301",
+      "$user_id"                   : self.user_id,
       # Supported Fields
       "$session_id"                : "gigtleqddo84l8cm15qe4il",
       "$order_id"                  : "ORDER-28168441",
-      "$user_email"                : "billjones1@example.com",
+      "$user_email"                : self.user_email,
       "$verification_phone_number" : "+123456789012",
       "$amount"                    : 115940000, # $115.94
       "$currency_code"             : "USD",
@@ -562,7 +565,7 @@ class EventsAPI():
     # Sample $flag_content event
     flag_content_properties = {
       # Required Fields
-      "$user_id"    : "billy_jones_301", # content creator
+      "$user_id"    : self.user_id, # content creator
       "$content_id" : "9671500641",
 
       # Supported Fields
@@ -574,7 +577,7 @@ class EventsAPI():
     # Sample $link_session_to_user event
     link_session_to_user_properties = {
       # Required Fields
-      "$user_id"    : "billy_jones_301",
+      "$user_id"    : self.user_id,
       "$session_id" : "gigtleqddo84l8cm15qe4il"
     }
     return self.client.track("$link_session_to_user", link_session_to_user_properties)
@@ -583,13 +586,13 @@ class EventsAPI():
     # Sample $login event
     login_properties = {
       # Required Fields
-      "$user_id"      : "billy_jones_301",
+      "$user_id"      : self.user_id,
       "$login_status" : "$failure",
       "$session_id"   : "gigtleqddo84l8cm15qe4il",
       "$ip"           : "128.148.1.135",
 
       # Optional Fields
-      "$user_email"                : "billjones1@example.com",
+      "$user_email"                : self.user_email,
       "$verification_phone_number" : "+123456789012",
       "$failure_reason"            : "$wrong_password",
       "$username"                  : "billjones1@example.com",
@@ -612,7 +615,7 @@ class EventsAPI():
     # Sample $logout event
     logout_properties = {
       # Required Fields
-      "$user_id"   : "billy_jones_301",
+      "$user_id"   : self.user_id,
 
       # Send this information from a BROWSER client.
       "$browser"      : {
@@ -627,7 +630,7 @@ class EventsAPI():
     # Sample $order_status event
     order_properties = {
       # Required Fields
-      "$user_id"          : "billy_jones_301",
+      "$user_id"          : self.user_id,
       "$order_id"         : "ORDER-28168441",
       "$order_status"     : "$canceled",
 
@@ -651,7 +654,7 @@ class EventsAPI():
     # Sample $remove_item_from_cart event
     remove_item_from_cart_properties = {
       # Required Fields
-      "$user_id"    : "billy_jones_301",
+      "$user_id"    : self.user_id,
 
       # Supported Fields
       "$session_id" : "gigtleqddo84l8cm15qe4il",
@@ -683,7 +686,7 @@ class EventsAPI():
     # Sample $security_notification event
     security_notification_properties = {
       # Required Fields
-      "$user_id"    : "billy_jones_301",
+      "$user_id"    : self.user_id,
       "$session_id" : "gigtleqddo84l8cm15qe4il",
       "$notification_status"     : "$sent",
       # Optional fields if applicable
@@ -703,11 +706,11 @@ class EventsAPI():
     # Sample $transaction event
     transaction_properties = {
       # Required Fields
-      "$user_id"          : "billy_jones_301",
+      "$user_id"          : self.user_id,
       "$amount"           : 506790000, # $506.79
       "$currency_code"    : "USD",
       # Supported Fields
-      "$user_email"                : "billjones1@example.com",
+      "$user_email"                : self.user_email,
       "$verification_phone_number" : "+123456789012",
       "$transaction_type"          : "$sale",
       "$transaction_status"        : "$failure",
@@ -788,11 +791,11 @@ class EventsAPI():
     # Sample $update_account event
     update_account_properties = {
       # Required Fields
-      "$user_id"    : "billy_jones_301",
+      "$user_id"    : self.user_id,
 
       # Supported Fields
       "$changed_password"          : True,
-      "$user_email"                : "billjones1@example.com",
+      "$user_email"                : self.user_email,
       "$verification_phone_number" : "+123456789012",
       "$name"                      : "Bill Jones",
       "$phone"                     : "1-415-555-6040",
@@ -843,7 +846,7 @@ class EventsAPI():
   # Sample $update_content event for comments
     update_content_comment_properties = {
       # Required fields
-      "$user_id"                : "fyw3989sjpqr71",
+      "$user_id"                : self.user_id,
       "$content_id"             : "comment-23412",
 
       # Recommended fields
@@ -884,7 +887,7 @@ class EventsAPI():
     # Sample $update_content event for listings
     update_content_listing_properties = {
       # Required fields
-      "$user_id"                : "fyw3989sjpqr71",
+      "$user_id"                : self.user_id,
       "$content_id"             : "listing-23412",
 
       # Recommended fields
@@ -948,7 +951,7 @@ class EventsAPI():
     # Sample $update_content event for messages
     update_content_message_properties = {
       # Required fields
-      "$user_id"                 : "fyw3989sjpqr71",
+      "$user_id"                 : self.user_id,
       "$content_id"              : "message-23412",
 
       # Recommended fields
@@ -984,7 +987,7 @@ class EventsAPI():
     # Sample $update_content event for posts
     update_content_post_properties = {
       # Required fields
-      "$user_id"              : "fyw3989sjpqr71",
+      "$user_id"              : self.user_id,
       "$content_id"           : "post-23412",
 
       # Recommended fields
@@ -1041,7 +1044,7 @@ class EventsAPI():
     # Sample $update_content event for reviews
     update_content_profile_properties = {
       # Required fields
-      "$user_id"              : "fyw3989sjpqr71",
+      "$user_id"              : self.user_id,
       "$content_id"           : "profile-23412",
 
       # Recommended fields
@@ -1093,7 +1096,7 @@ class EventsAPI():
     # Sample $update_content event for reviews
     update_content_review_properties = {
       # Required fields
-      "$user_id"                  : "fyw3989sjpqr71",
+      "$user_id"                  : self.user_id,
       "$content_id"               : "review-23412",
 
       # Recommended fields
@@ -1143,11 +1146,11 @@ class EventsAPI():
     # Sample $update_order event
     update_order_properties = {
       # Required Fields
-      "$user_id"          : "billy_jones_301",
+      "$user_id"          : self.user_id,
       # Supported Fields
       "$session_id"                : "gigtleqddo84l8cm15qe4il",
       "$order_id"                  : "ORDER-28168441",
-      "$user_email"                : "billjones1@example.com",
+      "$user_email"                : self.user_email,
       "$verification_phone_number" : "+123456789012",
       "$amount"           : 115940000, # $115.94
       "$currency_code"    : "USD",
@@ -1266,7 +1269,7 @@ class EventsAPI():
     # Sample $update_password event
     update_password_properties = {
       # Required Fields
-      "$user_id"       : "billy_jones_301",
+      "$user_id"       : self.user_id,
       "$session_id"    : "gigtleqddo84l8cm15qe4il",
       "$status"        : "$success",
       "$reason"        : "$forced_reset",
@@ -1290,7 +1293,7 @@ class EventsAPI():
     # Sample $verification event
     verification_properties = {
       # Required Fields
-      "$user_id"            : "billy_jones_301",
+      "$user_id"            : self.user_id,
       "$session_id"         : "gigtleqddo84l8cm15qe4il",
       "$status"             : "$pending",
 
@@ -1301,5 +1304,4 @@ class EventsAPI():
       "$verified_value"     : "14155551212"
     }
     return self.client.track("$verification", verification_properties)
-  
   

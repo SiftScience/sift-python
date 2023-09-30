@@ -11,11 +11,11 @@ class Utils:
             return ((response.status == 0) and ((response.http_status_code == 200) or (response.http_status_code == 201)))
         else:
             return ((response.http_status_code == 200) or (response.http_status_code == 201))
-
+    
 def runAllMethods():
     objUtils = Utils()
     objEvents = test_events_api.EventsAPI()
-    ObjDecision = test_decisions_api.DecisionAPI()
+    objDecision = test_decisions_api.DecisionAPI()
     objScore = test_score_api.ScoreAPI()
     objWorkflow = test_workflows_api.WorkflowsAPI()
     objVerification = test_verification_api.VerificationAPI()
@@ -53,33 +53,40 @@ def runAllMethods():
     assert (objUtils.isOK(objEvents.update_order()) == True)
     assert (objUtils.isOK(objEvents.update_password()) == True)
     assert (objUtils.isOK(objEvents.verification()) == True)
-        
+    print("Events API Tested")
+    
     # Decision APIs
 
-    assert (objUtils.isOK(ObjDecision.apply_user_decision()) == False)
-    assert (objUtils.isOK(ObjDecision.apply_order_decision()) == False)
-    assert (objUtils.isOK(ObjDecision.apply_session_decision()) == False)
-    assert (objUtils.isOK(ObjDecision.apply_content_decision()) == False)
-    assert (objUtils.isOK(ObjDecision.get_user_decisions()) == True)
-    assert (objUtils.isOK(ObjDecision.get_order_decisions()) == True)
-    assert (objUtils.isOK(ObjDecision.get_content_decisions()) == True)
-    assert (objUtils.isOK(ObjDecision.get_session_decisions()) == True)
-    assert (objUtils.isOK(ObjDecision.get_decisions()) == True)
-
+    assert (objUtils.isOK(objDecision.apply_user_decision()) == False)
+    assert (objUtils.isOK(objDecision.apply_order_decision()) == False)
+    assert (objUtils.isOK(objDecision.apply_session_decision()) == False)
+    assert (objUtils.isOK(objDecision.apply_content_decision()) == False)
+    assert (objUtils.isOK(objDecision.get_user_decisions()) == True)
+    assert (objUtils.isOK(objDecision.get_order_decisions()) == True)
+    assert (objUtils.isOK(objDecision.get_content_decisions()) == True)
+    assert (objUtils.isOK(objDecision.get_session_decisions()) == True)
+    assert (objUtils.isOK(objDecision.get_decisions()) == True)
+    print("Decision API Tested")
+    
     # Workflows APIs
 
     assert (objUtils.isOK(objWorkflow.synchronous_workflows()) == True)
-
+    print("Workflow API Tested")
+    
     # Score APIs
 
     assert (objUtils.isOK(objScore.get_user_score()) == False)
-
+    print("Score API Tested")
+    
     # Verification APIs
 
     assert (objUtils.isOK(objVerification.send()) == True)
     assert (objUtils.isOK(objVerification.resend()) == True)
-    assert (objUtils.isOK(objVerification.check()) == True)
-
+    checkResponse = objVerification.check()
+    assert (objUtils.isOK(checkResponse) == True)
+    assert (checkResponse.body["status"] == 50)
+    print("Verification API Tested")
+    
     # PSP Merchant APIs
 
     assert (objUtils.isOK(objPSPMerchant.create_merchant()) == True)
@@ -87,7 +94,6 @@ def runAllMethods():
     assert (objUtils.isOK(objPSPMerchant.get_a_merchant_profile()) == True)
     assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles()) == True)
     assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles(batch_size=10, batch_token=None)) == True)
-
+    print("PSP Merchant API Tested")
 
 runAllMethods()
-
