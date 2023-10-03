@@ -180,8 +180,7 @@ class Client(object):
             params['force_workflow_run'] = 'true'
 
         if include_score_percentiles:
-            field_types = ['SCORE_PERCENTILES']
-            params['fields'] = ','.join(field_types)
+            params['fields'] = 'SCORE_PERCENTILES'
         try:
             response = self.session.post(
                 path,
@@ -193,7 +192,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), path)
 
-    def score(self, user_id, timeout=None, abuse_types=None, version=None):
+    def score(self, user_id, timeout=None, abuse_types=None, version=None, include_score_percentiles=False):
         """Retrieves a user's fraud score from the Sift Science API.
         This call is blocking.  Check out https://siftscience.com/resources/references/score_api.html
         for more information on our Score response structure.
@@ -209,6 +208,9 @@ class Client(object):
                  be returned for every abuse_type to which you are subscribed.
 
             version(optional): Use a different version of the Sift Science API for this call.
+
+            include_score_percentiles(optional) : Whether to add new parameter in the query parameter.
+                if include_score_percentiles is true then add a new parameter called fields in the query parameter
 
         Returns:
             A sift.client.Response object if the score call succeeded, or raises
@@ -227,6 +229,9 @@ class Client(object):
         if abuse_types:
             params['abuse_types'] = ','.join(abuse_types)
 
+        if include_score_percentiles:
+            params['fields'] = 'SCORE_PERCENTILES'
+
         url = self._score_url(user_id, version)
 
         try:
@@ -239,7 +244,7 @@ class Client(object):
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
 
-    def get_user_score(self, user_id, timeout=None, abuse_types=None):
+    def get_user_score(self, user_id, timeout=None, abuse_types=None, include_score_percentiles=False):
         """Fetches the latest score(s) computed for the specified user and abuse types from the Sift Science API.
         As opposed to client.score() and client.rescore_user(), this *does not* compute a new score for the user; it
         simply fetches the latest score(s) which have computed. These scores may be arbitrarily old.
@@ -256,6 +261,9 @@ class Client(object):
                  should be returned (if scores were requested).  If not specified, a score will
                  be returned for every abuse_type to which you are subscribed.
 
+            include_score_percentiles(optional) : Whether to add new parameter in the query parameter.
+                if include_score_percentiles is true then add a new parameter called fields in the query parameter
+
         Returns:
             A sift.client.Response object if the score call succeeded, or raises
             an ApiException.
@@ -270,6 +278,9 @@ class Client(object):
         params = {'api_key': self.api_key}
         if abuse_types:
             params['abuse_types'] = ','.join(abuse_types)
+
+        if include_score_percentiles:
+            params['fields'] = 'SCORE_PERCENTILES'
 
         try:
             response = self.session.get(

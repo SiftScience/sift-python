@@ -1411,7 +1411,7 @@ class TestSiftPythonClient(unittest.TestCase):
             self.assertIsInstance(response, sift.client.Response)
             assert ('address' in response.body)
 
-    def test_with__include_score_percentiles_ok(self):
+    def test_with_include_score_percentiles_ok(self):
         event = '$transaction'
         mock_response = mock.Mock()
         mock_response.content = '{"status": 0, "error_message": "OK"}'
@@ -1453,6 +1453,51 @@ class TestSiftPythonClient(unittest.TestCase):
             assert (response.api_status == 0)
             assert (response.api_error_message == "OK")
 
+    def test_score_api_include_score_percentiles_ok(self):
+        mock_response = mock.Mock()
+        mock_response.content = score_response_json()
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch.object(self.sift_client.session, 'get') as mock_get:
+            mock_get.return_value = mock_response
+            response = self.sift_client.score(user_id='12345', include_score_percentiles=True)
+            mock_get.assert_called_with(
+                'https://api.siftscience.com/v205/score/12345',
+                params={'api_key': self.test_key, 'fields': 'SCORE_PERCENTILES'},
+                headers=mock.ANY,
+                timeout=mock.ANY)
+            self.assertIsInstance(response, sift.client.Response)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['score'] == 0.85)
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
+
+    def test_get_user_score_include_score_percentiles_ok(self):
+        """Test the GET /{version}/users/{userId}/score API, i.e. client.get_user_score()
+        """
+        test_timeout = 5
+        mock_response = mock.Mock()
+        mock_response.content = USER_SCORE_RESPONSE_JSON
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+        with mock.patch.object(self.sift_client.session, 'get') as mock_get:
+            mock_get.return_value = mock_response
+            response = self.sift_client.get_user_score(user_id='12345', timeout=test_timeout, include_score_percentiles=True)
+            mock_get.assert_called_with(
+                'https://api.siftscience.com/v205/users/12345/score',
+                params={'api_key': self.test_key, 'fields': 'SCORE_PERCENTILES'},
+                headers=mock.ANY,
+                timeout=test_timeout)
+            self.assertIsInstance(response, sift.client.Response)
+            assert (response.is_ok())
+            assert (response.api_error_message == "OK")
+            assert (response.body['entity_id'] == '12345')
+            assert (response.body['scores']['content_abuse']['score'] == 0.14)
+            assert (response.body['scores']['payment_abuse']['score'] == 0.97)
+            assert ('latest_decisions' in response.body)
 
 def main():
     unittest.main()
