@@ -22,7 +22,7 @@ def valid_transaction_properties():
         '$seller_user_id': '654321',
         '$amount': Decimal('1253200.0'),
         '$currency_code': 'USD',
-        '$time': int(datetime.datetime.now().strftime('%s')),
+        '$time': int(datetime.datetime.now().strftime('%S')),
         '$transaction_id': 'my_transaction_id',
         '$billing_name': 'Mike Snow',
         '$billing_bin': '411111',
