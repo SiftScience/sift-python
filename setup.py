@@ -32,9 +32,7 @@ except Exception:
     README = ''
     CHANGES = ''
 
-
-
-# Use imp to avoid sift/__init__.py
+# Use imp/importlib to avoid sift/__init__.py
 version_mod = load_source('__tmp', os.path.join(here, 'sift/version.py'))
 
 setup(
