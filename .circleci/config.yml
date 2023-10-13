@@ -44,10 +44,15 @@ jobs:
       - image: cimg/python:3.10.2
     steps:
       - checkout
-      - run: |
-          cd ~/sift-python
-          pip3 install sift-python
-          python3 test_integration_app/main.py
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Run tests
+          command: python test_integration_app/main.py
+#      - run: |
+#          cd ~/sift-python
+#          pip3 install sift-python
+#          python3 test_integration_app/main.py
 
 workflows:
   build-and-test-wf:
