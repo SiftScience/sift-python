@@ -45,7 +45,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          cd sift-python
+          cd ~/sift-python
           pip3 install sift-python
           python3 test_integration_app/main.py
 
