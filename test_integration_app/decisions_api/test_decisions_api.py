@@ -10,10 +10,11 @@ class DecisionAPI():
     client = sift.Client(api_key = api_key, account_id = account_id)
     globals.initialize()
     user_id = globals.user_id
+    session_id = globals.session_id
 
     def apply_user_decision(self):
         applyDecisionRequest = {
-            "decision_id"     : "block_user_payment_abuse",
+            "decision_id"     : "integration_app_watch_account_abuse",
             "source"          : "MANUAL_REVIEW",
             "analyst"         : "analyst@example.com",
             "description"     : "User linked to three other payment abusers and ordering high value items"
@@ -32,17 +33,17 @@ class DecisionAPI():
 
     def apply_session_decision(self):
         applySessionDecisionRequest = {
-            "decision_id"   : "session_looks_fraud_account_takover",
+            "decision_id"   : "integration_app_watch_account_takeover",
             "source"    : "MANUAL_REVIEW",
             "analyst"   : "analyst@example.com",
             "description"   : "compromised account reported to customer service"
         }
         
-        return self.client.apply_session_decision(self.user_id, "session_id", applySessionDecisionRequest)
+        return self.client.apply_session_decision(self.user_id, self.session_id, applySessionDecisionRequest)
 
     def apply_content_decision(self):
         applyContentDecisionRequest = {
-            "decision_id"    : "content_looks_fraud_content_abuse",
+            "decision_id"    : "integration_app_watch_content_abuse",
             "source"         : "MANUAL_REVIEW",
             "analyst"       : "analyst@example.com",
             "description"    : "fraudulent listing"

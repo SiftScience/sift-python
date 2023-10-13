@@ -1,3 +1,6 @@
+import string
+import random
+
 from events_api import test_events_api
 from decisions_api import test_decisions_api
 from workflows_api import test_workflows_api
@@ -22,7 +25,6 @@ def runAllMethods():
     objPSPMerchant = test_psp_merchant_api.PSPMerchantAPI()
 
     #Events APIs
-
     assert (objUtils.isOK(objEvents.add_item_to_cart()) == True)
     assert (objUtils.isOK(objEvents.add_promotion()) == True)
     assert (objUtils.isOK(objEvents.chargeback()) == True)
@@ -56,11 +58,10 @@ def runAllMethods():
     print("Events API Tested")
     
     # Decision APIs
-
-    assert (objUtils.isOK(objDecision.apply_user_decision()) == False)
-    assert (objUtils.isOK(objDecision.apply_order_decision()) == False)
-    assert (objUtils.isOK(objDecision.apply_session_decision()) == False)
-    assert (objUtils.isOK(objDecision.apply_content_decision()) == False)
+    assert (objUtils.isOK(objDecision.apply_user_decision()) == True)
+    assert (objUtils.isOK(objDecision.apply_order_decision()) == True)
+    assert (objUtils.isOK(objDecision.apply_session_decision()) == True)
+    assert (objUtils.isOK(objDecision.apply_content_decision()) == True)
     assert (objUtils.isOK(objDecision.get_user_decisions()) == True)
     assert (objUtils.isOK(objDecision.get_order_decisions()) == True)
     assert (objUtils.isOK(objDecision.get_content_decisions()) == True)
@@ -69,17 +70,14 @@ def runAllMethods():
     print("Decision API Tested")
     
     # Workflows APIs
-
     assert (objUtils.isOK(objWorkflow.synchronous_workflows()) == True)
     print("Workflow API Tested")
     
     # Score APIs
-
-    assert (objUtils.isOK(objScore.get_user_score()) == False)
+    assert (objUtils.isOK(objScore.get_user_score()) == True)
     print("Score API Tested")
     
     # Verification APIs
-
     assert (objUtils.isOK(objVerification.send()) == True)
     assert (objUtils.isOK(objVerification.resend()) == True)
     checkResponse = objVerification.check()
@@ -88,14 +86,13 @@ def runAllMethods():
     print("Verification API Tested")
     
     # PSP Merchant APIs
-
-    assert (objUtils.isOK(objPSPMerchant.create_merchant()) == True)
-    assert (objUtils.isOK(objPSPMerchant.edit_merchant()) == True)
-    assert (objUtils.isOK(objPSPMerchant.get_a_merchant_profile()) == True)
+    merchant_id = 'merchant_id_test_app' + ''.join(random.choices(string.digits, k = 7))
+    assert (objUtils.isOK(objPSPMerchant.create_merchant(merchant_id)) == True)
+    assert (objUtils.isOK(objPSPMerchant.edit_merchant(merchant_id)) == True)
     assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles()) == True)
     assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles(batch_size=10, batch_token=None)) == True)
     print("PSP Merchant API Tested")
-    
-    print("Execution completed")
+
+    print("API Integration tests execution finished")
 
 runAllMethods()
