@@ -45,9 +45,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build and run tests
+          name: Install the lib and run tests
           command: | 
-            pwd
             pip3 install ../project
             python3 test_integration_app/main.py
 
