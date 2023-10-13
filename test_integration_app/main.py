@@ -95,5 +95,7 @@ def runAllMethods():
     assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles()) == True)
     assert (objUtils.isOK(objPSPMerchant.get_merchant_profiles(batch_size=10, batch_token=None)) == True)
     print("PSP Merchant API Tested")
+    
+    print("Execution completed")
 
 runAllMethods()
