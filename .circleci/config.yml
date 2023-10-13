@@ -45,8 +45,9 @@ jobs:
     steps:
       - checkout
       - run: |
-          pip install sift-python
-          echo "Run tests"
+          cd sift-python
+          pip3 install sift-python
+          python3 test_integration_app/main.py
 
 workflows:
   build-and-test-wf:
