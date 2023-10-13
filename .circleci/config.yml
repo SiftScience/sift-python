@@ -47,6 +47,7 @@ jobs:
       - run:
           name: Build and run tests
           command: | 
+            cd ..
             ls
 #            cd ~/project/sift-python
 #            pip3 install ../sift-python
