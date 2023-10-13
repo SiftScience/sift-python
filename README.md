@@ -248,7 +248,7 @@ errors from the root dir of the repository:
 
 For testing the app with real calls it is possible to run the integration testing app, 
 it makes calls to almost all our public endpoints to make sure the library integrates
-well. At the moment the app is run for every merge to master
+well. At the moment, the app is run on every merge to master
 
 It is possible to run it from local env following the steps:
 1. Add env variable `ACCOUNT_ID` with the valid account id
