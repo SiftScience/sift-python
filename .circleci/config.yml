@@ -39,8 +39,23 @@ jobs:
           mock-version: 3.0.5
           requests-version: 2.27.1
 
+  run-integration-tests-python3:
+    docker:
+      - image: cimg/python:3.10.2
+    steps:
+      - checkout
+      - run:
+          name: Install the lib and run tests
+          command: | 
+            pip3 install ../project
+            python3 test_integration_app/main.py
+
 workflows:
   build-and-test-wf:
     jobs:
       - build-and-test-python3
       - build-and-test-python2
+      - run-integration-tests-python3:
+          filters:
+            branches:
+              only: master

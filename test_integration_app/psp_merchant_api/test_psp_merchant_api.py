@@ -11,10 +11,9 @@ class PSPMerchantAPI():
 
   client = sift.Client(api_key = api_key, account_id = account_id)
   
-  def create_merchant(self):
-    merchant_id = ''.join(random.choices(string.digits, k = 7))    
+  def create_merchant(self, merchant_id):
     merchantProperties={
-      "id": 'merchant_id_' + merchant_id,
+      "id": merchant_id,
       "name": "Wonderful Payments Inc.13",
       "description": "Wonderful Payments payment provider.",
       "address": {
@@ -37,9 +36,9 @@ class PSPMerchantAPI():
     }
     return self.client.create_psp_merchant_profile(merchantProperties)
     
-  def edit_merchant(self):
-    merchantProperties={
-      "id": "merchant_id_01013",
+  def edit_merchant(self, merchant_id):
+    merchantProperties = {
+      "id": merchant_id,
       "name": "Wonderful Payments Inc.13 edit",
       "description": "Wonderful Payments payment provider. edit",
       "address": {
@@ -60,10 +59,10 @@ class PSPMerchantAPI():
         "score": 10
       }
     }
-    return self.client.update_psp_merchant_profile("merchant_id_01013", merchantProperties)
+    return self.client.update_psp_merchant_profile(merchant_id, merchantProperties)
 
-  def get_a_merchant_profile(self):
-    return self.client.get_a_psp_merchant_profile("merchant_id_01013")
+  def get_a_merchant_profile(self, merchant_id):
+    return self.client.get_a_psp_merchant_profile(merchant_id)
 
   def get_merchant_profiles(self, batch_token = None, batch_size = None):
     return self.client.get_psp_merchant_profiles(batch_token, batch_size)
