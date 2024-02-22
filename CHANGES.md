@@ -1,3 +1,6 @@
+5.5.1 2024-02-22
+- Support for Python 3.12
+
 5.5.0 2023-10-03
 - Score percentiles for Score API
 
