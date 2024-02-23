@@ -25,20 +25,13 @@ jobs:
             echo "Version $curr_version does not match tag $TAG" 
             exit 1
           fi
-      - name: Configure pypirc
-        run: |
-          cat << EOF > ~/.pypirc
-          [distutils]
-          index-servers =
-            pypi
-          [pypi]
-          username=${{ secrets.USER }}
-          password=${{ secrets.PASS }}
-          EOF
       - name: Create distribution files
         run: |
           python3 setup.py sdist
       - name: Upload distribution files
+        env:
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          TWINE_USER: ${{ secrets.USER }}
         run: |
           python3 -m pip install --user --upgrade twine
           ls  dist/ | xargs  -I % python3 -m twine upload --repository pypi dist/%
