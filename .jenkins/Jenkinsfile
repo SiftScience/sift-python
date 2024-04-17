@@ -1,0 +1,116 @@
+// Load Jenkins shared library
+jenkinsBranch = 'sift-python'
+sharedLib = library("shared-lib@${jenkinsBranch}")
+
+def siftPythonWorkflow = sharedLib.com.sift.ci.SiftPythonWorkflow.new()
+def ciUtil = sharedLib.com.sift.ci.CIUtil.new()
+def stackdriver = sharedLib.com.sift.ci.StackDriverMetrics.new()
+
+// Default GitHub status context for automatically triggered builds
+def defaultStatusContext = 'Jenkins:auto'
+
+// Pod template file for Jenkins agent pod
+// Pod template yaml file is defined in https://github.com/SiftScience/jenkins/tree/master/resources/jenkins-k8s-pod-templates
+def python2PodTemplateFile = 'python-2-7-pod-template.yaml'
+def python3PodTemplateFile = 'python-3-10-pod-template.yaml'
+def podLabel = "python-${BUILD_TAG}"
+
+
+// GitHub repo name
+def repoName = 'sift-python'
+
+pipeline {
+    agent none
+    options {
+        timestamps()
+        skipDefaultCheckout()
+        disableConcurrentBuilds()
+        parallelsAlwaysFailFast()
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '')
+    }
+    environment {
+        GIT_BRANCH = "${env.CHANGE_BRANCH != null? env.CHANGE_BRANCH : env.BRANCH_NAME}"
+    }
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    statusContext = defaultStatusContext
+                    // Get the commit sha for the build
+                    commitSha = ciUtil.commitHashForBuild()
+                    ciUtil.updateGithubCommitStatus(repoName, statusContext, 'Started', 'pending', commitSha)
+                }
+            }
+        }
+        stage ('Build and Test Workflows') {
+            steps {
+                script {
+                    def workflows = [:]
+                    def stage1 = 'Run Integration Tests - python3'
+                    workflows[stage1] = {
+                        stage(stage1) {
+                            // if (env.GIT_BRANCH.equals('master')) {
+                                ciUtil.updateGithubCommitStatus(repoName, stage1, 'Started', 'pending', commitSha)
+                                try {
+                                    siftPythonWorkflow.runSiftPythonIntegration(python3PodTemplateFile, podLabel)
+                                    ciUtil.updateGithubCommitStatus(repoName, stage1, 'SUCCESS', 'success', commitSha)
+                                } catch (Exception e) {
+                                    ciUtil.updateGithubCommitStatus(repoName, stage1, 'FAILURE', 'failure', commitSha)
+                                    print("${stage1} failed")
+                                    throw e
+                                }
+                            // }
+                        }
+                    }
+                    def stage2 = 'Build and Test - python2'
+                    workflows[stage2] = {
+                        stage(stage2) {
+                            ciUtil.updateGithubCommitStatus(repoName, stage2, 'Started', 'pending', commitSha)
+                            try {
+                                siftPythonWorkflow.runSiftPythonBuildAndTest(python2PodTemplateFile, podLabel, '3.0.5', '2.27.1')
+                                ciUtil.updateGithubCommitStatus(repoName, stage2, 'SUCCESS', 'success', commitSha)
+                            } catch (Exception e) {
+                                ciUtil.updateGithubCommitStatus(repoName, stage2, 'FAILURE', 'failure', commitSha)
+                                print("${stage2} failed")
+                                throw e
+                            }
+                        }
+                    }
+                    def stage3 = 'Build and Test - python3'
+                    workflows[stage3] = {
+                        stage(stage3) {
+                            ciUtil.updateGithubCommitStatus(repoName, stage3, 'Started', 'pending', commitSha)
+                            try {
+                                siftPythonWorkflow.runSiftPythonBuildAndTest(python3PodTemplateFile, podLabel, '5.0.1', '2.28.2')
+                                ciUtil.updateGithubCommitStatus(repoName, stage3, 'SUCCESS', 'success', commitSha)
+                            } catch (Exception e) {
+                                ciUtil.updateGithubCommitStatus(repoName, stage3, 'FAILURE', 'failure', commitSha)
+                                print("${stage3} failed")
+                                throw e
+                            }
+                        }
+                    }
+                    parallel workflows
+                }
+            }
+        }
+    }
+    post {
+        success {
+            script {
+                ciUtil.updateGithubCommitStatus(repoName, statusContext, currentBuild.currentResult, 'success', commitSha)
+            }
+        }
+        unsuccessful {
+            script {
+                ciUtil.updateGithubCommitStatus(repoName, statusContext, currentBuild.currentResult, 'failure', commitSha)
+                ciUtil.notifySlack(repoName, commitSha)
+            }
+        }
+        always {
+            script {
+                stackdriver.updatePipelineStatistics(this)
+            }
+        }
+    }
+}
