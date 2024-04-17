@@ -49,7 +49,7 @@ pipeline {
                     def stage1 = 'Run Integration Tests - python3'
                     workflows[stage1] = {
                         stage(stage1) {
-                            // if (env.GIT_BRANCH.equals('master')) {
+                            if (env.GIT_BRANCH.equals('master')) {
                                 ciUtil.updateGithubCommitStatus(repoName, stage1, 'Started', 'pending', commitSha)
                                 try {
                                     siftPythonWorkflow.runSiftPythonIntegration(python3PodTemplateFile, podLabel)
@@ -59,7 +59,7 @@ pipeline {
                                     print("${stage1} failed")
                                     throw e
                                 }
-                            // }
+                            }
                         }
                     }
                     def stage2 = 'Build and Test - python2'
