@@ -13,7 +13,7 @@ def defaultStatusContext = 'Jenkins:auto'
 // Pod template yaml file is defined in https://github.com/SiftScience/jenkins/tree/master/resources/jenkins-k8s-pod-templates
 def python2PodTemplateFile = 'python-2-7-pod-template.yaml'
 def python3PodTemplateFile = 'python-3-10-pod-template.yaml'
-def python2PodLabel = "python3-${BUILD_TAG}"
+def python2PodLabel = "python2-${BUILD_TAG}"
 def python3PodLabel = "python3-${BUILD_TAG}"
 
 
