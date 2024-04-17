@@ -13,7 +13,8 @@ def defaultStatusContext = 'Jenkins:auto'
 // Pod template yaml file is defined in https://github.com/SiftScience/jenkins/tree/master/resources/jenkins-k8s-pod-templates
 def python2PodTemplateFile = 'python-2-7-pod-template.yaml'
 def python3PodTemplateFile = 'python-3-10-pod-template.yaml'
-def podLabel = "python-${BUILD_TAG}"
+def python2PodLabel = "python3-${BUILD_TAG}"
+def python3PodLabel = "python3-${BUILD_TAG}"
 
 
 // GitHub repo name
@@ -52,7 +53,7 @@ pipeline {
                             if (env.GIT_BRANCH.equals('master')) {
                                 ciUtil.updateGithubCommitStatus(repoName, stage1, 'Started', 'pending', commitSha)
                                 try {
-                                    siftPythonWorkflow.runSiftPythonIntegration(python3PodTemplateFile, podLabel)
+                                    siftPythonWorkflow.runSiftPythonIntegration(python3PodTemplateFile, python3PodLabel)
                                     ciUtil.updateGithubCommitStatus(repoName, stage1, 'SUCCESS', 'success', commitSha)
                                 } catch (Exception e) {
                                     ciUtil.updateGithubCommitStatus(repoName, stage1, 'FAILURE', 'failure', commitSha)
@@ -67,7 +68,7 @@ pipeline {
                         stage(stage2) {
                             ciUtil.updateGithubCommitStatus(repoName, stage2, 'Started', 'pending', commitSha)
                             try {
-                                siftPythonWorkflow.runSiftPythonBuildAndTest(python2PodTemplateFile, podLabel, '3.0.5', '2.27.1')
+                                siftPythonWorkflow.runSiftPythonBuildAndTest(python2PodTemplateFile, python2PodLabel, '3.0.5', '2.27.1')
                                 ciUtil.updateGithubCommitStatus(repoName, stage2, 'SUCCESS', 'success', commitSha)
                             } catch (Exception e) {
                                 ciUtil.updateGithubCommitStatus(repoName, stage2, 'FAILURE', 'failure', commitSha)
@@ -81,7 +82,7 @@ pipeline {
                         stage(stage3) {
                             ciUtil.updateGithubCommitStatus(repoName, stage3, 'Started', 'pending', commitSha)
                             try {
-                                siftPythonWorkflow.runSiftPythonBuildAndTest(python3PodTemplateFile, podLabel, '5.0.1', '2.28.2')
+                                siftPythonWorkflow.runSiftPythonBuildAndTest(python3PodTemplateFile, python3PodLabel, '5.0.1', '2.28.2')
                                 ciUtil.updateGithubCommitStatus(repoName, stage3, 'SUCCESS', 'success', commitSha)
                             } catch (Exception e) {
                                 ciUtil.updateGithubCommitStatus(repoName, stage3, 'FAILURE', 'failure', commitSha)
