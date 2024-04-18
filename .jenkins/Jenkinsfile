@@ -26,6 +26,7 @@ pipeline {
         timestamps()
         skipDefaultCheckout()
         disableConcurrentBuilds()
+        disableRestartFromStage()
         parallelsAlwaysFailFast()
         buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '')
     }
