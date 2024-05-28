@@ -235,6 +235,10 @@ except sift.client.ApiException:
     pass
 
 ```
+To include `warnings` field to Events API response via calling `track()` method, set it by the `include_warnings` param:
+```python
+response = client.track("$transaction", properties, include_warnings=True)
+```
 
 ## Testing
 
