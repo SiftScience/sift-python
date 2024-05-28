@@ -14,7 +14,17 @@ class Utils:
             return ((response.status == 0) and ((response.http_status_code == 200) or (response.http_status_code == 201)))
         else:
             return ((response.http_status_code == 200) or (response.http_status_code == 201))
-    
+
+    def is_ok_with_warnings(self, response):
+        return self.isOK(response) and \
+            hasattr(response, 'body') and \
+            len(response.body['warnings']) > 0
+
+    def is_ok_without_warnings(self, response):
+        return self.isOK(response) and \
+            hasattr(response, 'body') and \
+            'warnings' not in response.body
+
 def runAllMethods():
     objUtils = Utils()
     objEvents = test_events_api.EventsAPI()
@@ -24,7 +34,7 @@ def runAllMethods():
     objVerification = test_verification_api.VerificationAPI()
     objPSPMerchant = test_psp_merchant_api.PSPMerchantAPI()
 
-    #Events APIs
+    # Events APIs
     assert (objUtils.isOK(objEvents.add_item_to_cart()) == True)
     assert (objUtils.isOK(objEvents.add_promotion()) == True)
     assert (objUtils.isOK(objEvents.chargeback()) == True)
@@ -55,6 +65,11 @@ def runAllMethods():
     assert (objUtils.isOK(objEvents.update_order()) == True)
     assert (objUtils.isOK(objEvents.update_password()) == True)
     assert (objUtils.isOK(objEvents.verification()) == True)
+
+    # Testing include warnings query param
+    assert (objUtils.is_ok_without_warnings(objEvents.create_order()) == True)
+    assert (objUtils.is_ok_with_warnings(objEvents.create_order_with_warnings()) == True)
+
     print("Events API Tested")
 
     # Decision APIs
