@@ -1,3 +1,6 @@
+5.6.0 2024-05-31
+- Added support for a `warnings` value in the `fields` query parameter
+
 5.5.1 2024-02-22
 - Support for Python 3.12
 
