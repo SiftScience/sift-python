@@ -119,6 +119,14 @@ except sift.client.ApiException:
     # request failed
     pass
 
+# To include `warnings` field to Events API response via calling `track()` method, set it by the `include_warnings` param:
+try:
+    response = client.track("$transaction", properties, include_warnings=True)
+    # ...
+except sift.client.ApiException:
+    # request failed
+    pass
+
 # Request a score for the user with user_id 23056
 try:
     response = client.score(user_id)

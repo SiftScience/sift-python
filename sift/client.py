@@ -97,7 +97,8 @@ class Client(object):
             abuse_types=None,
             timeout=None,
             version=None,
-            include_score_percentiles=False):
+            include_score_percentiles=False,
+            include_warnings=False):
         """Track an event and associated properties to the Sift Science client.
         This call is blocking.  Check out https://siftscience.com/resources/references/events-api
         for more information on what types of events you can send and fields you can add to the
@@ -137,6 +138,10 @@ class Client(object):
             include_score_percentiles(optional) : Whether to add new parameter in the query parameter.
                 if include_score_percentiles is true then add a new parameter called fields in the query parameter
 
+            include_warnings(optional) : Whether the API response should include `warnings` field.
+                if include_warnings is True `warnings` field returns the amount of validation warnings
+                along with their descriptions. They are not critical enough to reject the whole request,
+                but important enough to be fixed.
         Returns:
             A sift.client.Response object if the track call succeeded, otherwise
             raises an ApiException.
@@ -179,8 +184,12 @@ class Client(object):
         if force_workflow_run:
             params['force_workflow_run'] = 'true'
 
-        if include_score_percentiles:
-            params['fields'] = 'SCORE_PERCENTILES'
+        include_fields = Client._get_fields_param(include_score_percentiles,
+                                               include_warnings)
+        if include_fields:
+            params['fields'] = ",".join(include_fields)
+
+
         try:
             response = self.session.post(
                 path,
@@ -1119,6 +1128,16 @@ class Client(object):
     
     def _verification_check_url(self):
         return (API_URL_VERIFICATION + 'check')
+
+    @staticmethod
+    def _get_fields_param(include_score_percentiles, include_warnings):
+        return [
+            field for include, field in [
+                (include_score_percentiles, 'SCORE_PERCENTILES'),
+                (include_warnings, 'WARNINGS')
+            ] if include
+        ]
+
 
 class Response(object):
     HTTP_CODES_WITHOUT_BODY = [204, 304]

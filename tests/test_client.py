@@ -1499,6 +1499,44 @@ class TestSiftPythonClient(unittest.TestCase):
             assert (response.body['scores']['payment_abuse']['score'] == 0.97)
             assert ('latest_decisions' in response.body)
 
+    def test_warnings_added_as_fields_param(self):
+        event = '$transaction'
+        mock_response = mock.Mock()
+        mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.track(event, valid_transaction_properties(),
+                                              include_warnings=True)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v205/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={'fields': 'WARNINGS'})
+            self.assertIsInstance(response, sift.client.Response)
+
+    def test_warnings_and_score_percentiles_added_as_fields_param(self):
+        event = '$transaction'
+        mock_response = mock.Mock()
+        mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        with mock.patch.object(self.sift_client.session, 'post') as mock_post:
+            mock_post.return_value = mock_response
+            response = self.sift_client.track(event, valid_transaction_properties(),
+                                              include_score_percentiles=True,
+                                              include_warnings=True)
+            mock_post.assert_called_with(
+                'https://api.siftscience.com/v205/events',
+                data=mock.ANY,
+                headers=mock.ANY,
+                timeout=mock.ANY,
+                params={'fields': 'SCORE_PERCENTILES,WARNINGS'})
+            self.assertIsInstance(response, sift.client.Response)
+
+
 def main():
     unittest.main()
 
