@@ -1,10 +1,8 @@
 name: CI-WORKFLOW
 
 on:
-  push:
-    branches: [ "CI-16181" ]
   pull_request:
-    branches: [ "CI-16181" ]
+    branches: [ "master" ]
 
 permissions:
   contents: read
