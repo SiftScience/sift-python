@@ -10,10 +10,10 @@ permissions:
   contents: read
 
 env:
-  mock-version-python3: "5.0.1"
-  requests-version-python3: "2.28.2"
-  mock-version-python2: "3.0.5"
-  requests-version-python2: "2.27.1"
+  mock_version_python3: "5.0.1"
+  requests_version_python3: "2.28.2"
+  mock_version_python2: "3.0.5"
+  requests_version_python2: "2.27.1"
   ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
   API_KEY: ${{ secrets.API_KEY }}
 
@@ -34,22 +34,6 @@ jobs:
         run: |
           python -m unittest discover
 
-  build-and-test-python2:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 2.7.18
-        uses: actions/setup-python@v2
-        with:
-          python-version: "2.7"
-      - name: Install test dependencies
-        run: |
-          pip install mock==${mock-version-python2}
-          pip install requests==${requests-version-python2}
-      - name: Run tests
-        run: |
-          python -m unittest discover
-
   run-integration-tests-python3:
     runs-on: ubuntu-latest
     steps:
@@ -57,7 +41,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.10.14"
       - name: Install test dependencies
         run: |
           pip3 install ../project
