@@ -12,15 +12,12 @@ permissions:
   contents: read
 
 env:
+  mock_version_python3: "5.0.1"
+  requests_version_python3: "2.28.2"
   mock_version_python2: "3.0.5"
   requests_version_python2: "2.27.1"
   ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
   API_KEY: ${{ secrets.API_KEY }}
-
-inputs:
-  version:
-    mock_version_python3: "5.0.1"
-    requests_version_python3: "2.28.2"
 
 jobs:
   build-and-test-python3:
@@ -33,8 +30,8 @@ jobs:
           python-version: "3.10.14"
       - name: Install test dependencies
         run: |
-          pip install mock==${{ inputs.version.mock_version_python3 }}
-          pip install requests==${{ inputs.version.requests_version_python3 }}
+          pip install mock=="${{ env.mock_version_python3 }}"
+          pip install requests=="${{ env.requests_version_python3 }}"
       - name: Run tests
         run: |
           python -m unittest discover
