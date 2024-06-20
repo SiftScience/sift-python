@@ -2,7 +2,8 @@ name: CI-WORKFLOW
 
 on:
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - '*'
 
 permissions:
   contents: read
@@ -34,13 +35,16 @@ jobs:
 
   run-integration-tests-python3:
     runs-on: ubuntu-latest
+    env:
+      PUSH_PACKAGES: ${{ github.event_name == 'pull_request' || github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
           python-version: "3.10.14"
-      - name: Install test dependencies
+      - name: run-integration-tests-python3
+        if: ${{ env.PUSH_PACKAGES }}
         run: |
           pip3 install .
           python3 test_integration_app/main.py
