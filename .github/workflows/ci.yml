@@ -1,0 +1,49 @@
+name: CI-WORKFLOW
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+env:
+  mock_version_python3: "5.0.1"
+  requests_version_python3: "2.28.2"
+  ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+  API_KEY: ${{ secrets.API_KEY }}
+
+jobs:
+  build-and-test-python3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10.14"
+      - name: Install test dependencies
+        run: |
+          pip install mock=="${{ env.mock_version_python3 }}"
+          pip install requests=="${{ env.requests_version_python3 }}"
+      - name: Run tests
+        run: |
+          python -m unittest discover
+
+  run-integration-tests-python3:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10.14"
+      - name: run-integration-tests-python3
+        run: |
+          pip3 install .
+          python3 test_integration_app/main.py
