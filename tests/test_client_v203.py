@@ -288,7 +288,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v203/users/%s/labels' % user_id,
                 headers=mock.ANY,
                 timeout=mock.ANY,
-                params={'api_key': self.test_key})
+                params={},
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
 
@@ -329,7 +330,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v203/users/%s/labels' % urllib.parse.quote(user_id),
                 headers=mock.ANY,
                 timeout=mock.ANY,
-                params={'api_key': self.test_key})
+                params={},
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
 

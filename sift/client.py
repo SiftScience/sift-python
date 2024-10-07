@@ -404,7 +404,7 @@ class Client(object):
 
         url = self._label_url(user_id, version)
         headers = {'User-Agent': self._user_agent()}
-        params = {'api_key': self.api_key}
+        params = {}
         if abuse_type:
             params['abuse_type'] = abuse_type
 
@@ -413,7 +413,8 @@ class Client(object):
                 url,
                 headers=headers,
                 timeout=timeout,
-                params=params)
+                params=params,
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''))
             return Response(response)
 
         except requests.exceptions.RequestException as e:
