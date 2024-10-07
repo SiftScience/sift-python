@@ -445,9 +445,10 @@ class TestSiftPythonClient(unittest.TestCase):
             response = self.sift_client.rescore_user('12345', test_timeout)
             mock_post.assert_called_with(
                 'https://api.siftscience.com/v205/users/12345/score',
-                params={'api_key': self.test_key},
+                params={},
                 headers=mock.ANY,
-                timeout=test_timeout)
+                timeout=test_timeout,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert (response.is_ok())
             assert (response.api_error_message == "OK")
@@ -472,9 +473,10 @@ class TestSiftPythonClient(unittest.TestCase):
                                                      timeout=test_timeout)
             mock_post.assert_called_with(
                 'https://api.siftscience.com/v205/users/12345/score',
-                params={'api_key': self.test_key, 'abuse_types': 'payment_abuse,content_abuse'},
+                params={'abuse_types': 'payment_abuse,content_abuse'},
                 headers=mock.ANY,
-                timeout=test_timeout)
+                timeout=test_timeout,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert (response.is_ok())
             assert (response.api_error_message == "OK")

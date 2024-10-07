@@ -328,7 +328,7 @@ class Client(object):
 
         url = self._user_score_url(user_id, self.version)
         headers = {'User-Agent': self._user_agent()}
-        params = {'api_key': self.api_key}
+        params = {}
         if abuse_types:
             params['abuse_types'] = ','.join(abuse_types)
 
@@ -337,7 +337,8 @@ class Client(object):
                 url,
                 headers=headers,
                 timeout=timeout,
-                params=params)
+                params=params,
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''))
             return Response(response)
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
