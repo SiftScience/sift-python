@@ -4,6 +4,7 @@ import sys
 import unittest
 import warnings
 from decimal import Decimal
+from requests.auth import HTTPBasicAuth
 
 import mock
 import requests.exceptions
@@ -388,9 +389,10 @@ class TestSiftPythonClient(unittest.TestCase):
             response = self.sift_client.get_user_score('12345', test_timeout)
             mock_get.assert_called_with(
                 'https://api.siftscience.com/v205/users/12345/score',
-                params={'api_key': self.test_key},
+                params={},
                 headers=mock.ANY,
-                timeout=test_timeout)
+                timeout=test_timeout,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert (response.is_ok())
             assert (response.api_error_message == "OK")
@@ -415,9 +417,10 @@ class TestSiftPythonClient(unittest.TestCase):
                                                        timeout=test_timeout)
             mock_get.assert_called_with(
                 'https://api.siftscience.com/v205/users/12345/score',
-                params={'api_key': self.test_key, 'abuse_types': 'payment_abuse,content_abuse'},
+                params={'abuse_types': 'payment_abuse,content_abuse'},
                 headers=mock.ANY,
-                timeout=test_timeout)
+                timeout=test_timeout,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert (response.is_ok())
             assert (response.api_error_message == "OK")
@@ -1488,9 +1491,10 @@ class TestSiftPythonClient(unittest.TestCase):
             response = self.sift_client.get_user_score(user_id='12345', timeout=test_timeout, include_score_percentiles=True)
             mock_get.assert_called_with(
                 'https://api.siftscience.com/v205/users/12345/score',
-                params={'api_key': self.test_key, 'fields': 'SCORE_PERCENTILES'},
+                params={'fields': 'SCORE_PERCENTILES'},
                 headers=mock.ANY,
-                timeout=test_timeout)
+                timeout=test_timeout,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert (response.is_ok())
             assert (response.api_error_message == "OK")
