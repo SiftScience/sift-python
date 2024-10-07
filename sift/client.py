@@ -7,7 +7,6 @@ import json
 import requests
 import requests.auth
 import sys
-from requests.auth import HTTPBasicAuth
 
 if sys.version_info[0] < 3:
     import six.moves.urllib as urllib
@@ -250,7 +249,7 @@ class Client(object):
                 headers=headers,
                 timeout=timeout,
                 params=params,
-                auth=HTTPBasicAuth(self.api_key, ''))
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''))
             return Response(response)
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
@@ -299,7 +298,7 @@ class Client(object):
                 headers=headers,
                 timeout=timeout,
                 params=params,
-                auth=HTTPBasicAuth(self.api_key, ''))
+                auth=requests.auth.HTTPBasicAuth(self.api_key, ''))
             return Response(response)
         except requests.exceptions.RequestException as e:
             raise ApiException(str(e), url)
