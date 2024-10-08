@@ -1,3 +1,10 @@
+5.6.1 2024-10-08
+- Updated implementation to use Basic Authentication instead of passing `API_KEY` as a request parameter for the following calls:
+  - `client.score()`
+  - `client.get_user_score()`
+  - `client.rescore_user()`
+  - `client.unlabel()`
+
 5.6.0 2024-05-31
 - Added support for a `warnings` value in the `fields` query parameter
 
