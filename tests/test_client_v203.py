@@ -7,6 +7,7 @@ import sift
 import unittest
 import sys
 import requests.exceptions
+from requests.auth import HTTPBasicAuth
 if sys.version_info[0] < 3:
     import six.moves.urllib as urllib 
 else:
@@ -166,9 +167,10 @@ class TestSiftPythonClient(unittest.TestCase):
             response = self.sift_client_v204.score('12345', version='203')
             mock_get.assert_called_with(
                 'https://api.siftscience.com/v203/score/12345',
-                params={'api_key': self.test_key},
+                params={},
                 headers=mock.ANY,
-                timeout=mock.ANY)
+                timeout=mock.ANY,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
@@ -186,9 +188,10 @@ class TestSiftPythonClient(unittest.TestCase):
             response = self.sift_client.score('12345', test_timeout)
             mock_get.assert_called_with(
                 'https://api.siftscience.com/v203/score/12345',
-                params={'api_key': self.test_key},
+                params={},
                 headers=mock.ANY,
-                timeout=test_timeout)
+                timeout=test_timeout,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
@@ -285,7 +288,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v203/users/%s/labels' % user_id,
                 headers=mock.ANY,
                 timeout=mock.ANY,
-                params={'api_key': self.test_key})
+                params={},
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
 
@@ -326,7 +330,8 @@ class TestSiftPythonClient(unittest.TestCase):
                 'https://api.siftscience.com/v203/users/%s/labels' % urllib.parse.quote(user_id),
                 headers=mock.ANY,
                 timeout=mock.ANY,
-                params={'api_key': self.test_key})
+                params={},
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
 
@@ -373,9 +378,10 @@ class TestSiftPythonClient(unittest.TestCase):
             response = self.sift_client.score(user_id)
             mock_get.assert_called_with(
                 'https://api.siftscience.com/v203/score/%s' % urllib.parse.quote(user_id),
-                params={'api_key': self.test_key},
+                params={},
                 headers=mock.ANY,
-                timeout=mock.ANY)
+                timeout=mock.ANY,
+                auth=HTTPBasicAuth(self.test_key, ''))
             self.assertIsInstance(response, sift.client.Response)
             assert(response.is_ok())
             assert(response.api_error_message == "OK")
