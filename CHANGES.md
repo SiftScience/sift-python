@@ -1,3 +1,11 @@
+6.0.0 Unreleased
+================
+- Support for Python 3.13
+
+INCOMPATIBLE CHANGES INTRODUCED IN 6.0.0:
+
+- Removed support for Python < 3.8
+
 5.6.1 2024-10-08
 - Updated implementation to use Basic Authentication instead of passing `API_KEY` as a request parameter for the following calls:
   - `client.score()`
@@ -127,7 +135,7 @@ INCOMPATIBLE CHANGES INTRODUCED IN API V205:
 1.1.2.0 (2015-02-04)
 ====================
 
--   Added Unlabel functionaly
+-   Added Unlabel functionality
 -   Minor bug fixes.
 
 1.1.1.0 (2014-09-3)

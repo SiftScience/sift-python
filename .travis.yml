@@ -1,10 +1,23 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
+  - "3.8"
+  - "3.9"
+  - "3.10"
+  - "3.11"
+  - "3.12"
+  - "3.13"
+before_install:
+  - python --version
+  - pip install -U pip
 # command to install dependencies
 install:
-  - pip install -e .[test]
+  - pip install -e .
+  - pip install -r requirements-dev.txt
 # command to run tests
 script:
-  - unit2
+  - flake8 --count
+  - black --check .
+  - isort --check .
+  - mypy --install-types --non-interactive .
+  - typos
+  - python -m unittest discover

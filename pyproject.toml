@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Sift"
+version = "6.0.0"
+authors = [
+    {name = "Sift Science", email = "support@siftscience.com"},
+]
+description = "Python bindings for Sift Science's API"
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers=[
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+    "License :: OSI Approved :: MIT License",
+]
+keywords = ["sift", "sift-python"]
+requires-python = ">= 3.8"
+dependencies = [
+    "requests < 3.0.0",
+]
+
+[project.urls]
+Source = "https://github.com/SiftScience/sift-python"
+Changelog = "https://github.com/SiftScience/sift-python/blob/master/CHANGES.md"
+
+[tool.setuptools]
+packages = ["sift"]
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+profile = "black"
+combine_as_imports = true
+remove_redundant_aliases = true
+line_length = 79
+skip = [
+    "build",
+]
+
+[tool.mypy]
+follow_imports_for_stubs = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+warn_return_any = true
+warn_no_return = true
+enable_error_code = "possibly-undefined,ignore-without-code"
+exclude = [
+    "build",
+]
