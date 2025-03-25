@@ -24,7 +24,6 @@ AbuseType = t.Literal[
     "content_abuse",
     "legacy",
     "payment_abuse",
-    # TODO: Ask which of the following is supported (?)
     "promo_abuse",
     "promotion_abuse",
 ]
@@ -126,16 +125,11 @@ class Client:
     account_id: str
 
     def __init__(
-        self,  # TODO: Require to pass all arguments as a keyword arguments (?)
+        self,
         api_key: str | None = None,
         api_url: str = API_URL,
-        timeout: (
-            int
-            | float
-            | tuple[int | float, int | float]
-            | tuple[int | float, int | float]
-        ) = 2,
-        account_id: str | None = None,  # TODO: Move as a second argument (?)
+        timeout: int | float | tuple[int | float, int | float] = 2,
+        account_id: str | None = None,
         version: str = API_VERSION,
         session: requests.Session | None = None,
     ) -> None:
@@ -887,9 +881,7 @@ class Client:
         entity_type: t.Literal["user", "order", "session", "content"],
         limit: int | None = None,
         start_from: int | None = None,
-        abuse_types: (
-            str | None
-        ) = None,  # TODO: Ask if here should be a Sequence[AbuseType] instead of str
+        abuse_types: str | None = None,
         timeout: int | float | tuple[int | float, int | float] | None = None,
     ) -> Response:
         """Get decisions available to the customer

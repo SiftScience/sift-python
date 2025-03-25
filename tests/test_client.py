@@ -239,7 +239,9 @@ class TestSiftPythonClient(TestCase):
 
     def test_global_api_key(self) -> None:
         # test for error if global key is undefined
-        self.assertRaises(TypeError, sift.Client)
+        with mock.patch("sift.api_key"):
+            self.assertRaises(TypeError, sift.Client)
+
         sift.api_key = "a_test_global_api_key"
         local_api_key = "a_test_local_api_key"
 
@@ -255,7 +257,8 @@ class TestSiftPythonClient(TestCase):
         # test that client2 is assigned a new object with global api_key
         assert client2.api_key == sift.api_key
 
-    def test_constructor_requires_valid_api_key(self) -> None:
+    @mock.patch("sift.api_key", return_value=None)
+    def test_constructor_requires_valid_api_key(self, _) -> None:
         self.assertRaises(TypeError, sift.Client, None)
         self.assertRaises(ValueError, sift.Client, "")
 
