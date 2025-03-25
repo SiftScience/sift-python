@@ -10,36 +10,14 @@ APIs.
 
 ## Installation
 
-Set up a virtual environment with virtualenv (otherwise you will need
-to make the pip calls as sudo):
-
-    virtualenv venv
-    source venv/bin/activate
-
-Get the latest released package from pip:
-
-Python 2:
-
-    pip install Sift
-
-Python 3:
-
-    pip3 install Sift
-
-or install newest source directly from GitHub:
-
-Python 2:
-
-    pip install git+https://github.com/SiftScience/sift-python
-
-Python 3:
-
-    pip3 install git+https://github.com/SiftScience/sift-python
-
+```sh
+# install from PyPi
+pip install Sift
+```
 
 ## Documentation
 
-Please see [here](https://sift.com/developers/docs/python/events-api/overview) for the
+Please see [here](https://developers.sift.com/docs/python/apis-overview) for the
 most up-to-date documentation.
 
 ## Changelog
@@ -59,8 +37,7 @@ Here's an example:
 
 ```python
 
-import json
-import sift.client
+import sift
 
 client = sift.Client(api_key='<your API key here>', account_id='<your account ID here>')
 
@@ -85,12 +62,17 @@ properties = {
 }
 
 try:
-    response = client.track("$transaction", properties)
-    if response.is_ok():
-        print "Successfully tracked event"
+    response = client.track(
+        "$transaction",
+        properties,
+    )
 except sift.client.ApiException:
     # request failed
     pass
+else:
+    if response.is_ok():
+        print("Successfully tracked event")
+
 
 # Track a transaсtion event and receive a score with percentiles in response (sync flow).
 # Note: `return_score` or `return_workflow_status` must be set `True`.
@@ -111,15 +93,24 @@ properties = {
 }
 
 try:
-    response = client.track("$transaction", properties, return_score=True, include_score_percentiles=True, abuse_types=["promotion_abuse", "content_abuse", "payment_abuse"])
-    if response.is_ok():
-        score_response = response.body["score_response"]
-        print(score_response)
+    response = client.track(
+        "$transaction",
+        properties,
+        return_score=True,
+        include_score_percentiles=True,
+        abuse_types=("promotion_abuse", "content_abuse", "payment_abuse"),
+    )
 except sift.client.ApiException:
     # request failed
     pass
+else:
+    if response.is_ok():
+        score_response = response.body["score_response"]
+        print(score_response)
 
-# To include `warnings` field to Events API response via calling `track()` method, set it by the `include_warnings` param:
+
+# In order to include `warnings` field to Events API response via calling
+# `track()` method, set it by the `include_warnings` param:
 try:
     response = client.track("$transaction", properties, include_warnings=True)
     # ...
@@ -130,12 +121,12 @@ except sift.client.ApiException:
 # Request a score for the user with user_id 23056
 try:
     response = client.score(user_id)
-    s = json.dumps(response.body)
-    print s
-
 except sift.client.ApiException:
     # request failed
     pass
+else:
+    print(response.body)
+
 
 try:
     # Label the user with user_id 23056 as Bad with all optional fields
@@ -211,6 +202,7 @@ send_properties = {
 		}
 	}
 }
+
 try:
     response = client.verification_send(send_properties)
 except sift.client.ApiException:
@@ -241,35 +233,4 @@ try:
 except sift.client.ApiException:
     # request failed
     pass
-
-```
-
-## Testing
-
-Before submitting a change, make sure the following commands run without
-errors from the root dir of the repository:
-
-    python -m unittest discover
-    python3 -m unittest discover
-
-## Integration testing app
-
-For testing the app with real calls it is possible to run the integration testing app, 
-it makes calls to almost all our public endpoints to make sure the library integrates
-well. At the moment, the app is run on every merge to master
-
-#### How to run it locally
-
-1. Add env variable `ACCOUNT_ID` with the valid account id
-2. Add env variable `API_KEY` with the valid Api Key associated from the account
-3. Run the following under the project root folder
-```
-# uninstall the lib from the local env (if it was installed)
-pip uninstall sift
-
-# install the lib from the local source code
-pip install ../sift-python
-
-# run the app
-python test_integration_app/main.py
 ```

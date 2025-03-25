@@ -1,10 +1,11 @@
-6.0.0 Unreleased
+6.0.0 (Not released yet)
 ================
-- Support for Python 3.13
+
+- Added support for Python 3.13
 
 INCOMPATIBLE CHANGES INTRODUCED IN 6.0.0:
 
-- Removed support for Python < 3.8
+- Dropped support for Python < 3.8
 
 5.6.1 2024-10-08
 - Updated implementation to use Basic Authentication instead of passing `API_KEY` as a request parameter for the following calls:
