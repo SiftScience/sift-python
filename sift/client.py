@@ -204,12 +204,10 @@ class Client:
         return self._api_url("v3", endpoint)
 
     def _user_agent(self, version: str | None = None) -> str:
-        py_version = sys.version.split(" ")[0].split(".")
-
         return (
             f"SiftScience/v{version or self.version} "
             f"sift-python/{VERSION} "
-            f"Python/{py_version[0]}.{py_version[1]}"
+            f"Python/{sys.version.split(' ')[0]}"
         )
 
     def _headers(self, version: str | None = None) -> dict[str, str]:
