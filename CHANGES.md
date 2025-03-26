@@ -2,6 +2,10 @@
 ================
 
 - Added support for Python 3.13
+- Dropped support for Python < 3.8
+- Added typing annotations overall the library
+- Updated doc strings with actual information
+- Fixed issue when library could send requests with invalid version in the "User-Agent" header
 
 INCOMPATIBLE CHANGES INTRODUCED IN 6.0.0:
 
