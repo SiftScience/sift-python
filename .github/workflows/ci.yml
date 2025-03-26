@@ -28,7 +28,6 @@ jobs:
           python-version: "3.10.14"
       - name: Install test dependencies
         run: |
-          pip install mock=="${{ env.mock_version_python3 }}"
           pip install requests=="${{ env.requests_version_python3 }}"
       - name: Run tests
         run: |
