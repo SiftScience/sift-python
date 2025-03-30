@@ -750,7 +750,7 @@ class TestSiftPythonClient(TestCase):
                     entity_type="session",
                     limit=10,
                     start_from=None,
-                    abuse_types=("legacy", "account_takeover"),
+                    abuse_types=t.cast(list, "legacy,account_takeover"),
                     timeout=3,
                 )
 
