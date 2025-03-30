@@ -46,9 +46,9 @@ def _assert_non_empty_str(
 
 
 def _assert_non_empty_dict(val: object, name: str) -> None:
-    error = f"{name} must be a non-empty dict"
+    error = f"{name} must be a non-empty mapping (dict)"
 
-    if not isinstance(val, dict):
+    if not isinstance(val, Mapping):
         raise TypeError(error)
 
     if not val:
@@ -128,7 +128,7 @@ class Client:
         self,
         api_key: str | None = None,
         api_url: str = API_URL,
-        timeout: int | float | tuple[int | float, int | float] = 2,
+        timeout: float | tuple[float, float] = 2,
         account_id: str | None = None,
         version: str = API_VERSION,
         session: requests.Session | None = None,
@@ -140,23 +140,24 @@ class Client:
                 The Sift Science API key associated with your account. You can
                 obtain it from https://console.sift.com/developer/api-keys
 
-            api_url(optional):
+            api_url (optional):
                 Base URL, including scheme and host, for sending events.
                 Defaults to 'https://api.sift.com'.
 
-            timeout(optional):
-                Number of seconds to wait before failing a request.
+            timeout (optional):
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
                 Defaults to 2 seconds.
 
-            account_id(optional):
+            account_id (optional):
                 The ID of your Sift Science account. You can obtain
                 it from https://developers.sift.com/console/account/profile
 
-            version{optional}:
+            version (optional):
                 The version of the Sift Science API to call.
                 Defaults to the latest version.
 
-            session(optional):
+            session (optional):
                 requests.Session object
                 https://requests.readthedocs.io/en/latest/user/advanced/#session-objects
         """
@@ -188,20 +189,9 @@ class Client:
             if include
         ]
 
+    @property
     def _auth(self) -> HTTPBasicAuth:
         return HTTPBasicAuth(self.api_key, "")
-
-    def _api_url(self, version: str, endpoint: str) -> str:
-        return f"{self.url}/{version}{endpoint}"
-
-    def _versioned_api(self, version: str, endpoint: str) -> str:
-        return self._api_url(f"v{version}", endpoint)
-
-    def _v1_api(self, endpoint: str) -> str:
-        return self._api_url("v1", endpoint)
-
-    def _v3_api(self, endpoint: str) -> str:
-        return self._api_url("v3", endpoint)
 
     def _user_agent(self, version: str | None = None) -> str:
         return (
@@ -210,17 +200,29 @@ class Client:
             f"Python/{sys.version.split(' ')[0]}"
         )
 
-    def _headers(self, version: str | None = None) -> dict[str, str]:
+    def _default_headers(self, version: str | None = None) -> dict[str, str]:
         return {
             "User-Agent": self._user_agent(version),
         }
 
     def _post_headers(self, version: str | None = None) -> dict[str, str]:
         return {
+            **self._default_headers(version),
             "Content-type": "application/json",
             "Accept": "*/*",
-            "User-Agent": self._user_agent(version),
         }
+
+    def _api_url(self, version: str, endpoint: str) -> str:
+        return f"{self.url}/{version}{endpoint}"
+
+    def _v1_api(self, endpoint: str) -> str:
+        return self._api_url("v1", endpoint)
+
+    def _v3_api(self, endpoint: str) -> str:
+        return self._api_url("v3", endpoint)
+
+    def _versioned_api(self, version: str, endpoint: str) -> str:
+        return self._api_url(f"v{version}", endpoint)
 
     def _events_url(self, version: str) -> str:
         return self._versioned_api(version, "/events")
@@ -309,10 +311,10 @@ class Client:
         )
 
         event = properties.get("$event")
-        if not isinstance(event, dict):
-            raise TypeError("$event must be a dict")
+        if not isinstance(event, Mapping):
+            raise TypeError("$event must be a mapping (dict)")
         elif not event:
-            raise ValueError("$event dictionary may not be empty")
+            raise ValueError("$event mapping (dict) may not be empty")
 
         session_id = event.get("$session_id")
         _assert_non_empty_str(session_id, "session_id", error_cls=ValueError)
@@ -336,8 +338,7 @@ class Client:
         user_id = properties.get("$user_id")
         _assert_non_empty_str(user_id, "user_id", error_cls=ValueError)
 
-        otp_code = properties.get("$code")
-        if otp_code is None:
+        if properties.get("$code") is None:
             raise ValueError("code is required")
 
     def _validate_apply_decision_request(
@@ -373,7 +374,7 @@ class Client:
         return_route_info: bool = False,
         force_workflow_run: bool = False,
         abuse_types: Sequence[AbuseType] | None = None,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         version: str | None = None,
         include_score_percentiles: bool = False,
         include_warnings: bool = False,
@@ -394,7 +395,7 @@ class Client:
                 a custom event name (that does not start with a $).
 
             properties:
-                A dict of additional event-specific attributes to track.
+                A mapping of additional event-specific attributes to track.
 
             path:
                 An API endpoint to make a request to.
@@ -408,7 +409,7 @@ class Client:
                 Whether the API response should include actions in the
                 response. For more information on how this works, please
                 visit the tutorial at:
-                https://developers.sift.com/tutorials/formulas .
+                https://developers.sift.com/tutorials/formulas
 
             return_workflow_status (optional):
                 Whether the API response should include the status of any
@@ -426,13 +427,14 @@ class Client:
                 score response, and no workflow will run.
 
             abuse_types (optional):
-                A Sequence of abuse types, specifying for which abuse types
+                A sequence of abuse types, specifying for which abuse types
                 a score should be returned (if scores were requested). If not
                 specified, a score will be returned for every abuse_type
                 to which you are subscribed.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             version (optional):
                 Use a different version of the Sift Science API for this call.
@@ -450,11 +452,10 @@ class Client:
                 but important enough to be fixed.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(event, "event")
         _assert_non_empty_dict(properties, "properties")
@@ -517,7 +518,7 @@ class Client:
     def score(
         self,
         user_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         abuse_types: Sequence[AbuseType] | None = None,
         version: str | None = None,
         include_score_percentiles: bool = False,
@@ -536,10 +537,11 @@ class Client:
                 used in event calls.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             abuse_types (optional):
-                A Sequence of abuse types, specifying for which abuse types
+                A sequence of abuse types, specifying for which abuse types
                 a score should be returned (if scores were requested). If not
                 specified, a score will be returned for every abuse_type
                 to which you are subscribed.
@@ -553,11 +555,10 @@ class Client:
                 parameter called `fields` in the query parameter
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(user_id, "user_id")
 
@@ -581,8 +582,8 @@ class Client:
             response = self.session.get(
                 url,
                 params=params,
-                auth=self._auth(),
-                headers=self._headers(version),
+                auth=self._auth,
+                headers=self._default_headers(version),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -593,7 +594,7 @@ class Client:
     def get_user_score(
         self,
         user_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         abuse_types: Sequence[AbuseType] | None = None,
         include_score_percentiles: bool = False,
     ) -> Response:
@@ -615,10 +616,11 @@ class Client:
                 event calls.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             abuse_types (optional):
-                A Sequence of abuse types, specifying for which abuse types
+                A sequence of abuse types, specifying for which abuse types
                 a score should be returned (if scores were requested). If not
                 specified, a score will be returned for every abuse_type
                 to which you are subscribed.
@@ -629,11 +631,10 @@ class Client:
                 called fields in the query parameter
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(user_id, "user_id")
 
@@ -653,8 +654,8 @@ class Client:
             response = self.session.get(
                 url,
                 params=params,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -665,7 +666,7 @@ class Client:
     def rescore_user(
         self,
         user_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         abuse_types: Sequence[AbuseType] | None = None,
     ) -> Response:
         """
@@ -683,20 +684,20 @@ class Client:
                 event calls.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             abuse_types (optional):
-                A Sequence of abuse types, specifying for which abuse types
+                A sequence of abuse types, specifying for which abuse types
                 a score should be returned (if scores were requested). If not
                 specified, a score will be returned for every abuse_type
                 to which you are subscribed.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(user_id, "user_id")
 
@@ -713,8 +714,8 @@ class Client:
             response = self.session.post(
                 url,
                 params=params,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -726,7 +727,7 @@ class Client:
         self,
         user_id: str,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         version: str | None = None,
     ) -> Response:
         """
@@ -743,20 +744,20 @@ class Client:
                 event calls.
 
             properties:
-                A dict of additional event-specific attributes to track.
+                A mapping of additional event-specific attributes to track.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             version (optional):
                 Use a different version of the Sift Science API for this call.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(user_id, "user_id")
 
@@ -774,7 +775,7 @@ class Client:
     def unlabel(
         self,
         user_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         abuse_type: AbuseType | None = None,
         version: str | None = None,
     ) -> Response:
@@ -792,7 +793,8 @@ class Client:
                 event calls.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             abuse_type (optional):
                 The abuse type for which the user should be unlabeled.
@@ -802,11 +804,10 @@ class Client:
                 Use a different version of the Sift Science API for this call.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(user_id, "user_id")
 
@@ -826,8 +827,8 @@ class Client:
             response = self.session.delete(
                 url,
                 params=params,
-                auth=self._auth(),
-                headers=self._headers(version),
+                auth=self._auth,
+                headers=self._default_headers(version),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -838,7 +839,7 @@ class Client:
     def get_workflow_status(
         self,
         run_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Gets the status of a workflow run.
 
@@ -847,14 +848,14 @@ class Client:
                 The workflow run unique identifier.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(self.account_id, "account_id")
         _assert_non_empty_str(run_id, "run_id")
@@ -867,8 +868,8 @@ class Client:
         try:
             response = self.session.get(
                 url,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -881,8 +882,8 @@ class Client:
         entity_type: t.Literal["user", "order", "session", "content"],
         limit: int | None = None,
         start_from: int | None = None,
-        abuse_types: str | None = None,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        abuse_types: Sequence[AbuseType] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Get decisions available to the customer
 
@@ -898,26 +899,32 @@ class Client:
                 Result set offset for use in pagination [default: 0]
 
             abuse_types (optional):
-                comma-separated list of abuse_types used to filter returned
-                decisions
+                A sequence of abuse types, specifying by which abuse types
+                decisions should be filtered.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
         _assert_non_empty_str(entity_type, "entity_type")
 
-        if entity_type.lower() not in ["user", "order", "session", "content"]:
+        if entity_type.lower() not in ("user", "order", "session", "content"):
             raise ValueError(
                 "entity_type must be one of {user, order, session, content}"
+            )
+
+        if isinstance(abuse_types, str):
+            raise ValueError(
+                "Passing `abuse_types` as string is deprecated. "
+                "Expected a sequence of string literals."
             )
 
         params: dict[str, t.Any] = {
@@ -931,7 +938,7 @@ class Client:
             params["from"] = start_from
 
         if abuse_types:
-            params["abuse_types"] = abuse_types
+            params["abuse_types"] = ",".join(abuse_types)
 
         if timeout is None:
             timeout = self.timeout
@@ -942,8 +949,8 @@ class Client:
             response = self.session.get(
                 url,
                 params=params,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -955,7 +962,7 @@ class Client:
         self,
         user_id: str,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Apply decision to a user
 
@@ -969,14 +976,14 @@ class Client:
                 time: in millis when decision was applied
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(self.account_id, "account_id")
 
@@ -991,7 +998,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(),
                 timeout=timeout,
             )
@@ -1005,7 +1012,7 @@ class Client:
         user_id: str,
         order_id: str,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Apply decision to order
 
@@ -1024,14 +1031,14 @@ class Client:
                 time: in millis when decision was applied (optional)
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1051,7 +1058,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(),
                 timeout=timeout,
             )
@@ -1063,7 +1070,7 @@ class Client:
     def get_user_decisions(
         self,
         user_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Gets the decisions for a user.
 
@@ -1072,14 +1079,14 @@ class Client:
                 The ID of a user.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1093,8 +1100,8 @@ class Client:
         try:
             response = self.session.get(
                 url,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -1105,7 +1112,7 @@ class Client:
     def get_order_decisions(
         self,
         order_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Gets the decisions for an order.
 
@@ -1114,14 +1121,14 @@ class Client:
                 The ID for the order.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1135,8 +1142,8 @@ class Client:
         try:
             response = self.session.get(
                 url,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -1148,7 +1155,7 @@ class Client:
         self,
         user_id: str,
         content_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Gets the decisions for a piece of content.
 
@@ -1160,14 +1167,14 @@ class Client:
                 The ID for the content.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1182,8 +1189,8 @@ class Client:
         try:
             response = self.session.get(
                 url,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -1195,7 +1202,7 @@ class Client:
         self,
         user_id: str,
         session_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Gets the decisions for a user's session.
 
@@ -1207,14 +1214,14 @@ class Client:
                 The ID for the session.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1229,8 +1236,8 @@ class Client:
         try:
             response = self.session.get(
                 url,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -1243,7 +1250,7 @@ class Client:
         user_id: str,
         session_id: str,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Apply decision to a session.
 
@@ -1262,14 +1269,14 @@ class Client:
                 time: in millis when decision was applied (optional)
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1287,7 +1294,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(),
                 timeout=timeout,
             )
@@ -1301,7 +1308,7 @@ class Client:
         user_id: str,
         content_id: str,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Apply decision to a piece of content.
 
@@ -1320,14 +1327,14 @@ class Client:
                 time: in millis when decision was applied (optional)
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(self.account_id, "account_id")
         _assert_non_empty_str(user_id, "user_id")
@@ -1344,7 +1351,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(),
                 timeout=timeout,
             )
@@ -1356,23 +1363,23 @@ class Client:
     def create_psp_merchant_profile(
         self,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Create a new PSP Merchant profile
 
         Args:
             properties:
-                A dict of merchant profile data.
+                A mapping of merchant profile data.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1386,7 +1393,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(),
                 timeout=timeout,
             )
@@ -1399,7 +1406,7 @@ class Client:
         self,
         merchant_id: str,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Update already existing PSP Merchant profile
 
@@ -1409,17 +1416,17 @@ class Client:
                 the good or service.
 
             properties:
-                A dict of merchant profile data.
+                A mapping of merchant profile data.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1433,7 +1440,7 @@ class Client:
             response = self.session.put(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(),
                 timeout=timeout,
             )
@@ -1446,7 +1453,7 @@ class Client:
         self,
         batch_token: str | None = None,
         batch_size: int | None = None,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Gets all PSP merchant profiles (paginated).
 
@@ -1458,14 +1465,14 @@ class Client:
                 Batch or page size of the paginated sequence.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1486,8 +1493,8 @@ class Client:
         try:
             response = self.session.get(
                 url,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 params=params,
                 timeout=timeout,
             )
@@ -1499,7 +1506,7 @@ class Client:
     def get_a_psp_merchant_profile(
         self,
         merchant_id: str,
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Gets a PSP merchant profile by merchant id.
 
@@ -1509,14 +1516,14 @@ class Client:
                 the good or service.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         _assert_non_empty_str(self.account_id, "account_id")
@@ -1529,8 +1536,8 @@ class Client:
         try:
             response = self.session.get(
                 url,
-                auth=self._auth(),
-                headers=self._headers(),
+                auth=self._auth,
+                headers=self._default_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
@@ -1541,7 +1548,7 @@ class Client:
     def verification_send(
         self,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         version: str | None = None,
     ) -> Response:
         """
@@ -1588,17 +1595,17 @@ class Client:
                             Use this field if the client is a browser.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             version (optional):
                 Use a different version of the Sift Science API for this call.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         if timeout is None:
@@ -1615,7 +1622,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(version),
                 timeout=timeout,
             )
@@ -1627,7 +1634,7 @@ class Client:
     def verification_resend(
         self,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         version: str | None = None,
     ) -> Response:
         """
@@ -1642,7 +1649,6 @@ class Client:
         Args:
 
             properties:
-
                 $user_id:
                     User ID of user being verified, e.g. johndoe123.
                 $verified_event (optional):
@@ -1651,17 +1657,17 @@ class Client:
                     The ID of the entity impacted by the event being verified.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             version (optional):
                 Use a different version of the Sift Science API for this call.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
 
         if timeout is None:
@@ -1678,7 +1684,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(version),
                 timeout=timeout,
             )
@@ -1690,7 +1696,7 @@ class Client:
     def verification_check(
         self,
         properties: Mapping[str, t.Any],
-        timeout: int | float | tuple[int | float, int | float] | None = None,
+        timeout: float | tuple[float, float] | None = None,
         version: str | None = None,
     ) -> Response:
         """
@@ -1718,17 +1724,17 @@ class Client:
                     The ID of the entity impacted by the event being verified.
 
             timeout (optional):
-                Use a custom timeout (in seconds) for this call.
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
 
             version (optional):
                 Use a different version of the Sift Science API for this call.
 
         Returns:
-            A sift.client.Response object if the call succeeded
+            A sift.client.Response object if the call to the Sift API is successful
 
         Raises:
-            ApiException:
-                if the call not succeeded
+            ApiException: If the call to the Sift API is not successful
         """
         if timeout is None:
             timeout = self.timeout
@@ -1744,7 +1750,7 @@ class Client:
             response = self.session.post(
                 url,
                 data=json.dumps(properties),
-                auth=self._auth(),
+                auth=self._auth,
                 headers=self._post_headers(version),
                 timeout=timeout,
             )

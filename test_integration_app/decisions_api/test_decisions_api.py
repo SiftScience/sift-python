@@ -76,5 +76,8 @@ class DecisionAPI:
             entity_type="user",
             limit=10,
             start_from=5,
-            abuse_types="legacy,payment_abuse",
+            abuse_types=(
+                "legacy",
+                "payment_abuse",
+            ),
         )

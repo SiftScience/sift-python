@@ -257,10 +257,10 @@ class TestSiftPythonClient(TestCase):
         # test that client2 is assigned a new object with global api_key
         assert client2.api_key == sift.api_key
 
-    @mock.patch("sift.api_key", return_value=None)
-    def test_constructor_requires_valid_api_key(self, _) -> None:
-        self.assertRaises(TypeError, sift.Client, None)
-        self.assertRaises(ValueError, sift.Client, "")
+    def test_constructor_requires_valid_api_key(self) -> None:
+        with mock.patch("sift.api_key", return_value=None):
+            self.assertRaises(TypeError, sift.Client, None)
+            self.assertRaises(ValueError, sift.Client, "")
 
     def test_constructor_invalid_api_url(self) -> None:
         self.assertRaises(TypeError, sift.Client, self.test_key, None)
@@ -665,7 +665,10 @@ class TestSiftPythonClient(TestCase):
                 entity_type="user",
                 limit=10,
                 start_from=None,
-                abuse_types="legacy,payment_abuse",
+                abuse_types=(
+                    "legacy",
+                    "payment_abuse",
+                ),
                 timeout=3,
             )
 
@@ -720,7 +723,7 @@ class TestSiftPythonClient(TestCase):
                 entity_type="session",
                 limit=10,
                 start_from=None,
-                abuse_types="account_takeover",
+                abuse_types=("account_takeover",),
                 timeout=3,
             )
 
@@ -739,6 +742,19 @@ class TestSiftPythonClient(TestCase):
             assert response.is_ok()
             assert isinstance(response.body, dict)
             assert response.body["data"][0]["id"] == "block_session"
+
+    def test_get_decisions_with_deprecated_signature(self) -> None:
+        with mock.patch.object(self.sift_client.session, "get") as mock_get:
+            with self.assertRaises(ValueError):
+                self.sift_client.get_decisions(
+                    entity_type="session",
+                    limit=10,
+                    start_from=None,
+                    abuse_types=("legacy", "account_takeover"),
+                    timeout=3,
+                )
+
+                mock_get.assert_not_called()
 
     def test_apply_decision_to_user_ok(self) -> None:
         user_id = "54321"

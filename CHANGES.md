@@ -5,11 +5,19 @@
 - Dropped support for Python < 3.8
 - Added typing annotations overall the library
 - Updated doc strings with actual information
-- Fixed issue when the client could send requests with invalid version in the "User-Agent" header
+- Fixed an issue when the client could send requests with invalid version in the "User-Agent" header
+- Changed the type of the `abuse_types` parameter in the `client.get_decisions()` method
 
 INCOMPATIBLE CHANGES INTRODUCED IN 6.0.0:
 
 - Dropped support for Python < 3.8
+- Passing `abuse_types` as a comma-separated string to the `client.get_decisions()` is deprecated.
+
+  Previously, `client.get_decisions()` method allowed to pass `abuse_types` parameter as a
+  comma-separated string e.g. `abuse_types="legacy,payment_abuse"`. This is deprecated now.
+  Starting from 6.0.0 callers must pass `abuse_types` parameter to the `client.get_decisions()`
+  method as a sequence of string literals e.g. `abuse_types=("legacy", "payment_abuse")`. The same
+  way as it passed to the other client's methods which receive `abuse_types` parameter.
 
 5.6.1 2024-10-08
 - Updated implementation to use Basic Authentication instead of passing `API_KEY` as a request parameter for the following calls:
