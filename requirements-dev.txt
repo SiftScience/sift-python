@@ -2,4 +2,4 @@ black==24.8.0
 flake8==7.1.2
 isort==5.13.2
 mypy==1.14.1
-typos==1.30.2
+typos==1.31.1
