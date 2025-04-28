@@ -18,16 +18,6 @@ from sift.exceptions import ApiException
 from sift.utils import DecimalEncoder, quote_path as _q
 from sift.version import API_VERSION, VERSION
 
-AbuseType = t.Literal[
-    "account_abuse",
-    "account_takeover",
-    "content_abuse",
-    "legacy",
-    "payment_abuse",
-    "promo_abuse",
-    "promotion_abuse",
-]
-
 
 def _assert_non_empty_str(
     val: object,
@@ -373,7 +363,7 @@ class Client:
         return_workflow_status: bool = False,
         return_route_info: bool = False,
         force_workflow_run: bool = False,
-        abuse_types: Sequence[AbuseType] | None = None,
+        abuse_types: Sequence[str] | None = None,
         timeout: float | tuple[float, float] | None = None,
         version: str | None = None,
         include_score_percentiles: bool = False,
@@ -519,7 +509,7 @@ class Client:
         self,
         user_id: str,
         timeout: float | tuple[float, float] | None = None,
-        abuse_types: Sequence[AbuseType] | None = None,
+        abuse_types: Sequence[str] | None = None,
         version: str | None = None,
         include_score_percentiles: bool = False,
     ) -> Response:
@@ -595,7 +585,7 @@ class Client:
         self,
         user_id: str,
         timeout: float | tuple[float, float] | None = None,
-        abuse_types: Sequence[AbuseType] | None = None,
+        abuse_types: Sequence[str] | None = None,
         include_score_percentiles: bool = False,
     ) -> Response:
         """
@@ -667,7 +657,7 @@ class Client:
         self,
         user_id: str,
         timeout: float | tuple[float, float] | None = None,
-        abuse_types: Sequence[AbuseType] | None = None,
+        abuse_types: Sequence[str] | None = None,
     ) -> Response:
         """
         Rescores the specified user for the specified abuse types and returns
@@ -776,7 +766,7 @@ class Client:
         self,
         user_id: str,
         timeout: float | tuple[float, float] | None = None,
-        abuse_type: AbuseType | None = None,
+        abuse_type: str | None = None,
         version: str | None = None,
     ) -> Response:
         """
@@ -882,7 +872,7 @@ class Client:
         entity_type: t.Literal["user", "order", "session", "content"],
         limit: int | None = None,
         start_from: int | None = None,
-        abuse_types: Sequence[AbuseType] | None = None,
+        abuse_types: Sequence[str] | None = None,
         timeout: float | tuple[float, float] | None = None,
     ) -> Response:
         """Get decisions available to the customer
