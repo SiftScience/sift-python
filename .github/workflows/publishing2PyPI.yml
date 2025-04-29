@@ -27,11 +27,12 @@ jobs:
           fi
       - name: Create distribution files
         run: |
-          python3 setup.py sdist
+          python -m pip install build
+          python -m build
       - name: Upload distribution files
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_USER: ${{ secrets.USER }}
         run: |
-          python3 -m pip install --user --upgrade twine
-          ls  dist/ | xargs  -I % python3 -m twine upload --repository pypi dist/%
+          python -m pip install --user --upgrade twine
+          ls  dist/ | xargs  -I % python -m twine upload --repository pypi dist/%

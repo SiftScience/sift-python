@@ -12,8 +12,6 @@ permissions:
   contents: read
 
 env:
-  mock_version_python3: "5.0.1"
-  requests_version_python3: "2.28.2"
   ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
   API_KEY: ${{ secrets.API_KEY }}
 
@@ -28,7 +26,12 @@ jobs:
           python-version: "3.10.14"
       - name: Install test dependencies
         run: |
-          pip install requests=="${{ env.requests_version_python3 }}"
+          pip install -e .
+          pip install -r requirements-dev.txt
+      - name: Run linters
+        run: |
+          pip install -U pre-commit
+          pre-commit run -v --all-files
       - name: Run tests
         run: |
           python -m unittest discover
@@ -42,7 +45,7 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.10.14"
-      - name: run-integration-tests-python3
+      - name: Run integration tests
         run: |
-          pip3 install .
-          python3 test_integration_app/main.py
+          pip install .
+          python test_integration_app/main.py
