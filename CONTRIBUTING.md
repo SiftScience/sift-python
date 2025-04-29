@@ -23,6 +23,7 @@ pip install -U pip
 
 ```sh
 pip install -U pre-commit
+pre-commit install
 ```
 
 5. Install the library:
