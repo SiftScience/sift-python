@@ -6,7 +6,7 @@
 
 ```sh
 # install necessary Python version
-pyenv install 3.13.2 
+pyenv install 3.13.2
 
 # create a virtual environment
 pyenv virtualenv 3.13.2 v3.13
