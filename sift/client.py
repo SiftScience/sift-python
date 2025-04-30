@@ -1,5 +1,5 @@
 """Python client for Sift Science's API.
-See: https://developers.sift.com/docs/python/events-api
+See: https://developers.sift.com/docs/python/events-api/
 """
 
 from __future__ import annotations
@@ -374,7 +374,7 @@ class Client:
 
         This call is blocking.
 
-        Visit https://siftscience.com/resources/references/events-api
+        Visit https://developers.sift.com/docs/python/events-api/
         for more information on what types of events you can send and fields
         you can add to the properties parameter.
 
@@ -518,7 +518,7 @@ class Client:
 
         This call is blocking.
 
-        Visit https://developers.sift.com/docs/python/score-api
+        Visit https://developers.sift.com/docs/python/score-api/
         for more details on our Score response structure.
 
         Args:
@@ -597,7 +597,7 @@ class Client:
 
         This call is blocking.
 
-        Visit https://developers.sift.com/docs/python/score-api/get-score
+        Visit https://developers.sift.com/docs/python/score-api/get-score/
         for more details.
 
         Args:
@@ -665,7 +665,7 @@ class Client:
 
         This call is blocking.
 
-        Visit https://developers.sift.com/docs/python/score-api/rescore/overview
+        Visit https://developers.sift.com/docs/python/score-api/rescore/
         for more details.
 
         Args:
@@ -725,7 +725,7 @@ class Client:
 
         This call is blocking.
 
-        Visit https://developers.sift.com/docs/python/labels-api
+        Visit https://developers.sift.com/docs/python/labels-api/label-user
         for more details on what fields to send in properties.
 
         Args:
@@ -774,7 +774,7 @@ class Client:
 
         This call is blocking.
 
-        Visit https://developers.sift.com/docs/python/labels-api
+        Visit https://developers.sift.com/docs/python/labels-api/unlabel-user
         for more details.
 
         Args:
