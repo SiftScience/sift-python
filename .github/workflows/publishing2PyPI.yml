@@ -18,7 +18,7 @@ jobs:
           VERSION=$(cat ./sift/version.py | grep -E -i '^VERSION.*' | cut -d'=' -f2 | cut -d\' -f2)
           [[ $VERSION == "NOT_SET" ]] && echo "Version in version.py NOT_SET" && exit 1
           echo "curr_version=$(echo $VERSION)" >> $GITHUB_ENV
-      - name: Compare package version and Releas tag
+      - name: Compare package version and Release tag
         run: |
           TAG=${GITHUB_REF##*/}
           if [[ $TAG != *"$curr_version"* ]]; then
@@ -27,11 +27,12 @@ jobs:
           fi
       - name: Create distribution files
         run: |
-          python3 setup.py sdist
+          python -m pip install build
+          python -m build
       - name: Upload distribution files
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           TWINE_USER: ${{ secrets.USER }}
         run: |
-          python3 -m pip install --user --upgrade twine
-          ls  dist/ | xargs  -I % python3 -m twine upload --repository pypi dist/%
+          python -m pip install --user --upgrade twine
+          ls  dist/ | xargs  -I % python -m twine upload --repository pypi dist/%
