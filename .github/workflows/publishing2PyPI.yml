@@ -15,7 +15,7 @@ jobs:
       - name: Get package version
         run: |
           VERSION=NOT_SET
-          VERSION=$(cat ./sift/version.py | grep -E -i '^VERSION.*' | cut -d'=' -f2 | cut -d\' -f2)
+          VERSION=$(cat ./sift/version.py | grep -E -i '^VERSION.*' | cut -d'=' -f2 | cut -d\" -f2)
           [[ $VERSION == "NOT_SET" ]] && echo "Version in version.py NOT_SET" && exit 1
           echo "curr_version=$(echo $VERSION)" >> $GITHUB_ENV
       - name: Compare package version and Release tag
