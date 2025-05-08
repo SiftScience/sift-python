@@ -16,6 +16,22 @@ env:
   API_KEY: ${{ secrets.API_KEY }}
 
 jobs:
+  run-cyclonedx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Log in to the github container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate CycloneDX SBOM
+        run: |
+          docker pull ghcr.io/cyclonedx/cdxgen-python:v11
+          docker run --rm -e FETCH_LICENSE=true -v /tmp:/tmp -v $(pwd):/app:rw -t ghcr.io/cyclonedx/cdxgen-python310:v11 -r /app -o /app/sift-bom.json -t python --profile license-compliance
+
   build-and-test-python3:
     runs-on: ubuntu-latest
     steps:
