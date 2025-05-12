@@ -41,6 +41,8 @@ jobs:
           bomFilename: "sbom.json"
           autoCreate: true
           parentName: 'sift-python'
+        env:
+          ACTIONS_STEP_DEBUG: true
 
   build-and-test-python3:
     runs-on: ubuntu-latest
