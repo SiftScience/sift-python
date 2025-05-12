@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Log in to the github container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -30,7 +30,17 @@ jobs:
       - name: Generate CycloneDX SBOM
         run: |
           docker pull ghcr.io/cyclonedx/cdxgen-python:v11
-          docker run --rm -e FETCH_LICENSE=true -v /tmp:/tmp -v $(pwd):/app:rw -t ghcr.io/cyclonedx/cdxgen-python310:v11 -r /app -o /app/sift-bom.json -t python --profile license-compliance
+          docker run --rm -e FETCH_LICENSE=true -e CDXGEN_DEBUG_MODE=debug -v /tmp:/tmp -v $(pwd):/app:rw -t ghcr.io/cyclonedx/cdxgen-python310:v11 -r /app -o /app/sbom.json -t python --profile license-compliance
+      - name: Upload BOM to Dependency-Track
+        uses: DependencyTrack/gh-upload-sbom@v3
+        with:
+          serverHostname: ${{ secrets.DEPENDENCYTRACK_HOSTNAME }}
+          apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          projectName: 'python'
+          projectVersion: ${{ github.sha }}
+          bomFilename: "sbom.json"
+          autoCreate: true
+          parentName: 'sift-python'
 
   build-and-test-python3:
     runs-on: ubuntu-latest
