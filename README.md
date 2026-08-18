@@ -227,4 +227,25 @@ try:
 except sift.client.ApiException:
     # request failed
     pass
+
+# Get the Global Profile for a user
+try:
+    response = client.get_global_profile(
+        user_id,
+        global_only=False,
+        include_own_data=True,
+    )
+except sift.client.ApiException:
+    # request failed
+    pass
+
+# Look up a Global Profile by email and/or phone
+try:
+    response = client.get_global_profile_by_attributes(
+        email="buyer@gmail.com",
+        phone="+15555550100",
+    )
+except sift.client.ApiException:
+    # request failed
+    pass
 ```

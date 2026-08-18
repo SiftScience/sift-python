@@ -1616,6 +1616,155 @@ class TestSiftPythonClient(TestCase):
             assert isinstance(response.body, dict)
             assert "address" in response.body
 
+    def test_get_global_profile(self) -> None:
+        """Test the GET /v3/accounts/{accountId}/global_profile/users/{userId}"""
+        test_timeout = 5
+        mock_response = mock.Mock()
+        global_profile_response_json = """
+        {
+            "status": 0,
+            "error_message": "OK",
+            "error_code": null,
+            "lookback_months": 12,
+            "profile_summary": {
+                "identity_found": true,
+                "has_links": true,
+                "link_count": 7,
+                "linked_accounts_count_per_industry": {"finances": 3, "internet": 4}
+            }
+        }
+        """
+        mock_response.content = global_profile_response_json
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch.object(self.sift_client.session, "get") as mock_get:
+            mock_get.return_value = mock_response
+
+            response = self.sift_client.get_global_profile(
+                "example_user",
+                global_only=True,
+                include_own_data=False,
+                timeout=test_timeout,
+            )
+
+            mock_get.assert_called_with(
+                "https://api.sift.com/v3/accounts/ACCT/global_profile/users/example_user",
+                params={
+                    "global_only": "true",
+                    "include_own_data": "false",
+                },
+                headers=mock.ANY,
+                auth=mock.ANY,
+                timeout=test_timeout,
+            )
+            self.assertIsInstance(response, sift.client.Response)
+            assert response.is_ok()
+            assert isinstance(response.body, dict)
+            assert response.body["profile_summary"]["identity_found"] is True
+
+    def test_get_global_profile_default_params(self) -> None:
+        mock_response = mock.Mock()
+        mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch.object(self.sift_client.session, "get") as mock_get:
+            mock_get.return_value = mock_response
+
+            self.sift_client.get_global_profile("example_user")
+
+            mock_get.assert_called_with(
+                "https://api.sift.com/v3/accounts/ACCT/global_profile/users/example_user",
+                params={
+                    "global_only": "false",
+                    "include_own_data": "true",
+                },
+                headers=mock.ANY,
+                auth=mock.ANY,
+                timeout=mock.ANY,
+            )
+
+    def test_get_global_profile_requires_user_id(self) -> None:
+        with self.assertRaises(ValueError):
+            self.sift_client.get_global_profile("")
+
+    def test_get_global_profile_by_attributes(self) -> None:
+        """Test the POST /v3/accounts/{accountId}/global_profile/lookup"""
+        test_timeout = 5
+        mock_response = mock.Mock()
+        global_profile_response_json = """
+        {
+            "status": 0,
+            "error_message": "OK",
+            "error_code": null,
+            "lookback_months": 12,
+            "profile_summary": {
+                "identity_found": true,
+                "has_links": true,
+                "link_count": 7,
+                "linked_accounts_count_per_industry": {"finances": 3, "internet": 4}
+            }
+        }
+        """
+        mock_response.content = global_profile_response_json
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch.object(self.sift_client.session, "post") as mock_post:
+            mock_post.return_value = mock_response
+
+            response = self.sift_client.get_global_profile_by_attributes(
+                email="buyer@example.com",
+                phone="+15555550100",
+                timeout=test_timeout,
+            )
+
+            mock_post.assert_called_with(
+                "https://api.sift.com/v3/accounts/ACCT/global_profile/lookup",
+                data=json.dumps(
+                    {"email": "buyer@example.com", "phone": "+15555550100"}
+                ),
+                headers=mock.ANY,
+                auth=mock.ANY,
+                timeout=test_timeout,
+            )
+            self.assertIsInstance(response, sift.client.Response)
+            assert response.is_ok()
+            assert isinstance(response.body, dict)
+            assert response.body["profile_summary"]["identity_found"] is True
+
+    def test_get_global_profile_by_attributes_email_only(self) -> None:
+        mock_response = mock.Mock()
+        mock_response.content = '{"status": 0, "error_message": "OK"}'
+        mock_response.json.return_value = json.loads(mock_response.content)
+        mock_response.status_code = 200
+        mock_response.headers = response_with_data_header()
+
+        with mock.patch.object(self.sift_client.session, "post") as mock_post:
+            mock_post.return_value = mock_response
+
+            self.sift_client.get_global_profile_by_attributes(
+                email="buyer@example.com"
+            )
+
+            mock_post.assert_called_with(
+                "https://api.sift.com/v3/accounts/ACCT/global_profile/lookup",
+                data=json.dumps({"email": "buyer@example.com"}),
+                headers=mock.ANY,
+                auth=mock.ANY,
+                timeout=mock.ANY,
+            )
+
+    def test_get_global_profile_by_attributes_requires_email_or_phone(
+        self,
+    ) -> None:
+        with self.assertRaises(ValueError):
+            self.sift_client.get_global_profile_by_attributes()
+
     def test_create_psp_merchant_profile(self) -> None:
         mock_response = mock.Mock()
         mock_response.content = valid_psp_merchant_properties_response()
