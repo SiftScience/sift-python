@@ -1,3 +1,10 @@
+6.1.0 2026-08-18
+================
+
+- Added support for the Global Profile API:
+  - `client.get_global_profile()` to fetch a user's Global Profile
+  - `client.get_global_profile_by_attributes()` to look up a Global Profile by email and/or phone
+
 6.0.0 2025-05-05
 ================
 

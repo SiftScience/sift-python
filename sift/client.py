@@ -275,6 +275,16 @@ class Client:
             f"/accounts/{_q(account_id)}/psp_management/merchants/{_q(merchant_id)}"
         )
 
+    def _global_profile_url(self, account_id: str, user_id: str) -> str:
+        return self._v3_api(
+            f"/accounts/{_q(account_id)}/global_profile/users/{_q(user_id)}"
+        )
+
+    def _global_profile_lookup_url(self, account_id: str) -> str:
+        return self._v3_api(
+            f"/accounts/{_q(account_id)}/global_profile/lookup"
+        )
+
     def _verification_send_url(self) -> str:
         return self._v1_api("/verification/send")
 
@@ -1528,6 +1538,124 @@ class Client:
                 url,
                 auth=self._auth,
                 headers=self._default_headers(),
+                timeout=timeout,
+            )
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+        return Response(response)
+
+    def get_global_profile(
+        self,
+        user_id: str,
+        global_only: bool = False,
+        include_own_data: bool = True,
+        timeout: float | tuple[float, float] | None = None,
+    ) -> Response:
+        """Gets the Global Profile for a user.
+
+        Args:
+            user_id:
+                The ID of the user to fetch the Global Profile for.
+
+            global_only (optional):
+                If True, excludes the requesting tenant's own network
+                connections from the response. [default: False]
+
+            include_own_data (optional):
+                If True, includes the requested user's own feature values
+                in the response. [default: True]
+
+            timeout (optional):
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
+
+        Returns:
+            A sift.client.Response object if the call to the Sift API is successful
+
+        Raises:
+            ApiException: If the call to the Sift API is not successful
+        """
+        _assert_non_empty_str(self.account_id, "account_id")
+        _assert_non_empty_str(user_id, "user_id", error_cls=ValueError)
+
+        params: dict[str, t.Any] = {
+            "global_only": "true" if global_only else "false",
+            "include_own_data": "true" if include_own_data else "false",
+        }
+
+        if timeout is None:
+            timeout = self.timeout
+
+        url = self._global_profile_url(self.account_id, user_id)
+
+        try:
+            response = self.session.get(
+                url,
+                params=params,
+                auth=self._auth,
+                headers=self._default_headers(),
+                timeout=timeout,
+            )
+        except requests.exceptions.RequestException as e:
+            raise ApiException(str(e), url)
+
+        return Response(response)
+
+    def get_global_profile_by_attributes(
+        self,
+        email: str | None = None,
+        phone: str | None = None,
+        timeout: float | tuple[float, float] | None = None,
+    ) -> Response:
+        """Looks up the Global Profile for a user by email and/or phone.
+
+        Args:
+            email (optional):
+                The email address to look up. At least one of `email` or
+                `phone` must be provided.
+
+            phone (optional):
+                The phone number to look up. At least one of `email` or
+                `phone` must be provided.
+
+            timeout (optional):
+                How many seconds to wait for the server to send data before
+                giving up, as a float, or a (connect timeout, read timeout) tuple.
+
+        Returns:
+            A sift.client.Response object if the call to the Sift API is successful
+
+        Raises:
+            ApiException: If the call to the Sift API is not successful
+        """
+        _assert_non_empty_str(self.account_id, "account_id")
+
+        email_stripped = email.strip() if email else ""
+        phone_stripped = phone.strip() if phone else ""
+
+        if not email_stripped and not phone_stripped:
+            raise ValueError("must provide at least one of 'email' or 'phone'")
+
+        properties: dict[str, t.Any] = {}
+
+        if email_stripped:
+            properties["email"] = email_stripped
+
+        if phone_stripped:
+            properties["phone"] = phone_stripped
+
+        if timeout is None:
+            timeout = self.timeout
+
+        url = self._global_profile_lookup_url(self.account_id)
+
+        try:
+            response = self.session.post(
+                url,
+                data=json.dumps(properties),
+                auth=self._auth,
+                headers=self._post_headers(),
                 timeout=timeout,
             )
         except requests.exceptions.RequestException as e:
