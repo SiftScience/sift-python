@@ -227,6 +227,23 @@ def response_with_data_header() -> dict[str, t.Any]:
     return {"content-type": "application/json; charset=UTF-8"}
 
 
+def global_profile_response_json() -> str:
+    return """
+    {
+        "status": 0,
+        "error_message": "OK",
+        "error_code": null,
+        "lookback_months": 12,
+        "profile_summary": {
+            "identity_found": true,
+            "has_links": true,
+            "link_count": 7,
+            "linked_accounts_count_per_industry": {"finances": 3, "internet": 4}
+        }
+    }
+    """
+
+
 class TestSiftPythonClient(TestCase):
 
     def setUp(self) -> None:
@@ -1620,21 +1637,7 @@ class TestSiftPythonClient(TestCase):
         """Test the GET /v3/accounts/{accountId}/global_profile/users/{userId}"""
         test_timeout = 5
         mock_response = mock.Mock()
-        global_profile_response_json = """
-        {
-            "status": 0,
-            "error_message": "OK",
-            "error_code": null,
-            "lookback_months": 12,
-            "profile_summary": {
-                "identity_found": true,
-                "has_links": true,
-                "link_count": 7,
-                "linked_accounts_count_per_industry": {"finances": 3, "internet": 4}
-            }
-        }
-        """
-        mock_response.content = global_profile_response_json
+        mock_response.content = global_profile_response_json()
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()
@@ -1695,21 +1698,7 @@ class TestSiftPythonClient(TestCase):
         """Test the POST /v3/accounts/{accountId}/global_profile/lookup"""
         test_timeout = 5
         mock_response = mock.Mock()
-        global_profile_response_json = """
-        {
-            "status": 0,
-            "error_message": "OK",
-            "error_code": null,
-            "lookback_months": 12,
-            "profile_summary": {
-                "identity_found": true,
-                "has_links": true,
-                "link_count": 7,
-                "linked_accounts_count_per_industry": {"finances": 3, "internet": 4}
-            }
-        }
-        """
-        mock_response.content = global_profile_response_json
+        mock_response.content = global_profile_response_json()
         mock_response.json.return_value = json.loads(mock_response.content)
         mock_response.status_code = 200
         mock_response.headers = response_with_data_header()

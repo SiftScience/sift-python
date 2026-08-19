@@ -1577,7 +1577,7 @@ class Client:
             ApiException: If the call to the Sift API is not successful
         """
         _assert_non_empty_str(self.account_id, "account_id")
-        _assert_non_empty_str(user_id, "user_id")
+        _assert_non_empty_str(user_id, "user_id", error_cls=ValueError)
 
         params: dict[str, t.Any] = {
             "global_only": "true" if global_only else "false",
@@ -1631,16 +1631,19 @@ class Client:
         """
         _assert_non_empty_str(self.account_id, "account_id")
 
-        if not email and not phone:
+        email_stripped = email.strip() if email else ""
+        phone_stripped = phone.strip() if phone else ""
+
+        if not email_stripped and not phone_stripped:
             raise ValueError("must provide at least one of 'email' or 'phone'")
 
         properties: dict[str, t.Any] = {}
 
-        if email:
-            properties["email"] = email
+        if email_stripped:
+            properties["email"] = email_stripped
 
-        if phone:
-            properties["phone"] = phone
+        if phone_stripped:
+            properties["phone"] = phone_stripped
 
         if timeout is None:
             timeout = self.timeout
