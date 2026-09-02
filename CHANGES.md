@@ -1,7 +1,9 @@
 6.1.0 2026-08-27
 ================
 
-- Added support for KYC, geo, and bot-detection structured fields ($nationality, $year_of_birth, $kyc, $geo, $bot_identification) on existing event types
+- Added support for `$nationality`, `$year_of_birth` fields on `$create_account`, `$update_account` events
+- Added support for `$kyc` field on `$create_account`, `$update_account`, `$transaction`, `$create_order`, `$update_order`, `$verification` events
+- Added support for `$geo`, `$bot_identification` fields on `$create_account`, `$update_account`, `$login`, `$transaction`, `$create_order`, `$update_order` events
 
 6.0.0 2025-05-05
 ================

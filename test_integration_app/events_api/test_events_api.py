@@ -158,6 +158,23 @@ class EventsAPI:
             ],
             "$social_sign_on_type": "$twitter",
             "$account_types": ["merchant", "premium"],
+            # Structured fields (KYC / geo / bot detection)
+            "$nationality": "US",
+            "$year_of_birth": 1985,
+            "$kyc": {
+                "$names_match": True,
+                "$kyc_level": "$basic",
+                "$bin_nationality_match": True,
+                "$provider": "lexisnexis",
+            },
+            "$geo": {
+                "$uuid": "gc-abc-123",
+                "$provider": "geocomply",
+            },
+            "$bot_identification": {
+                "$result": "$human",
+                "$provider": "datadome",
+            },
             # Suggested Custom Fields
             "twitter_handle": "billyjones",
             "work_phone": "1-347-555-5921",
@@ -541,6 +558,20 @@ class EventsAPI:
                     },
                 }
             ],
+            # Structured fields (KYC / geo / bot detection)
+            "$kyc": {
+                "$names_match": True,
+                "$kyc_level": "$basic",
+                "$provider": "lexisnexis",
+            },
+            "$geo": {
+                "$uuid": "gc-abc-123",
+                "$provider": "geocomply",
+            },
+            "$bot_identification": {
+                "$result": "$human",
+                "$provider": "datadome",
+            },
             # Sample Custom Fields
             "digital_wallet": "apple_pay",  # "google_wallet", etc.
             "coupon_code": "dollarMadness",
@@ -595,6 +626,15 @@ class EventsAPI:
             "$brand_name": "sift",
             "$site_domain": "sift.com",
             "$site_country": "US",
+            # Structured fields (geo / bot detection)
+            "$geo": {
+                "$uuid": "gc-abc-123",
+                "$provider": "geocomply",
+            },
+            "$bot_identification": {
+                "$result": "$human",
+                "$provider": "datadome",
+            },
             # Send this information with a login from a BROWSER client.
             "$browser": {
                 "$user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
@@ -761,6 +801,20 @@ class EventsAPI:
             "$session_id": "gigtleqddo84l8cm15qe4il",
             # For marketplaces, use $seller_user_id to identify the seller
             "$seller_user_id": "slinkys_emporium",
+            # Structured fields (KYC / geo / bot detection)
+            "$kyc": {
+                "$names_match": True,
+                "$bin_nationality_match": False,
+                "$provider": "prove",
+            },
+            "$geo": {
+                "$uuid": "gc-abc-123",
+                "$provider": "geocomply",
+            },
+            "$bot_identification": {
+                "$result": "$human",
+                "$provider": "human_security",
+            },
             # Sample Custom Fields
             "digital_wallet": "apple_pay",  # "google_wallet", etc.
             "coupon_code": "dollarMadness",
@@ -816,6 +870,23 @@ class EventsAPI:
             },
             "$social_sign_on_type": "$twitter",
             "$account_types": ["merchant", "premium"],
+            # Structured fields (KYC / geo / bot detection)
+            "$nationality": "US",
+            "$year_of_birth": 1985,
+            "$kyc": {
+                "$names_match": True,
+                "$kyc_level": "$full",
+                "$bin_nationality_match": True,
+                "$provider": "prove",
+            },
+            "$geo": {
+                "$uuid": "gc-abc-123",
+                "$provider": "geocomply",
+            },
+            "$bot_identification": {
+                "$result": "$human",
+                "$provider": "datadome",
+            },
             # Send this information from a BROWSER client.
             "$browser": {
                 "$user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
@@ -1226,6 +1297,20 @@ class EventsAPI:
                     },
                 }
             ],
+            # Structured fields (KYC / geo / bot detection)
+            "$kyc": {
+                "$names_match": True,
+                "$kyc_level": "$basic",
+                "$provider": "lexisnexis",
+            },
+            "$geo": {
+                "$uuid": "gc-abc-123",
+                "$provider": "geocomply",
+            },
+            "$bot_identification": {
+                "$result": "$human",
+                "$provider": "datadome",
+            },
             # Sample Custom Fields
             "digital_wallet": "apple_pay",  # "google_wallet", etc.
             "coupon_code": "dollarMadness",
@@ -1284,5 +1369,12 @@ class EventsAPI:
             "$reason": "$automated_rule",
             "$verification_type": "$sms",
             "$verified_value": "14155551212",
+            # Structured fields (KYC)
+            "$kyc": {
+                "$names_match": True,
+                "$kyc_level": "$basic",
+                "$bin_nationality_match": False,
+                "$provider": "lexisnexis",
+            },
         }
         return self.client.track("$verification", verification_properties)
