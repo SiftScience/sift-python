@@ -53,6 +53,23 @@ properties = {
     },
     "$currency_code": "USD",
     "$amount": 15230000,
+    # Identity / KYC signals
+    "$kyc": {
+        "$names_match": True,
+        "$kyc_level": "$basic",   # "$basic" or "$full"
+        "$bin_nationality_match": True,
+        "$provider": "lexisnexis",
+    },
+    # Geo/compliance signals
+    "$geo": {
+        "$uuid": "gc-abc-123",
+        "$provider": "geocomply",
+    },
+    # Bot detection signals
+    "$bot_identification": {
+        "$result": "$human",        # "$bot", "$human", or "$suspected"
+        "$provider": "datadome",
+    },
 }
 
 try:
