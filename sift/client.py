@@ -61,34 +61,24 @@ class Response:
         self.body: dict[str, t.Any] | None = None
         self.request: dict[str, t.Any] | None = None
 
-        if (
-            self.http_status_code not in self.HTTP_CODES_WITHOUT_BODY
-        ) and http_response.text:
-            try:
-                self.body = http_response.json()
+        try:
+            if (
+                self.http_status_code not in self.HTTP_CODES_WITHOUT_BODY
+            ) and http_response.text:
+                try:
+                    self.body = http_response.json()
 
-                if "status" in self.body:
-                    self.api_status = self.body["status"]
+                    if "status" in self.body:
+                        self.api_status = self.body["status"]
 
-                if "error_message" in self.body:
-                    self.api_error_message = self.body["error_message"]
+                    if "error_message" in self.body:
+                        self.api_error_message = self.body["error_message"]
 
-                if isinstance(self.body.get("request"), str):
-                    self.request = json.loads(self.body["request"])
-            except ValueError:
-                raise ApiException(
-                    f"Failed to parse json response from {self.url}",
-                    url=self.url,
-                    http_status_code=self.http_status_code,
-                    body=self.body,
-                    api_status=self.api_status,
-                    api_error_message=self.api_error_message,
-                    request=self.request,
-                )
-            finally:
-                if not 200 <= self.http_status_code < 300:
+                    if isinstance(self.body.get("request"), str):
+                        self.request = json.loads(self.body["request"])
+                except ValueError:
                     raise ApiException(
-                        f"{self.url} returned non-2XX http status code {self.http_status_code}",
+                        f"Failed to parse json response from {self.url}",
                         url=self.url,
                         http_status_code=self.http_status_code,
                         body=self.body,
@@ -96,6 +86,17 @@ class Response:
                         api_error_message=self.api_error_message,
                         request=self.request,
                     )
+        finally:
+            if not 200 <= self.http_status_code < 300:
+                raise ApiException(
+                    f"{self.url} returned non-2XX http status code {self.http_status_code}",
+                    url=self.url,
+                    http_status_code=self.http_status_code,
+                    body=self.body,
+                    api_status=self.api_status,
+                    api_error_message=self.api_error_message,
+                    request=self.request,
+                )
 
     def __str__(self) -> str:
         body = (
